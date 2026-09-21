@@ -1,0 +1,271 @@
+{% extends 'admin/base.html' %}
+{% block title %}Dashboard Overview — Beyond Tour Admin{% endblock %}
+
+{% block admin_content %}
+<div class="space-y-8">
+
+  <!-- KPI / Metric Cards Grid -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+    
+    <!-- Pending Hotels -->
+    <a href="{{ url_for('admin.hotels') }}?status=pending"
+       class="bg-surface rounded-2xl border p-5 transition-all shadow-2xs hover:shadow-card
+       {% if pending_hotels_count > 0 %}border-amber-400/80 bg-amber-50/20{% else %}border-stone/60{% endif %}">
+      <div class="flex items-center justify-between mb-3">
+        <span class="text-xs font-bold uppercase tracking-wider text-charcoal/60">Pending Stays</span>
+        <div class="w-8 h-8 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+        </div>
+      </div>
+      <div class="flex items-baseline gap-2">
+        <span class="font-serif text-3xl font-bold text-charcoal">{{ pending_hotels_count }}</span>
+        <span class="text-xs text-charcoal/60">awaiting review</span>
+      </div>
+      <p class="text-[11px] text-charcoal/50 mt-2 font-light">Self-submitted homestays & lodges</p>
+    </a>
+
+    <!-- Pending Guides -->
+    <a href="{{ url_for('admin.guides') }}?status=pending"
+       class="bg-surface rounded-2xl border p-5 transition-all shadow-2xs hover:shadow-card
+       {% if pending_guides_count > 0 %}border-amber-400/80 bg-amber-50/20{% else %}border-stone/60{% endif %}">
+      <div class="flex items-center justify-between mb-3">
+        <span class="text-xs font-bold uppercase tracking-wider text-charcoal/60">Pending Guides</span>
+        <div class="w-8 h-8 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+          </svg>
+        </div>
+      </div>
+      <div class="flex items-baseline gap-2">
+        <span class="font-serif text-3xl font-bold text-charcoal">{{ pending_guides_count }}</span>
+        <span class="text-xs text-charcoal/60">awaiting review</span>
+      </div>
+      <p class="text-[11px] text-charcoal/50 mt-2 font-light">Local certified guides verification</p>
+    </a>
+
+    <!-- Flagged Community Content -->
+    <a href="{{ url_for('admin.community') }}?filter=flagged"
+       class="bg-surface rounded-2xl border p-5 transition-all shadow-2xs hover:shadow-card
+       {% if flagged_posts_count > 0 %}border-terracotta/80 bg-terracotta/5{% else %}border-stone/60{% endif %}">
+      <div class="flex items-center justify-between mb-3">
+        <span class="text-xs font-bold uppercase tracking-wider text-charcoal/60">Flagged Posts</span>
+        <div class="w-8 h-8 rounded-xl bg-terracotta/15 text-terracotta flex items-center justify-center">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/>
+            <line x1="4" x2="4" y1="22" y2="15"/>
+          </svg>
+        </div>
+      </div>
+      <div class="flex items-baseline gap-2">
+        <span class="font-serif text-3xl font-bold text-charcoal">{{ flagged_posts_count }}</span>
+        <span class="text-xs text-charcoal/60">reported by travelers</span>
+      </div>
+      <p class="text-[11px] text-charcoal/50 mt-2 font-light">Community moderation queue</p>
+    </a>
+
+    <!-- Live Directory Counts -->
+    <div class="bg-surface rounded-2xl border border-stone/60 p-5 shadow-2xs">
+      <div class="flex items-center justify-between mb-3">
+        <span class="text-xs font-bold uppercase tracking-wider text-charcoal/60">Live Directory</span>
+        <div class="w-8 h-8 rounded-xl bg-pine/10 text-pine flex items-center justify-center">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/>
+            <path d="m9 12 2 2 4-4"/>
+          </svg>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-2 text-xs">
+        <div>
+          <strong class="font-serif text-lg font-bold text-charcoal block">{{ total_live_hotels }}</strong>
+          <span class="text-charcoal/60 text-[11px]">Live Stays</span>
+        </div>
+        <div>
+          <strong class="font-serif text-lg font-bold text-charcoal block">{{ total_live_guides }}</strong>
+          <span class="text-charcoal/60 text-[11px]">Live Guides</span>
+        </div>
+        <div>
+          <strong class="font-serif text-lg font-bold text-charcoal block">{{ total_destinations }}</strong>
+          <span class="text-charcoal/60 text-[11px]">Destinations</span>
+        </div>
+        <div>
+          <strong class="font-serif text-lg font-bold text-charcoal block">{{ total_culture }}</strong>
+          <span class="text-charcoal/60 text-[11px]">Festivals/Arts</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Priority Queues Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    
+    <!-- 1. Stays Awaiting Review -->
+    <div class="bg-surface rounded-3xl border border-stone/60 p-6 shadow-card">
+      <div class="flex items-center justify-between pb-4 border-b border-stone/30 mb-4">
+        <div>
+          <h2 class="font-serif text-lg font-bold text-charcoal">Hotels & Homestays Awaiting Approval</h2>
+          <p class="text-xs text-charcoal/60">Verify village homestay certifications and pricing</p>
+        </div>
+        <a href="{{ url_for('admin.hotels') }}" class="text-xs font-bold text-terracotta hover:underline">
+          View All →
+        </a>
+      </div>
+
+      {% if pending_hotels %}
+      <div class="divide-y divide-stone/30">
+        {% for hotel in pending_hotels %}
+        <div class="py-3 flex items-center justify-between gap-4">
+          <div class="min-w-0">
+            <h3 class="font-bold text-sm text-charcoal truncate">{{ hotel.name }}</h3>
+            <p class="text-xs text-charcoal/60 flex items-center gap-2 mt-0.5">
+              <span>{{ hotel.district }}</span>
+              <span>·</span>
+              <span>INR {{ hotel.price_min }} - {{ hotel.price_max }}</span>
+              <span>·</span>
+              <span class="text-charcoal/50">Host: {{ hotel.host_name or 'Unspecified' }}</span>
+            </p>
+          </div>
+
+          <div class="flex items-center gap-2 flex-shrink-0">
+            <form action="{{ url_for('admin.hotel_approve', hotel_id=hotel.id) }}" method="POST">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button type="submit"
+                      class="px-3 py-1.5 rounded-lg bg-pine text-ivory text-xs font-bold hover:bg-pine-dark transition-colors shadow-2xs">
+                Approve Live
+              </button>
+            </form>
+            <a href="{{ url_for('admin.hotels') }}?hotel_id={{ hotel.id }}"
+               class="px-3 py-1.5 rounded-lg bg-stone/20 text-charcoal text-xs font-semibold hover:bg-stone/40 transition-colors">
+              Review
+            </a>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="py-10 text-center text-xs text-charcoal/50 font-light">
+        <svg class="w-8 h-8 mx-auto mb-2 text-charcoal/30" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="m9 12 2 2 4-4"/>
+        </svg>
+        All submitted hotels and homestays have been reviewed.
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- 2. Community Content Flags -->
+    <div class="bg-surface rounded-3xl border border-stone/60 p-6 shadow-card">
+      <div class="flex items-center justify-between pb-4 border-b border-stone/30 mb-4">
+        <div>
+          <h2 class="font-serif text-lg font-bold text-charcoal">Reported Community Posts</h2>
+          <p class="text-xs text-charcoal/60">Address traveler flags and inappropriate content</p>
+        </div>
+        <a href="{{ url_for('admin.community') }}?filter=flagged" class="text-xs font-bold text-terracotta hover:underline">
+          View All →
+        </a>
+      </div>
+
+      {% if flagged_posts %}
+      <div class="divide-y divide-stone/30">
+        {% for post in flagged_posts %}
+        <div class="py-3 flex items-start justify-between gap-4">
+          <div class="min-w-0">
+            <p class="text-xs text-charcoal font-medium line-clamp-2">"{{ post.content }}"</p>
+            <div class="flex items-center gap-2 text-[11px] text-charcoal/50 mt-1">
+              <span>Author: {{ post.user.name if post.user else 'Unknown' }}</span>
+              <span>·</span>
+              <span>{{ post.created_at.strftime('%d %b %Y') }}</span>
+              {% if post.is_hidden %}
+              <span class="text-terracotta font-semibold">Currently Hidden</span>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2 flex-shrink-0">
+            <form action="{{ url_for('admin.community_unflag', post_id=post.id) }}" method="POST">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button type="submit"
+                      class="px-2.5 py-1.5 rounded-lg bg-stone/20 hover:bg-stone/40 text-charcoal text-xs font-semibold transition-colors">
+                Dismiss Flag
+              </button>
+            </form>
+
+            <form action="{{ url_for('admin.community_toggle_hidden', post_id=post.id) }}" method="POST">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button type="submit"
+                      class="px-2.5 py-1.5 rounded-lg {% if post.is_hidden %}bg-pine text-ivory{% else %}bg-terracotta text-white{% endif %} text-xs font-bold transition-colors">
+                {{ 'Restore' if post.is_hidden else 'Soft Delete' }}
+              </button>
+            </form>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="py-10 text-center text-xs text-charcoal/50 font-light">
+        <svg class="w-8 h-8 mx-auto mb-2 text-charcoal/30" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="m9 12 2 2 4-4"/>
+        </svg>
+        No flagged community posts at this time.
+      </div>
+      {% endif %}
+    </div>
+
+  </div>
+
+  <!-- Recent System Audit Actions -->
+  <div class="bg-surface rounded-3xl border border-stone/60 p-6 shadow-card">
+    <div class="flex items-center justify-between pb-4 border-b border-stone/30 mb-4">
+      <div>
+        <h2 class="font-serif text-lg font-bold text-charcoal">Recent Administrative Activity</h2>
+        <p class="text-xs text-charcoal/60">Traceable audit logs for all creations, edits, and moderation approvals</p>
+      </div>
+      <a href="{{ url_for('admin.audit_log') }}" class="text-xs font-bold text-terracotta hover:underline">
+        Full Audit Log →
+      </a>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-xs">
+        <thead class="text-[11px] uppercase tracking-wider text-charcoal/60 border-b border-stone/30">
+          <tr>
+            <th class="py-2.5 pr-4">Timestamp</th>
+            <th class="py-2.5 px-4">Operator</th>
+            <th class="py-2.5 px-4">Action</th>
+            <th class="py-2.5 px-4">Target Type</th>
+            <th class="py-2.5 pl-4">Details</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-stone/20">
+          {% for log in recent_logs %}
+          <tr class="hover:bg-ivory/50">
+            <td class="py-2.5 pr-4 text-charcoal/60 whitespace-nowrap">{{ log.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+            <td class="py-2.5 px-4 font-semibold text-charcoal whitespace-nowrap">{{ log.user.name if log.user else 'System' }}</td>
+            <td class="py-2.5 px-4">
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase
+                {% if log.action in ['approve', 'create', 'restore'] %}bg-emerald-100 text-emerald-800
+                {% elif log.action in ['delete', 'hide'] %}bg-rose-100 text-rose-800
+                {% else %}bg-amber-100 text-amber-800{% endif %}">
+                {{ log.action }}
+              </span>
+            </td>
+            <td class="py-2.5 px-4 font-mono text-charcoal/70">{{ log.target_type }}</td>
+            <td class="py-2.5 pl-4 text-charcoal/80">{{ log.details or '-' }}</td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="5" class="py-6 text-center text-charcoal/50">No recent activity recorded.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

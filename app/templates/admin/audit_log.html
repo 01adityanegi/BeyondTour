@@ -1,0 +1,96 @@
+{% extends 'admin/base.html' %}
+{% block title %}Audit Trail & Governance — Beyond Tour Admin{% endblock %}
+
+{% block admin_content %}
+<div>
+
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+    <div>
+      <h2 class="font-serif text-2xl font-bold text-charcoal">Audit Trail & System Logs</h2>
+      <p class="text-xs text-charcoal/60 mt-0.5">Immutable record of all creation, approval, moderation, and deletion activities</p>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="bg-surface rounded-3xl border border-stone/60 shadow-card overflow-hidden mb-6">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-xs">
+        <thead class="bg-ivory/60 text-[11px] uppercase tracking-wider text-charcoal/70 border-b border-stone/30">
+          <tr>
+            <th class="py-3.5 px-5">Timestamp</th>
+            <th class="py-3.5 px-4">Operator</th>
+            <th class="py-3.5 px-4">Action</th>
+            <th class="py-3.5 px-4">Target Entity</th>
+            <th class="py-3.5 px-4">Entity ID</th>
+            <th class="py-3.5 px-5">Event Description</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-stone/20">
+          {% for log in logs.items %}
+          <tr class="hover:bg-ivory/30 transition-colors">
+            <td class="py-3.5 px-5 font-mono text-charcoal/60 whitespace-nowrap">
+              {{ log.created_at.strftime('%Y-%m-%d %H:%M:%S') }}
+            </td>
+
+            <td class="py-3.5 px-4 font-semibold text-charcoal whitespace-nowrap">
+              {{ log.user.name if log.user else 'System Automation' }}
+            </td>
+
+            <td class="py-3.5 px-4">
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase
+                {% if log.action in ['approve', 'create', 'restore'] %}bg-emerald-100 text-emerald-800 border border-emerald-300
+                {% elif log.action in ['delete', 'hide'] %}bg-rose-100 text-rose-800 border border-rose-300
+                {% else %}bg-amber-100 text-amber-800 border border-amber-300{% endif %}">
+                {{ log.action }}
+              </span>
+            </td>
+
+            <td class="py-3.5 px-4 font-mono text-charcoal/80">
+              {{ log.target_type }}
+            </td>
+
+            <td class="py-3.5 px-4 font-mono text-charcoal/60">
+              #{{ log.target_id or '-' }}
+            </td>
+
+            <td class="py-3.5 px-5 text-charcoal/80">
+              {{ log.details or '-' }}
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="6" class="py-12 text-center text-charcoal/50">
+              No audit logs recorded yet.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  {% if logs.pages > 1 %}
+  <div class="flex items-center justify-between text-xs text-charcoal/60">
+    <span>Page {{ logs.page }} of {{ logs.pages }}</span>
+    <div class="flex items-center gap-2">
+      {% if logs.has_prev %}
+      <a href="{{ url_for('admin.audit_log', page=logs.prev_num) }}"
+         class="px-3.5 py-1.5 rounded-xl bg-surface border border-stone/60 text-charcoal hover:bg-stone/20 font-semibold transition-colors">
+        ← Previous
+      </a>
+      {% endif %}
+
+      {% if logs.has_next %}
+      <a href="{{ url_for('admin.audit_log', page=logs.next_num) }}"
+         class="px-3.5 py-1.5 rounded-xl bg-surface border border-stone/60 text-charcoal hover:bg-stone/20 font-semibold transition-colors">
+        Next →
+      </a>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

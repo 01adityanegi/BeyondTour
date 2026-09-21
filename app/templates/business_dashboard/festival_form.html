@@ -1,0 +1,442 @@
+{% extends '_base.html' %}
+{% block title %}{{ title or 'Add Culture Festival / Event — Beyond Tour Guide Portal' }}{% endblock %}
+
+{% block content %}
+<div class="pt-6 pb-20 bg-ivory min-h-screen"
+     x-data="festivalUploader()">
+
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    
+    <!-- Breadcrumb & Back -->
+    <div class="flex items-center justify-between mb-6">
+      <div class="flex items-center gap-2 text-xs text-charcoal/60 font-medium">
+        <a href="{{ url_for('business_dashboard.index') }}" class="hover:text-terracotta flex items-center gap-1">
+          <i data-lucide="layout-dashboard" class="w-3.5 h-3.5"></i>
+          <span>Dashboard</span>
+        </a>
+        <i data-lucide="chevron-right" class="w-3 h-3"></i>
+        <a href="{{ url_for('culture.index') }}" class="hover:text-terracotta">Culture Hub</a>
+        <i data-lucide="chevron-right" class="w-3 h-3"></i>
+        <span class="text-terracotta font-semibold">Add Festival & Event</span>
+      </div>
+
+      <a href="{{ url_for('business_dashboard.index') }}"
+         class="text-xs font-semibold text-charcoal/70 hover:text-charcoal px-3 py-1.5 rounded-xl border border-stone/60 bg-surface hover:bg-stone/20 transition-colors inline-flex items-center gap-1.5">
+        <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+        <span>Back to Dashboard</span>
+      </a>
+    </div>
+
+    <!-- Header Banner -->
+    <div class="bg-gradient-to-br from-pine via-pine/95 to-pine-dark text-ivory rounded-3xl p-6 sm:p-8 mb-8 shadow-card border border-stone/20 relative overflow-hidden">
+      <div class="relative z-10 max-w-2xl">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-ivory text-xs font-bold uppercase tracking-wider mb-3 border border-white/15">
+          <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-300"></i>
+          <span>Guide Heritage Contributor</span>
+        </div>
+        <h1 class="font-serif text-3xl sm:text-4xl font-bold tracking-tight text-white mb-2">
+          Publish Local Festival or Cultural Event
+        </h1>
+        <p class="text-xs sm:text-sm text-ivory/80 leading-relaxed">
+          Share your valley's authentic Himalayan festivals, seasonal melas, sacred folk dances, and temple gatherings with responsible travelers worldwide.
+        </p>
+      </div>
+      
+      <!-- Ambient background decoration -->
+      <div class="absolute -right-10 -bottom-10 w-48 h-48 rounded-full bg-terracotta/20 blur-2xl pointer-events-none"></div>
+    </div>
+
+    <!-- Main Submission Form -->
+    <form action="{{ url_for('business_dashboard.festival_new') }}"
+          method="POST"
+          enctype="multipart/form-data"
+          class="space-y-8">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <!-- Guide Attribution Badge -->
+      <div class="bg-surface rounded-2xl p-4 border border-stone/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-pine/10 text-pine flex items-center justify-center flex-shrink-0 font-bold font-serif">
+            <i data-lucide="award" class="w-5 h-5 text-pine"></i>
+          </div>
+          <div>
+            <p class="text-[11px] uppercase tracking-wider text-charcoal/50 font-bold">Author & Curator</p>
+            <p class="text-sm font-bold text-charcoal">
+              {{ guide.name if guide else current_user.name }}
+              <span class="text-xs font-normal text-charcoal/60">
+                ({% if guide %}Certified Local Mountain Guide{% else %}Verified Partner{% endif %})
+              </span>
+            </p>
+          </div>
+        </div>
+        <div class="text-xs font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-xl inline-flex items-center gap-1.5 self-start sm:self-center">
+          <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-600"></i>
+          <span>Verified Contributor Badge Applied</span>
+        </div>
+      </div>
+
+      <!-- Section 1: Basic Event Details -->
+      <div class="bg-surface rounded-3xl p-6 sm:p-8 border border-stone/50 shadow-card space-y-6">
+        <div class="border-b border-stone/30 pb-4">
+          <h2 class="font-serif text-xl font-bold text-charcoal flex items-center gap-2">
+            <i data-lucide="info" class="w-5 h-5 text-terracotta"></i>
+            <span>Event & Festival Identity</span>
+          </h2>
+          <p class="text-xs text-charcoal/60 mt-0.5">Primary nomenclature and administrative jurisdiction</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <!-- Title -->
+          <div class="sm:col-span-2">
+            <label class="block text-xs font-bold text-charcoal mb-1.5">
+              Festival or Event Name <span class="text-rose-600">*</span>
+            </label>
+            <input type="text"
+                   name="title"
+                   required
+                   placeholder="e.g. Kandali Festival, Bagwal Stone Fair, Jageshwar Monsoon Mela"
+                   class="w-full text-xs sm:text-sm rounded-xl border border-stone/70 bg-white p-3.5 focus:outline-hidden focus:border-terracotta focus:ring-1 focus:ring-terracotta transition-colors shadow-2xs font-medium">
+          </div>
+
+          <!-- Tagline / Subtitle -->
+          <div class="sm:col-span-2">
+            <label class="block text-xs font-bold text-charcoal mb-1.5">
+              One-Line Summary / Subtitle
+            </label>
+            <input type="text"
+                   name="subtitle"
+                   placeholder="e.g. Celebrated once every 12 years in the Chaundas Valley to honor local warrior heritage"
+                   class="w-full text-xs rounded-xl border border-stone/70 bg-white p-3 focus:outline-hidden focus:border-terracotta focus:ring-1 focus:ring-terracotta transition-colors shadow-2xs">
+          </div>
+
+          <!-- District -->
+          <div>
+            <label class="block text-xs font-bold text-charcoal mb-1.5">
+              District (Regional Scope) <span class="text-rose-600">*</span>
+            </label>
+            <select name="district"
+                    required
+                    class="w-full text-xs rounded-xl border border-stone/70 bg-white p-3 focus:outline-hidden focus:border-terracotta focus:ring-1 focus:ring-terracotta transition-colors shadow-2xs font-semibold">
+              <option value="Almora" {% if default_district == 'Almora' %}selected{% endif %}>Almora (Kumaon)</option>
+              <option value="Nainital" {% if default_district == 'Nainital' %}selected{% endif %}>Nainital (Kumaon)</option>
+              <option value="Pithoragarh" {% if default_district == 'Pithoragarh' %}selected{% endif %}>Pithoragarh (Kumaon)</option>
+              <option value="Uttarkashi" {% if default_district == 'Uttarkashi' %}selected{% endif %}>Uttarkashi (Garhwal)</option>
+            </select>
+          </div>
+
+          <!-- Category -->
+          <div>
+            <label class="block text-xs font-bold text-charcoal mb-1.5">
+              Category / Tradition Type <span class="text-rose-600">*</span>
+            </label>
+            <select name="category"
+                    required
+                    class="w-full text-xs rounded-xl border border-stone/70 bg-white p-3 focus:outline-hidden focus:border-terracotta focus:ring-1 focus:ring-terracotta transition-colors shadow-2xs font-medium">
+              <option value="Religious">Religious & Temple Sanctuary Ritual</option>
+              <option value="Folk Fair">Traditional Folk Fair (Mela / Kauthig)</option>
+              <option value="Harvest">Harvest & Agriculture Thanksgiving</option>
+              <option value="Cultural Heritage">Tribal & Cultural Living Heritage</option>
+              <option value="Music & Dance">Sacred Jagar, Folk Music & Dance</option>
+            </select>
+          </div>
+
+          <!-- Venue -->
+          <div>
+            <label class="block text-xs font-bold text-charcoal mb-1.5">
+              Specific Venue / Village Grounds
+            </label>
+            <input type="text"
+                   name="venue"
+                   placeholder="e.g. Varunavat Foothills, Chaugan Almora, Jageshwar Dham"
+                   class="w-full text-xs rounded-xl border border-stone/70 bg-white p-3 focus:outline-hidden focus:border-terracotta focus:ring-1 focus:ring-terracotta transition-colors shadow-2xs">
+          </div>
+
+          <!-- Attendance -->
+          <div>
+            <label class="block text-xs font-bold text-charcoal mb-1.5">
+              Estimated Crowd Scale / Gathering
+            </label>
+            <input type="text"
+                   name="attendance"
+                   placeholder="e.g. Est. 10,000+ devotees and mountain travelers"
+                   class="w-full text-xs rounded-xl border border-stone/70 bg-white p-3 focus:outline-hidden focus:border-terracotta focus:ring-1 focus:ring-terracotta transition-colors shadow-2xs">
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 2: Date & Seasonal Timing -->
+      <div class="bg-surface rounded-3xl p-6 sm:p-8 border border-stone/50 shadow-card space-y-6">
+        <div class="border-b border-stone/30 pb-4">
+          <h2 class="font-serif text-xl font-bold text-charcoal flex items-center gap-2">
+            <i data-lucide="calendar" class="w-5 h-5 text-terracotta"></i>
+            <span>Calendar & Seasonal Timing</span>
+          </h2>
+          <p class="text-xs text-charcoal/60 mt-0.5">Help travelers schedule journeys ahead of time</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+          <!-- Month -->
+          <div>
+            <label class="block text-xs font-bold text-charcoal mb-1.5">
+              Primary Month <span class="text-rose-600">*</span>
+            </label>
+            <select name="month_name"
+                    required
+                    class="w-full text-xs rounded-xl border border-stone/70 bg-white p-3 focus:outline-hidden focus:border-terracotta focus:ring-1 focus:ring-terracotta transition-colors shadow-2xs font-semibold">
+              <option value="January">January</option>
+              <option value="February">February</option>
+              <option value="March">March</option>
+              <option value="April">April</option>
+              <option value="May">May</option>
+              <option value="June">June</option>
+              <option value="July">July</option>
+              <option value="August">August</option>
+              <option value="September">September</option>
+              <option value="October" selected>October</option>
+              <option value="November">November</option>
+              <option value="December">December</option>
+            </select>
+          </div>
+
+          <!-- Specific Dates -->
+          <div>
+            <label class="block text-xs font-bold text-charcoal mb-1.5">
+              Specific Date / Range
+            </label>
+            <input type="text"
+                   name="event_date"
+                   placeholder="e.g. October 14 – 16, 2026"
+                   class="w-full text-xs rounded-xl border border-stone/70 bg-white p-3 focus:outline-hidden focus:border-terracotta focus:ring-1 focus:ring-terracotta transition-colors shadow-2xs font-medium">
+          </div>
+
+          <!-- When Celebrated / Lunar Timeline -->
+          <div>
+            <label class="block text-xs font-bold text-charcoal mb-1.5">
+              Traditional / Lunar Timing
+            </label>
+            <input type="text"
+                   name="when_celebrated"
+                   placeholder="e.g. Shukla Paksha Ashtami annually"
+                   class="w-full text-xs rounded-xl border border-stone/70 bg-white p-3 focus:outline-hidden focus:border-terracotta focus:ring-1 focus:ring-terracotta transition-colors shadow-2xs">
+          </div>
+        </div>
+
+        <div class="pt-2">
+          <label class="inline-flex items-center gap-2 cursor-pointer select-none">
+            <input type="checkbox"
+                   name="is_happening_soon"
+                   value="1"
+                   class="w-4 h-4 rounded text-terracotta focus:ring-terracotta border-stone/60">
+            <span class="text-xs font-bold text-charcoal">Mark as "Happening Soon" (will display live urgency badge in festival directory)</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Section 3: Interactive Drag & Drop Photo & Video Uploads -->
+      <div class="bg-surface rounded-3xl p-6 sm:p-8 border border-stone/50 shadow-card space-y-6">
+        <div class="border-b border-stone/30 pb-4">
+          <h2 class="font-serif text-xl font-bold text-charcoal flex items-center gap-2">
+            <i data-lucide="image" class="w-5 h-5 text-terracotta"></i>
+            <span>Visual Media (Photos & Video Showcase)</span>
+          </h2>
+          <p class="text-xs text-charcoal/60 mt-0.5">Drag and drop photos & video clips directly from your device</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          
+          <!-- Photo Dropzone -->
+          <div class="space-y-3">
+            <label class="block text-xs font-bold text-charcoal">
+              Cover Photograph <span class="text-rose-600">*</span>
+            </label>
+
+            <!-- Drop area -->
+            <div class="border-2 border-dashed rounded-2xl p-5 text-center transition-all cursor-pointer relative"
+                 :class="photoDragging ? 'border-terracotta bg-terracotta/5 scale-[1.01]' : 'border-stone/60 hover:border-terracotta/60 bg-ivory/50'"
+                 @dragover.prevent="photoDragging = true"
+                 @dragleave.prevent="photoDragging = false"
+                 @drop.prevent="handlePhotoDrop($event)"
+                 @click="$refs.photoInput.click()">
+              
+              <input type="file"
+                     x-ref="photoInput"
+                     name="cover_image_file"
+                     accept="image/*"
+                     class="hidden"
+                     @change="handlePhotoSelect($event)">
+
+              <!-- Preview if uploaded -->
+              <template x-if="photoPreview">
+                <div class="relative group rounded-xl overflow-hidden mb-2">
+                  <img :src="photoPreview" alt="Preview" class="w-full h-40 object-cover rounded-xl border border-stone/40">
+                  <div class="absolute inset-0 bg-charcoal/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                    <span class="text-white text-xs font-bold bg-charcoal/80 px-2.5 py-1 rounded-lg">Click to Replace</span>
+                  </div>
+                </div>
+              </template>
+
+              <!-- Uploading progress -->
+              <template x-if="photoUploading">
+                <div class="py-4 space-y-2">
+                  <div class="w-7 h-7 border-2 border-terracotta border-t-transparent rounded-full animate-spin mx-auto"></div>
+                  <p class="text-xs font-semibold text-terracotta">Compressing & Uploading photo...</p>
+                </div>
+              </template>
+
+              <!-- Default Dropzone instructions -->
+              <template x-if="!photoPreview && !photoUploading">
+                <div class="py-3">
+                  <div class="w-12 h-12 rounded-2xl bg-terracotta/10 text-terracotta flex items-center justify-center mx-auto mb-2.5">
+                    <i data-lucide="upload-cloud" class="w-6 h-6"></i>
+                  </div>
+                  <p class="text-xs font-bold text-charcoal">Drag & Drop photograph here</p>
+                  <p class="text-[11px] text-charcoal/60 mt-0.5">or click to browse files (JPG, PNG, WEBP)</p>
+                </div>
+              </template>
+            </div>
+
+            <!-- Image URL fallback input -->
+            <div class="pt-1">
+              <label class="block text-[11px] font-semibold text-charcoal/70 mb-1">Or enter photo URL:</label>
+              <input type="url"
+                     name="cover_image_url"
+                     x-model="photoUrl"
+                     placeholder="https://images.unsplash.com/..."
+                     class="w-full text-xs rounded-xl border border-stone/60 bg-white p-2.5 focus:outline-hidden focus:border-terracotta text-charcoal">
+            </div>
+          </div>
+
+          <!-- Video Dropzone & URL -->
+          <div class="space-y-3">
+            <label class="block text-xs font-bold text-charcoal">
+              Video Footage / Mela Reel (Optional)
+            </label>
+
+            <!-- Video Drop area -->
+            <div class="border-2 border-dashed rounded-2xl p-5 text-center transition-all cursor-pointer relative"
+                 :class="videoDragging ? 'border-pine bg-pine/5 scale-[1.01]' : 'border-stone/60 hover:border-pine/60 bg-ivory/50'"
+                 @dragover.prevent="videoDragging = true"
+                 @dragleave.prevent="videoDragging = false"
+                 @drop.prevent="handleVideoDrop($event)"
+                 @click="$refs.videoInput.click()">
+              
+              <input type="file"
+                     x-ref="videoInput"
+                     name="video_file"
+                     accept="video/*"
+                     class="hidden"
+                     @change="handleVideoSelect($event)">
+
+              <!-- Video Preview if uploaded -->
+              <template x-if="videoPreview">
+                <div class="relative rounded-xl overflow-hidden mb-2 bg-charcoal">
+                  <video :src="videoPreview" controls class="w-full h-40 object-cover rounded-xl"></video>
+                </div>
+              </template>
+
+              <!-- Uploading progress -->
+              <template x-if="videoUploading">
+                <div class="py-4 space-y-2">
+                  <div class="w-7 h-7 border-2 border-pine border-t-transparent rounded-full animate-spin mx-auto"></div>
+                  <p class="text-xs font-semibold text-pine">Uploading video clip...</p>
+                </div>
+              </template>
+
+              <!-- Default Video Dropzone instructions -->
+              <template x-if="!videoPreview && !videoUploading">
+                <div class="py-3">
+                  <div class="w-12 h-12 rounded-2xl bg-pine/10 text-pine flex items-center justify-center mx-auto mb-2.5">
+                    <i data-lucide="video" class="w-6 h-6"></i>
+                  </div>
+                  <p class="text-xs font-bold text-charcoal">Drag & Drop short video clip</p>
+                  <p class="text-[11px] text-charcoal/60 mt-0.5">MP4, WEBM (up to 50MB) or enter link below</p>
+                </div>
+              </template>
+            </div>
+
+            <!-- Video URL fallback input -->
+            <div class="pt-1">
+              <label class="block text-[11px] font-semibold text-charcoal/70 mb-1">Or YouTube / Instagram video link:</label>
+              <input type="text"
+                     name="video_url"
+                     x-model="videoUrl"
+                     placeholder="https://www.youtube.com/watch?v=... or /static/uploads/..."
+                     class="w-full text-xs rounded-xl border border-stone/60 bg-white p-2.5 focus:outline-hidden focus:border-terracotta text-charcoal">
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Section 4: Narrative Description, Rituals & Advice -->
+      <div class="bg-surface rounded-3xl p-6 sm:p-8 border border-stone/50 shadow-card space-y-6">
+        <div class="border-b border-stone/30 pb-4">
+          <h2 class="font-serif text-xl font-bold text-charcoal flex items-center gap-2">
+            <i data-lucide="book-open" class="w-5 h-5 text-terracotta"></i>
+            <span>Cultural Folklore, Rituals & Traveler Tips</span>
+          </h2>
+          <p class="text-xs text-charcoal/60 mt-0.5">Share deep local knowledge that ordinary guidebooks miss</p>
+        </div>
+
+        <div class="space-y-5">
+          <!-- Story Text -->
+          <div>
+            <label class="block text-xs font-bold text-charcoal mb-1.5">
+              Historical Legend, Folk Stories & Spiritual Significance <span class="text-rose-600">*</span>
+            </label>
+            <textarea name="story_text"
+                      rows="5"
+                      required
+                      placeholder="Narrate the living traditions: Which deities are invoked? What musical instruments (Dhol-Damau, Ransingha) are played? What sacred offerings (Prasad) are prepared? What is the origin story passed down by village elders?"
+                      class="w-full text-xs sm:text-sm rounded-xl border border-stone/70 bg-white p-3.5 focus:outline-hidden focus:border-terracotta focus:ring-1 focus:ring-terracotta transition-colors leading-relaxed shadow-2xs"></textarea>
+          </div>
+
+          <!-- Deity or Ritual -->
+          <div>
+            <label class="block text-xs font-bold text-charcoal mb-1.5">
+              Presiding Deity or Core Ritual
+            </label>
+            <input type="text"
+                   name="deity_or_ritual"
+                   placeholder="e.g. Goddess Nanda Devi, Lord Shiva, Stone-throwing ritual, Pandav Nritya"
+                   class="w-full text-xs rounded-xl border border-stone/70 bg-white p-3 focus:outline-hidden focus:border-terracotta focus:ring-1 focus:ring-terracotta transition-colors shadow-2xs">
+          </div>
+
+          <!-- Travel Tips -->
+          <div>
+            <label class="block text-xs font-bold text-charcoal mb-1.5">
+              Local Etiquette, Dress Code & Travel Advice
+            </label>
+            <textarea name="travel_tips"
+                      rows="3"
+                      placeholder="e.g. Photography is restricted inside the sanctum sanctorum. Travelers must remove leather items before entering the courtyard. Night temperatures dip near freezing; carry windproof fleece."
+                      class="w-full text-xs rounded-xl border border-stone/70 bg-white p-3 focus:outline-hidden focus:border-terracotta focus:ring-1 focus:ring-terracotta transition-colors leading-relaxed shadow-2xs"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Submit Actions -->
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4">
+        <a href="{{ url_for('business_dashboard.index') }}"
+           class="w-full sm:w-auto px-6 py-3 rounded-xl border border-stone/60 text-charcoal text-xs font-bold hover:bg-stone/20 transition-colors text-center">
+          Cancel
+        </a>
+
+        <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
+          <button type="submit"
+                  class="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-terracotta hover:bg-terracotta-hover text-white text-sm font-bold transition-all shadow-md hover:shadow-lg inline-flex items-center justify-center gap-2">
+            <i data-lucide="check-circle" class="w-4 h-4"></i>
+            <span>Publish Cultural Festival</span>
+          </button>
+        </div>
+      </div>
+
+    </form>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/festival-uploader.js') }}"></script>
+{% endblock %}

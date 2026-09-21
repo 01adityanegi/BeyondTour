@@ -1,0 +1,1341 @@
+{% extends '_base.html' %}
+{% block title %}{{ title or 'Festivals & Living Culture of Uttarakhand — Beyond Tour' }}{% endblock %}
+{% block meta_description %}Discover lesser-known regional festivals, traditional Himalayan fairs, sacred folk dances, and living cultural heritage across Kumaon and Garhwal, Uttarakhand.{% endblock %}
+
+{% block content %}
+<!-- Leaflet & Google Maps Assets -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+<link rel="stylesheet" href="{{ url_for('static', filename='css/culture.css') }}">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+<!-- Embedded Dataset for Alpine.js Instant Reactive Filtering -->
+<script id="featured-festivals-data" type="application/json">
+{{ featured_festivals_json|safe }}
+</script>
+<script id="living-culture-data" type="application/json">
+{{ living_culture_json|safe }}
+</script>
+<script id="nanda-yatra-data" type="application/json">
+{{ nanda_yatra_json|safe }}
+</script>
+<script id="map-locations-data" type="application/json">
+{{ map_locations_json|safe }}
+</script>
+<script id="initial-config-data" type="application/json">
+{{ initial_config_json|safe }}
+</script>
+
+
+
+<div class="pt-6 sm:pt-10 pb-24 bg-ivory min-h-screen" x-data="livingCultureDirectory">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+    <!-- ============================================================
+         TOP FEATURED HERO CARD
+         "Experience Uttarakhand Beyond the Tourist Trail"
+         ============================================================ -->
+    <section aria-label="Experience Uttarakhand Beyond the Tourist Trail" class="mb-14">
+      <div class="relative rounded-3xl overflow-hidden shadow-2xl border border-stone/60 bg-charcoal text-white">
+        <div class="absolute inset-0 z-0">
+          <img src="/static/images/festivals/dyara_bugyal_holi.jpg"
+               alt="Dyara Bugyal Alpine Meadow Celebration in Garhwal"
+               class="w-full h-full object-cover object-center filter brightness-[0.60] contrast-[1.08] scale-105 transform hover:scale-100 transition-transform duration-1000">
+          <div class="absolute inset-0 bg-gradient-to-r from-charcoal/95 via-charcoal/80 to-transparent"></div>
+          <div class="absolute inset-0 bg-gradient-to-t from-charcoal via-charcoal/40 to-transparent"></div>
+        </div>
+
+        <div class="relative z-10 p-6 sm:p-10 lg:p-14 max-w-3xl">
+          <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-terracotta/25 border border-terracotta/40 text-terracotta-light text-xs font-bold uppercase tracking-widest mb-5 backdrop-blur-md">
+            <span class="w-2 h-2 rounded-full bg-terracotta animate-pulse"></span>
+            <i data-lucide="compass" class="w-3.5 h-3.5"></i>
+            <span>Living Himalayan Heritage</span>
+          </div>
+
+          <h1 class="font-serif text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-white leading-tight mb-3">
+            Experience Uttarakhand Beyond the Tourist Trail
+          </h1>
+
+          <p class="text-xs sm:text-sm text-white/85 font-light leading-relaxed mb-6">
+            From butter-churning rituals on high alpine meadows to centuries-old trans-Himalayan trade gatherings, the true soul of Devbhoomi lives in community-guarded fairs and folk traditions rarely featured in mainstream guides.
+          </p>
+
+          <div class="flex flex-wrap items-center gap-4">
+            <button type="button"
+                    @click="openCalendarModal()"
+                    class="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-2xl bg-terracotta hover:bg-terracotta-hover text-white text-xs sm:text-sm font-bold shadow-lg shadow-terracotta/30 transition-all duration-300 hover:-translate-y-0.5 group">
+              <i data-lucide="calendar" class="w-4 h-4"></i>
+              <span>Explore Cultural Calendar</span>
+              <i data-lucide="arrow-right" class="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1"></i>
+            </button>
+
+            <a href="#arts-section"
+               class="inline-flex items-center gap-2 px-5 py-3.5 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 text-white text-xs sm:text-sm font-semibold backdrop-blur-md transition-all duration-300">
+              <i data-lucide="palette" class="w-4 h-4 text-terracotta"></i>
+              <span>Explore Artisan Crafts</span>
+            </a>
+
+            <a href="{{ url_for('business_dashboard.festival_new') }}"
+               class="inline-flex items-center gap-2 px-5 py-3.5 rounded-2xl bg-pine/90 hover:bg-pine border border-white/20 text-white text-xs sm:text-sm font-semibold backdrop-blur-md transition-all duration-300 shadow-md">
+              <i data-lucide="calendar-plus" class="w-4 h-4 text-amber-300"></i>
+              <span>+ Add Festival / Event</span>
+            </a>
+          </div>
+
+          <div class="grid grid-cols-3 gap-4 pt-8 mt-8 border-t border-white/15 text-xs text-white/75 font-light">
+            <div>
+              <span class="block text-base sm:text-xl font-bold text-white font-serif">12</span>
+              <span>Documented Fairs & Melas</span>
+            </div>
+            <div>
+              <span class="block text-base sm:text-xl font-bold text-white font-serif">Kumaon & Garhwal</span>
+              <span>Authentic Regional Roots</span>
+            </div>
+            <div>
+              <span class="block text-base sm:text-xl font-bold text-white font-serif">100%</span>
+              <span>Community-Verified Heritage</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         1. MAIN SECTION HEADER
+         ============================================================ -->
+    <header class="text-center max-w-4xl mx-auto mb-10">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-pine/10 border border-pine/20 text-pine text-xs font-bold uppercase tracking-wider mb-3">
+        <i data-lucide="sparkles" class="w-3.5 h-3.5 text-terracotta"></i>
+        <span>Authentic Himalayan Traditions</span>
+      </div>
+
+      <h2 class="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-charcoal tracking-tight mb-3">
+        Festivals & Living Culture of Uttarakhand
+      </h2>
+
+      <p class="text-charcoal/75 text-sm sm:text-base lg:text-lg leading-relaxed font-light max-w-2xl mx-auto">
+        Discover the traditions, fairs, music and celebrations that keep the Himalayan heritage of Uttarakhand alive.
+      </p>
+    </header>
+
+    <!-- ============================================================
+         AUTHENTIC GEOGRAPHIC MAP OF UTTARAKHAND (Map & Regional Selector)
+         "add here map" — Detailed SVG Map of Uttarakhand with Real Boundaries,
+         Rivers, Peaks, and Interactive Cultural & Artisan Pins
+         ============================================================ -->
+    <section id="cultural-map-section"
+             aria-label="Uttarakhand Cultural and Artisan Map"
+             class="bg-surface rounded-3xl border border-stone/60 shadow-card p-6 sm:p-8 mb-14 overflow-hidden relative">
+
+      <!-- Map Header & Mode Controls -->
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
+        <div>
+          <span class="text-[11px] uppercase tracking-widest font-bold text-terracotta flex items-center gap-1.5">
+            <i data-lucide="map" class="w-3.5 h-3.5"></i>
+            <span>Authentic Cartographic Explorer</span>
+          </span>
+          <h3 class="font-serif text-2xl sm:text-3xl font-bold text-charcoal">
+            Uttarakhand Sacred Heritage & Cultural Map
+          </h3>
+          <p class="text-xs text-charcoal/65 mt-0.5 max-w-xl">
+            Click pins across Garhwal and Kumaon to explore sacred fairs, melas, and the 280-km Nanda Devi Raj Jat pilgrimage trail.
+          </p>
+        </div>
+
+        <!-- Filter Mode Switcher -->
+        <div class="flex flex-wrap items-center gap-2">
+          <div class="flex items-center bg-ivory p-1 rounded-xl border border-stone/60 text-xs font-semibold">
+            <button type="button"
+                    @click="mapFilterMode = 'all'"
+                    :class="mapFilterMode === 'all' ? 'bg-terracotta text-white shadow-xs' : 'text-charcoal/70 hover:text-charcoal'"
+                    class="px-3 py-1.5 rounded-lg transition-all">
+              All Highlights (14)
+            </button>
+            <button type="button"
+                    @click="mapFilterMode = 'festivals'"
+                    :class="mapFilterMode === 'festivals' ? 'bg-terracotta text-white shadow-xs' : 'text-charcoal/70 hover:text-charcoal'"
+                    class="px-3 py-1.5 rounded-lg transition-all flex items-center gap-1">
+              <i data-lucide="sparkles" class="w-3 h-3"></i>
+              <span>Festivals & Melas</span>
+            </button>
+            <button type="button"
+                    @click="mapFilterMode = 'pilgrimage'"
+                    :class="mapFilterMode === 'pilgrimage' ? 'bg-pine text-white shadow-xs' : 'text-charcoal/70 hover:text-charcoal'"
+                    class="px-3 py-1.5 rounded-lg transition-all flex items-center gap-1">
+              <i data-lucide="compass" class="w-3 h-3"></i>
+              <span>Raj Jat & Pilgrimages</span>
+            </button>
+          </div>
+
+          <button type="button"
+                  x-show="selectedMapPin"
+                  @click="clearMapPin()"
+                  class="text-xs text-terracotta hover:underline font-bold px-3 py-1.5 rounded-xl border border-terracotta/30 bg-terracotta/10">
+            Clear Pin Filter ×
+          </button>
+        </div>
+      </div>
+
+      <!-- Active Pin Floating Inspector Bar -->
+      <div x-show="selectedMapPin && activePinObject"
+           x-transition:enter="transition ease-out duration-200"
+           x-transition:enter-start="opacity-0 -translate-y-2"
+           x-transition:enter-end="opacity-100 translate-y-0"
+           class="mb-4 p-4 rounded-2xl bg-pine/10 border border-pine/25 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+        <div class="flex items-start gap-3">
+          <div class="w-9 h-9 rounded-xl bg-pine text-white flex items-center justify-center flex-shrink-0 mt-0.5">
+            <i data-lucide="map-pin" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <strong class="font-serif text-base text-charcoal" x-text="activePinObject ? activePinObject.name : ''"></strong>
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-pine text-white"
+                    x-text="activePinObject ? activePinObject.division + ' Division' : ''"></span>
+            </div>
+            <p class="text-charcoal/80 text-xs mt-0.5" x-text="activePinObject ? activePinObject.description : ''"></p>
+            <div class="flex flex-wrap items-center gap-2 mt-1 text-[11px]">
+              <span class="text-charcoal/60" x-show="activePinObject && activePinObject.festivals.length > 0">
+                Traditions: <strong class="text-charcoal" x-text="activePinObject.festivals.join(', ')"></strong>
+              </span>
+              <span class="text-charcoal/40" x-show="activePinObject && activePinObject.festivals.length > 0 && activePinObject.crafts.length > 0">·</span>
+              <span class="text-pine font-medium" x-show="activePinObject && activePinObject.crafts.length > 0">
+                Heritage: <strong x-text="activePinObject.crafts.join(', ')"></strong>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 self-end sm:self-center">
+          <a href="#festivals-grid"
+             class="px-3.5 py-1.5 rounded-xl bg-terracotta text-white font-semibold text-xs hover:bg-terracotta-hover transition-colors shadow-2xs">
+            Filter Below ↓
+          </a>
+          <a href="#nanda-raj-jat-section"
+             class="px-3.5 py-1.5 rounded-xl bg-surface border border-stone/80 text-charcoal font-semibold text-xs hover:border-terracotta hover:text-terracotta transition-colors">
+            Raj Jat Details ↓
+          </a>
+          <a href="{{ url_for('culture.art') }}"
+             class="px-3.5 py-1.5 rounded-xl bg-pine/10 border border-pine/30 text-pine font-semibold text-xs hover:bg-pine hover:text-white transition-colors">
+            Arts & Crafts Page →
+          </a>
+        </div>
+      </div>
+
+      <!-- MAP CONTAINER: Authentic Interactive Google Map of Uttarakhand -->
+      <div class="relative w-full rounded-2xl border border-stone/70 overflow-hidden shadow-xl bg-charcoal">
+        
+        <!-- Floating Glassmorphism Map Control Toolbar -->
+        <div class="absolute top-3 left-3 right-3 sm:right-auto z-[400] flex flex-wrap items-center gap-1.5 p-1.5 rounded-xl bg-charcoal/85 backdrop-blur-md border border-white/20 text-white shadow-2xl text-xs">
+          
+          <!-- Layer Switcher -->
+          <div class="flex items-center bg-white/10 rounded-lg p-0.5">
+            <button type="button"
+                    @click="switchMapLayer('terrain')"
+                    :class="activeTileLayerKey === 'terrain' ? 'bg-terracotta text-white shadow-sm font-bold' : 'text-white/80 hover:text-white'"
+                    class="px-2.5 py-1 rounded-md transition-all flex items-center gap-1.5">
+              <i data-lucide="mountain" class="w-3.5 h-3.5"></i>
+              <span class="hidden sm:inline">Google Terrain</span>
+              <span class="sm:hidden">Terrain</span>
+            </button>
+            <button type="button"
+                    @click="switchMapLayer('satellite')"
+                    :class="activeTileLayerKey === 'satellite' ? 'bg-terracotta text-white shadow-sm font-bold' : 'text-white/80 hover:text-white'"
+                    class="px-2.5 py-1 rounded-md transition-all flex items-center gap-1.5">
+              <i data-lucide="globe" class="w-3.5 h-3.5"></i>
+              <span class="hidden sm:inline">Google Satellite</span>
+              <span class="sm:hidden">Satellite</span>
+            </button>
+            <button type="button"
+                    @click="switchMapLayer('road')"
+                    :class="activeTileLayerKey === 'road' ? 'bg-terracotta text-white shadow-sm font-bold' : 'text-white/80 hover:text-white'"
+                    class="px-2.5 py-1 rounded-md transition-all flex items-center gap-1.5">
+              <i data-lucide="map" class="w-3.5 h-3.5"></i>
+              <span class="hidden sm:inline">Google Roads</span>
+              <span class="sm:hidden">Roads</span>
+            </button>
+          </div>
+
+          <div class="h-4 w-px bg-white/20 hidden sm:block"></div>
+
+          <!-- Trail Focus Action -->
+          <button type="button"
+                  @click="focusRajJatTrail()"
+                  class="px-2.5 py-1 rounded-lg bg-amber-500/20 border border-amber-400/40 text-amber-200 hover:bg-amber-500 hover:text-charcoal font-semibold transition-all flex items-center gap-1.5">
+            <i data-lucide="footprints" class="w-3.5 h-3.5"></i>
+            <span>Raj Jat Trail (280 km)</span>
+          </button>
+
+          <!-- Reset View -->
+          <button type="button"
+                  @click="resetMapView()"
+                  class="px-2 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-white/90 transition-all ml-auto sm:ml-0 flex items-center gap-1"
+                  title="Fit whole Uttarakhand state">
+            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+            <span class="hidden sm:inline">Reset View</span>
+          </button>
+        </div>
+
+        <!-- Google Map Viewport Container -->
+        <div id="uttarakhand-google-map" class="w-full h-[520px] sm:h-[620px] z-10"></div>
+
+        <!-- Floating Interactive Map Legend (Bottom on desktop & mobile) -->
+        <div class="absolute bottom-3 left-3 right-3 sm:left-auto sm:right-3 z-[400] p-2 sm:p-2.5 rounded-xl bg-charcoal/90 backdrop-blur-md border border-white/20 text-white shadow-xl text-[11px] flex flex-wrap items-center gap-3">
+          <div class="flex items-center gap-1.5">
+            <span class="w-2.5 h-2.5 rounded-full bg-[#16302b] border border-[#6b8f71]"></span>
+            <span class="text-white/90 font-medium">Garhwal Hub</span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <span class="w-2.5 h-2.5 rounded-full bg-[#c1622d] border border-amber-200"></span>
+            <span class="text-white/90 font-medium">Kumaon Hub</span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <span class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-ping"></span>
+            <span class="text-amber-200 font-semibold">Raj Jat Stops</span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <span class="w-4 h-1 border-t-2 border-dashed border-amber-400"></span>
+            <span class="text-amber-300 font-medium">280-km Pilgrimage Trail</span>
+          </div>
+          <div class="flex items-center gap-1">
+            <span class="text-amber-300 text-[10px]">▲</span>
+            <span class="text-white/80">Himalayan Peaks</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Quick Location Pill List for All Screens -->
+      <div class="mt-4 flex items-center gap-2 overflow-x-auto pb-1 text-xs">
+        <span class="text-[10px] uppercase font-bold text-charcoal/50 flex-shrink-0">Locations:</span>
+        <template x-for="loc in filteredMapLocations" :key="loc.id">
+          <button type="button"
+                  @click="selectMapPin(loc)"
+                  :class="selectedMapPin === loc.id ? 'bg-terracotta text-white font-bold ring-2 ring-terracotta/40' : 'bg-ivory border border-stone/60 text-charcoal hover:border-terracotta'"
+                  class="px-2.5 py-1 rounded-lg text-xs whitespace-nowrap transition-all">
+            <span x-text="loc.name"></span>
+          </button>
+        </template>
+      </div>
+
+    </section>
+
+    <!-- ============================================================
+         SHRI NANDA DEVI RAJ JAT YATRA: THE HIMALAYAN MAHAKUMBH
+         "in culture add festivals , mele, or events ... and in add the nanada raj jaat yatra with updats where yatra reach , the last loaction and story"
+         ============================================================ -->
+    <section id="nanda-raj-jat-section"
+             aria-label="Shri Nanda Devi Raj Jat Yatra — The Himalayan Mahakumbh"
+             class="mb-20 pt-4">
+
+      <!-- Section Hero Header -->
+      <div class="relative rounded-3xl overflow-hidden shadow-2xl border border-stone/60 bg-charcoal text-white mb-10">
+        <div class="absolute inset-0 z-0">
+          <img src="/static/images/coverpic/gharwal.png"
+               alt="Shri Nanda Devi Sacred Himalayan Pilgrimage"
+               class="w-full h-full object-cover object-center filter brightness-[0.45] contrast-[1.1] scale-105 transform hover:scale-100 transition-transform duration-1000">
+          <div class="absolute inset-0 bg-gradient-to-r from-charcoal via-charcoal/85 to-transparent"></div>
+          <div class="absolute inset-0 bg-gradient-to-t from-charcoal via-charcoal/50 to-transparent"></div>
+        </div>
+
+        <div class="relative z-10 p-6 sm:p-10 lg:p-12 max-w-4xl">
+          <div class="flex flex-wrap items-center gap-2 mb-4">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-terracotta text-white text-[11px] font-bold uppercase tracking-widest shadow-md">
+              <span class="w-2 h-2 rounded-full bg-white animate-pulse"></span>
+              <span>The Himalayan Mahakumbh</span>
+            </span>
+            <span class="px-3 py-1 rounded-full bg-white/15 backdrop-blur-md text-white text-[11px] font-bold uppercase tracking-wider">
+              Once Every 12 Years · 280 km Barefoot Sacred Odyssey
+            </span>
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-200 text-[11px] font-bold uppercase tracking-wider backdrop-blur-md">
+              <i data-lucide="calendar" class="w-3.5 h-3.5 text-amber-300"></i>
+              <span>Schedule: 5 – 23 September 2026 · Homkund on 19 Sep (Nanda Ashtami)</span>
+            </span>
+          </div>
+
+          <h2 class="font-serif text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white mb-3">
+            Shri Nanda Devi Raj Jat Yatra
+          </h2>
+          <p class="text-terracotta-light text-base sm:text-lg font-serif italic mb-4">
+            "The Poignant Himalayan Farewell: Accompanying Goddess Nanda to Mount Trishul"
+          </p>
+          <p class="text-white/85 text-xs sm:text-sm leading-relaxed font-light max-w-3xl mb-6">
+            In Uttarakhand folk memory, Goddess Nanda is not merely a distant deity, but the beloved elder daughter (<em>Dhyani</em>) of every mountain household. Once every 12 years, thousands of devotees escort her on an arduous 22-day barefoot pilgrimage across river valleys, high alpine meadows (Bedni Bugyal), and glaciated moraines, walking from her maternal home in Nauti to her divine consort Lord Shiva's abode at Mount Trishul.
+          </p>
+
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 text-xs">
+            <div>
+              <span class="text-white/60 block text-[10px] uppercase font-bold tracking-wider">Total Trail</span>
+              <strong class="text-white font-serif text-base">~280 Kilometers</strong>
+              <span class="text-terracotta-light text-[10px] block">Barefoot past Bedni</span>
+            </div>
+            <div>
+              <span class="text-white/60 block text-[10px] uppercase font-bold tracking-wider">Pilgrimage Dates</span>
+              <strong class="text-white font-serif text-base">5 – 23 Sep 2026</strong>
+              <span class="text-white/70 text-[10px] block">19–22 Days · 18 Stages</span>
+            </div>
+            <div>
+              <span class="text-white/60 block text-[10px] uppercase font-bold tracking-wider">Culmination Peak</span>
+              <strong class="text-amber-300 font-serif text-base">19 Sep 2026</strong>
+              <span class="text-white/70 text-[10px] block">Nanda Ashtami at Homkund</span>
+            </div>
+            <div>
+              <span class="text-white/60 block text-[10px] uppercase font-bold tracking-wider">Cycle & Heritage</span>
+              <strong class="text-terracotta-light font-serif text-base">Last: 2014 · 12-Yr</strong>
+              <span class="text-white/70 text-[10px] block">18 Aug–6 Sep 2014 Record</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SACRED STORY, FOUR-HORNED RAM & KUMAON-GARHWAL UNITY -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
+        <!-- Story 1: The Divine Farewell (Vidaai) -->
+        <div class="bg-surface rounded-3xl border border-stone/60 shadow-card p-6 sm:p-7 flex flex-col justify-between">
+          <div>
+            <div class="w-10 h-10 rounded-2xl bg-terracotta/10 text-terracotta flex items-center justify-center mb-4">
+              <i data-lucide="heart" class="w-5 h-5"></i>
+            </div>
+            <span class="text-[10px] uppercase font-bold text-terracotta tracking-wider block mb-1">Maternal Lore</span>
+            <h3 class="font-serif text-xl font-bold text-charcoal mb-2">The Daughter's Farewell (Vidaai)</h3>
+            <p class="text-xs text-charcoal/75 leading-relaxed font-light">
+              Unlike typical temple pilgrimages, the Raj Jat is an emotional family journey. When Goddess Nanda leaves Nauti village, women across Chamoli sing tearful <em>Mangal Geet</em> as parents bid goodbye to a married daughter returning to her austere in-laws in the freezing snows of Mount Trishul.
+            </p>
+          </div>
+          <div class="mt-4 pt-4 border-t border-stone/30 text-[11px] text-terracotta font-semibold flex items-center gap-1">
+            <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
+            <span>Centuries-old oral folklore tradition</span>
+          </div>
+        </div>
+
+        <!-- Story 2: The Miracle of Chausingha Khadu & Golden Chhantoli -->
+        <div class="bg-surface rounded-3xl border border-stone/60 shadow-card p-6 sm:p-7 flex flex-col justify-between">
+          <div>
+            <div class="w-10 h-10 rounded-2xl bg-pine/10 text-pine flex items-center justify-center mb-4">
+              <i data-lucide="sparkles" class="w-5 h-5"></i>
+            </div>
+            <span class="text-[10px] uppercase font-bold text-pine tracking-wider block mb-1">Divine Marvel</span>
+            <h3 class="font-serif text-xl font-bold text-charcoal mb-2">The Four-Horned Ram & Chhantoli</h3>
+            <p class="text-xs text-charcoal/75 leading-relaxed font-light">
+              Before each Yatra, a male sheep with four horns (<em>Chausingha Khadu</em>) is miraculously born in Kasuwa village. Adorned with vermilion and silk, the sacred ram leads the entire 280-km procession without any rope or guidance, accompanied by the royal golden ringed umbrella (<em>Chhantoli</em>) carried by Garhwal's Parmar royalty.
+            </p>
+          </div>
+          <div class="mt-4 pt-4 border-t border-stone/30 text-[11px] text-pine font-semibold flex items-center gap-1">
+            <i data-lucide="compass" class="w-3.5 h-3.5"></i>
+            <span>Walks freely at head of procession</span>
+          </div>
+        </div>
+
+        <!-- Story 3: The Historic Garhwal-Kumaon Unity -->
+        <div class="bg-surface rounded-3xl border border-stone/60 shadow-card p-6 sm:p-7 flex flex-col justify-between">
+          <div>
+            <div class="w-10 h-10 rounded-2xl bg-amber-600/10 text-amber-600 flex items-center justify-center mb-4">
+              <i data-lucide="users" class="w-5 h-5"></i>
+            </div>
+            <span class="text-[10px] uppercase font-bold text-amber-600 tracking-wider block mb-1">Cultural Unification</span>
+            <h3 class="font-serif text-xl font-bold text-charcoal mb-2">Garhwal & Kumaon Sacred Union</h3>
+            <p class="text-xs text-charcoal/75 leading-relaxed font-light">
+              At the holy confluence of <strong>Nandkeshari</strong> on the Pranmati River, the grand Kumaoni procession arriving from Almora, Nainital, and Johar Valley unites with the Garhwal devotees. Both regions dissolve all political and historical divides, walking as one family behind the Goddess.
+            </p>
+          </div>
+          <div class="mt-4 pt-4 border-t border-stone/30 text-[11px] text-amber-600 font-semibold flex items-center gap-1">
+            <i data-lucide="check" class="w-3.5 h-3.5"></i>
+            <span>Confluence Camp at Nandkeshari (Day 6)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- LIVE YATRA CHECKPOINT STATUS: "WHERE YATRA REACH" & STAGE PROGRESS -->
+      <div class="bg-surface rounded-3xl border border-stone/60 shadow-card p-6 sm:p-8 mb-12">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-stone/30 mb-6">
+          <div class="flex items-start gap-3">
+            <div class="w-10 h-10 rounded-2xl bg-terracotta text-white flex items-center justify-center flex-shrink-0 mt-0.5 shadow-sm">
+              <i data-lucide="radio" class="w-5 h-5 animate-pulse"></i>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-[10px] uppercase font-bold text-terracotta tracking-widest">Live Checkpoint Status</span>
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+              </div>
+              <h3 class="font-serif text-xl sm:text-2xl font-bold text-charcoal">
+                Where the Yatra Reaches: Active Stage Tracker
+              </h3>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2 self-start md:self-center">
+            <span class="text-xs font-semibold px-3 py-1.5 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-900 flex items-center gap-1.5">
+              <i data-lucide="calendar" class="w-3.5 h-3.5 text-terracotta"></i>
+              <span>Yatra Window: <strong>5 – 23 Sep 2026</strong></span>
+            </span>
+            <span class="text-xs font-semibold px-3 py-1.5 rounded-xl bg-ivory border border-stone/60 text-charcoal/80">
+              Covered: <strong class="text-terracotta">105 km</strong> / 280 km
+            </span>
+            <span class="text-xs font-semibold px-3 py-1.5 rounded-xl bg-pine/10 border border-pine/20 text-pine">
+              Remaining: <strong>175 km</strong> to Homkund
+            </span>
+          </div>
+        </div>
+
+        <!-- Active Stage Status Callout Box -->
+        <div class="p-5 sm:p-6 rounded-2xl bg-gradient-to-r from-terracotta/10 via-ivory to-pine/10 border border-terracotta/30 mb-8">
+          <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <div>
+              <div class="flex items-center gap-2 mb-1.5">
+                <span class="px-2.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-terracotta text-white inline-block">
+                  Current Registered Milestone
+                </span>
+                <span class="px-2.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-pine text-white inline-flex items-center gap-1">
+                  <i data-lucide="calendar" class="w-3 h-3"></i>
+                  <span>13 September 2026</span>
+                </span>
+              </div>
+              <h4 class="font-serif text-lg sm:text-xl font-bold text-charcoal">
+                Stage 9: Wan Village (2,438 m) — The Last Inhabited Village on Earth
+              </h4>
+              <p class="text-xs sm:text-sm text-charcoal/80 mt-1 font-light leading-relaxed max-w-3xl">
+                The procession gathers at the ancient temple of Latu Devta in Wan on 13 September 2026, the final human settlement on the trail. Beyond this point, pilgrims leave all motorable roads and human dwellings behind, walking barefoot into the sacred alpine bugyals towards Bedni and Roopkund.
+              </p>
+              <div class="flex flex-wrap items-center gap-3 mt-3 text-xs text-charcoal/70">
+                <span class="flex items-center gap-1 font-medium text-terracotta">
+                  <i data-lucide="arrow-right-circle" class="w-3.5 h-3.5"></i>
+                  <span>Next Camp: Gairoli Patal & Bedni Bugyal (14 Sep · 3,354 m)</span>
+                </span>
+                <span>·</span>
+                <span class="flex items-center gap-1 text-pine font-medium">
+                  <i data-lucide="alert-circle" class="w-3.5 h-3.5"></i>
+                  <span>Footwear discarded; sub-zero night winds active</span>
+                </span>
+              </div>
+            </div>
+
+            <button type="button"
+                    @click="setYatraStage(9)"
+                    class="px-4 py-2.5 rounded-xl bg-terracotta text-white font-bold text-xs hover:bg-terracotta-hover transition-colors shadow-sm self-start lg:self-center flex-shrink-0">
+              Inspect Wan Checkpoint Details →
+            </button>
+          </div>
+        </div>
+
+        <!-- 18-STAGE INTERACTIVE TIMELINE SELECTOR -->
+        <div class="mb-6">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-bold uppercase tracking-wider text-charcoal/70">
+              Click Any Checkpoint to Track the Odyssey & Real Stage Dates:
+            </span>
+            <span class="text-xs text-charcoal/50">
+              Stage <span x-text="activeYatraStageNumber"></span> of 18
+            </span>
+          </div>
+
+          <!-- Horizontal Stage Buttons Scroller -->
+          <div class="flex items-center gap-2 overflow-x-auto pb-3 pt-1 scrollbar-thin">
+            <template x-for="stg in nandaYatra.stages" :key="stg.number">
+              <button type="button"
+                      @click="setYatraStage(stg.number)"
+                      :class="activeYatraStageNumber === stg.number 
+                        ? 'bg-terracotta text-white border-terracotta shadow-md scale-105 ring-2 ring-terracotta/30' 
+                        : (stg.number === 9 
+                           ? 'bg-pine text-white border-pine' 
+                           : (stg.number === 17 
+                              ? 'bg-amber-600 text-white border-amber-600' 
+                              : 'bg-ivory border-stone/70 text-charcoal hover:border-terracotta/50'))"
+                      class="px-3 py-2 rounded-xl border text-xs whitespace-nowrap font-bold transition-all flex-shrink-0 flex items-center gap-1.5">
+                <span class="w-4 h-4 rounded-full text-[10px] flex items-center justify-center flex-shrink-0"
+                      :class="activeYatraStageNumber === stg.number ? 'bg-white text-terracotta' : 'bg-black/10 text-charcoal'"
+                      x-text="stg.number"></span>
+                <span x-text="stg.name"></span>
+                <span class="text-[9px] px-1.5 py-0.5 rounded font-mono font-medium"
+                      :class="activeYatraStageNumber === stg.number ? 'bg-white/20 text-white' : 'bg-stone/30 text-charcoal/80'"
+                      x-show="stg.date_short"
+                      x-text="stg.date_short"></span>
+                <span class="text-[9px] opacity-75 font-normal" x-text="'(' + stg.altitude + ')'"></span>
+              </button>
+            </template>
+          </div>
+        </div>
+
+        <!-- ACTIVE STAGE INSPECTOR CARD -->
+        <div class="p-6 rounded-2xl bg-ivory border border-stone/60" x-show="activeYatraStage">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div class="lg:col-span-8 space-y-3">
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="px-2.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-pine text-ivory"
+                      x-text="activeYatraStage.day"></span>
+                <span class="px-2.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-amber-600/15 text-amber-800 flex items-center gap-1"
+                      x-show="activeYatraStage.date">
+                  <i data-lucide="calendar" class="w-3 h-3 text-amber-600"></i>
+                  <span x-text="activeYatraStage.date"></span>
+                </span>
+                <span class="px-2.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-terracotta/15 text-terracotta"
+                      x-text="activeYatraStage.tag"></span>
+              </div>
+              <h4 class="font-serif text-2xl font-bold text-charcoal">
+                Stage <span x-text="activeYatraStage.number"></span>: <span x-text="activeYatraStage.name"></span>
+              </h4>
+              <p class="text-xs sm:text-sm text-charcoal/85 leading-relaxed font-light"
+                 x-text="activeYatraStage.significance"></p>
+            </div>
+
+            <div class="lg:col-span-4 bg-surface p-4 rounded-xl border border-stone/50 space-y-3 text-xs">
+              <div x-show="activeYatraStage.date">
+                <span class="text-[10px] uppercase font-bold text-charcoal/50 block">Real Calendar Date</span>
+                <strong class="text-terracotta font-serif text-sm flex items-center gap-1.5">
+                  <i data-lucide="calendar-check" class="w-4 h-4 text-terracotta"></i>
+                  <span x-text="activeYatraStage.date"></span>
+                </strong>
+              </div>
+              <div>
+                <span class="text-[10px] uppercase font-bold text-charcoal/50 block">Camp Altitude</span>
+                <strong class="text-charcoal font-serif text-base" x-text="activeYatraStage.altitude"></strong>
+              </div>
+              <div>
+                <span class="text-[10px] uppercase font-bold text-charcoal/50 block">Distance From Nauti</span>
+                <strong class="text-pine font-serif text-base" x-text="activeYatraStage.distance"></strong>
+              </div>
+              <div class="pt-2 border-t border-stone/30">
+                <a :href="'/hotels?district=chamoli'"
+                   class="w-full inline-flex items-center justify-center gap-1.5 py-2 rounded-lg bg-ivory border border-stone/70 text-xs font-semibold text-charcoal hover:text-terracotta hover:border-terracotta transition-colors">
+                  <i data-lucide="home" class="w-3.5 h-3.5 text-terracotta"></i>
+                  <span>Find Nearby Base Camp Stays</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- THE LAST LOCATION SPOTLIGHT: HOMKUND (4,061 M) -->
+      <div class="bg-gradient-to-br from-charcoal via-[#1a2e26] to-charcoal rounded-3xl p-6 sm:p-10 border border-pine/40 shadow-2xl text-white mb-12 relative overflow-hidden">
+        <div class="absolute -right-10 -bottom-10 w-96 h-96 rounded-full bg-pine/20 blur-3xl pointer-events-none"></div>
+
+        <div class="relative z-10 max-w-4xl">
+          <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-terracotta/25 border border-terracotta/40 text-terracotta-light text-xs font-bold uppercase tracking-wider mb-3 backdrop-blur-md">
+            <i data-lucide="mountain-snow" class="w-3.5 h-3.5 text-terracotta"></i>
+            <span>The Last Location & Sacred Culmination</span>
+          </div>
+
+          <h3 class="font-serif text-2xl sm:text-4xl font-bold text-white mb-2">
+            Homkund (4,061 m) — Where the Yatra Ends & Eternity Begins
+          </h3>
+          <p class="text-white/80 text-xs sm:text-sm leading-relaxed font-light mb-6">
+            Situated in an immense glaciated moraine amphitheater right beneath the precipitous southern rock-and-ice face of <strong>Mount Trishul (7,120 m)</strong> and <strong>Mount Nanda Ghunti (6,309 m)</strong>, Homkund is the final terrestrial boundary permitted to mortals.
+          </p>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div class="p-5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 space-y-2 text-xs">
+              <span class="text-terracotta-light font-bold text-[11px] uppercase tracking-wider block">What Happens at the Last Location:</span>
+              <p class="text-white/85 leading-relaxed font-light">
+                At Homkund, the hereditary Nautiyal priests perform the concluding <strong>Maha-Hawan</strong>. In an intensely emotional ceremony, pilgrims bid their final tearful farewell to Goddess Nanda. The four-horned ram (<em>Chausingha Khadu</em>) is adorned with red vermilion, silken vestments, and offerings, and released into the snowfields.
+              </p>
+            </div>
+
+            <div class="p-5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 space-y-2 text-xs">
+              <span class="text-emerald-300 font-bold text-[11px] uppercase tracking-wider block">The Miracle of Departure:</span>
+              <p class="text-white/85 leading-relaxed font-light">
+                Miraculously, the ram sheds tears, turns toward the soaring peaks of Mount Trishul, and walks ahead alone into the glaciated wilderness without ever looking back, carrying the prayers of Uttarakhand to Lord Shiva. <strong>No human is permitted to walk past Homkund.</strong> Pilgrims turn back via Sutol and Ghat.
+              </p>
+            </div>
+          </div>
+
+          <!-- Survival & Sacred Rules Banner -->
+          <div class="p-4 rounded-2xl bg-black/40 border border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs">
+            <div class="flex items-center gap-3">
+              <i data-lucide="shield-alert" class="w-5 h-5 text-amber-400 flex-shrink-0"></i>
+              <span class="text-white/80 font-light">
+                Extreme glaciated altitude (oxygen &lt; 60%, sub-zero frost). Strict leave-no-trace ecological rules apply.
+              </span>
+            </div>
+            <a href="/guides?district=chamoli"
+               class="px-4 py-2 rounded-xl bg-terracotta hover:bg-terracotta-hover text-white font-bold text-xs transition-colors shadow-xs whitespace-nowrap self-start sm:self-auto">
+              Book High-Altitude Guide →
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- DEDICATED ART & CRAFT CROSS-LINK BANNER (SEPARATING CULTURE & ART) -->
+      <div class="p-6 sm:p-8 rounded-3xl bg-surface border border-stone/60 shadow-card flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div class="flex items-start gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-pine/10 text-pine flex items-center justify-center flex-shrink-0">
+            <i data-lucide="palette" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] uppercase font-bold text-terracotta tracking-wider">Dedicated Artisan Platform</span>
+              <span class="px-2 py-0.5 rounded text-[9px] font-bold uppercase bg-pine/10 text-pine">Separate Section</span>
+            </div>
+            <h3 class="font-serif text-xl sm:text-2xl font-bold text-charcoal mt-0.5">
+              Explore Traditional Arts & Living Crafts of Uttarakhand
+            </h3>
+            <p class="text-xs sm:text-sm text-charcoal/70 mt-1 max-w-2xl font-light">
+              Visit our dedicated <strong>Art & Craft Page</strong> to view photo galleries of GI-tagged Ringal bamboo weaving, sacred temple wood carving, Shauka sheep-wool pit looms, and Aipan geometric art. Get exact workshop routes and connect directly with verified artisan cooperatives with 0% middleman fees.
+            </p>
+          </div>
+        </div>
+
+        <a href="{{ url_for('culture.art') }}"
+           class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-pine hover:bg-pine-hover text-white text-xs font-bold shadow-md transition-all flex-shrink-0">
+          <span>Go to Dedicated Arts & Crafts Page</span>
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+        </a>
+      </div>
+
+    </section>
+
+    <!-- ============================================================
+         2. SECONDARY NAVIGATION & FILTER BAR (Festivals Directory)
+         All | Kumaon | Garhwal | Festivals | Fairs | Folk Culture | Seasonal Celebrations
+         ============================================================ -->
+    <nav id="festivals-directory-nav"
+         aria-label="Filter festivals and living culture"
+         class="sticky top-20 z-30 bg-surface/95 backdrop-blur-md rounded-2xl border border-stone/60 shadow-card p-4 sm:p-5 mb-10">
+
+      <!-- Row 1: Region Switcher + Category Filter Tabs -->
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+        
+        <!-- Region Switcher (Alpine Instant Toggle + Session Storage Sync) -->
+        <div class="flex items-center gap-1.5 p-1 bg-ivory rounded-2xl border border-stone/60 self-start">
+          <button type="button"
+                  @click="setRegion('all')"
+                  :class="region === 'all' ? 'bg-pine text-white font-bold shadow-xs' : 'text-charcoal/70 hover:text-charcoal font-medium'"
+                  class="px-3 py-1.5 rounded-xl text-xs transition-colors">
+            All Regions
+          </button>
+          <button type="button"
+                  @click="setRegion('kumaon')"
+                  :class="region === 'kumaon' ? 'bg-terracotta text-white font-bold shadow-xs' : 'text-charcoal/70 hover:text-charcoal font-medium'"
+                  class="px-3 py-1.5 rounded-xl text-xs transition-colors">
+            Kumaon
+          </button>
+          <button type="button"
+                  @click="setRegion('garhwal')"
+                  :class="region === 'garhwal' ? 'bg-terracotta text-white font-bold shadow-xs' : 'text-charcoal/70 hover:text-charcoal font-medium'"
+                  class="px-3 py-1.5 rounded-xl text-xs transition-colors">
+            Garhwal
+          </button>
+        </div>
+
+        <!-- Filter Tabs -->
+        <div class="flex items-center gap-2 overflow-x-auto pb-1 lg:pb-0 scrollbar-none" role="tablist">
+          <template x-for="tab in [
+            { id: 'all', label: 'All Celebrations' },
+            { id: 'festivals', label: 'Festivals' },
+            { id: 'fairs', label: 'Fairs & Melas' },
+            { id: 'folk_culture', label: 'Folk Culture' },
+            { id: 'seasonal', label: 'Seasonal' }
+          ]" :key="tab.id">
+            <button type="button"
+                    role="tab"
+                    :aria-selected="(activeTab === tab.id).toString()"
+                    @click="setTab(tab.id)"
+                    :class="activeTab === tab.id 
+                      ? 'bg-terracotta text-white font-bold shadow-md shadow-terracotta/20 border-terracotta' 
+                      : 'bg-ivory/80 text-charcoal/80 border-stone/60 hover:border-terracotta/50 hover:bg-stone/20 font-medium'"
+                    class="px-3.5 py-1.5 rounded-full border text-xs whitespace-nowrap transition-all duration-200 flex items-center gap-1.5 focus:outline-none">
+              <span x-text="tab.label"></span>
+            </button>
+          </template>
+
+          <button type="button"
+                  @click="openCalendarModal()"
+                  class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-ivory border border-stone/70 text-xs font-semibold text-terracotta hover:bg-terracotta hover:text-white hover:border-terracotta transition-colors shadow-2xs whitespace-nowrap">
+            <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
+            <span>Calendar</span>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Row 2: Secondary Filter Controls (Search + Month + Category + Happening Soon + Season + Reset) -->
+      <div class="mt-4 pt-4 border-t border-stone/30 flex flex-col lg:flex-row lg:items-center justify-between gap-3 text-xs">
+        
+        <!-- Search Input -->
+        <div class="relative flex-1 max-w-md">
+          <label for="culture-search" class="sr-only">Search celebrations, rituals, or places</label>
+          <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-charcoal/40">
+            <i data-lucide="search" class="w-4 h-4"></i>
+          </div>
+          <input type="search"
+                 id="culture-search"
+                 x-model.debounce.250ms="searchQuery"
+                 placeholder="Search by festival, ritual, deity, or valley..."
+                 class="w-full bg-ivory/70 border border-stone/70 rounded-xl pl-10 pr-8 py-2 text-xs text-charcoal placeholder-charcoal/40 focus:outline-none focus:border-terracotta focus:ring-1 focus:ring-terracotta transition-colors">
+          <button type="button"
+                  x-show="searchQuery"
+                  @click="searchQuery = ''"
+                  class="absolute inset-y-0 right-0 pr-3 flex items-center text-charcoal/40 hover:text-charcoal text-xs">
+            <i data-lucide="x" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+
+        <!-- Dropdowns & Toggles Strip -->
+        <div class="flex flex-wrap items-center gap-2">
+          
+          <!-- Happening Soon Toggle -->
+          <button type="button"
+                  @click="happeningSoon = !happeningSoon"
+                  :class="happeningSoon ? 'bg-amber-600 text-white font-bold shadow-xs' : 'bg-ivory/70 border border-stone/70 text-charcoal/70 hover:text-charcoal font-medium'"
+                  class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs transition-colors cursor-pointer">
+            <i data-lucide="calendar-clock" class="w-3.5 h-3.5"></i>
+            <span>Happening Soon</span>
+          </button>
+
+          <!-- Month Dropdown -->
+          <div class="relative">
+            <select x-model="selectedMonth"
+                    class="appearance-none bg-ivory/70 border border-stone/70 rounded-xl px-3 py-1.5 pr-7 text-xs font-medium text-charcoal focus:outline-none focus:border-terracotta cursor-pointer">
+              <option value="all">All Months</option>
+              <option value="january">January</option>
+              <option value="february">February</option>
+              <option value="march">March</option>
+              <option value="april">April</option>
+              <option value="may">May</option>
+              <option value="june">June</option>
+              <option value="july">July</option>
+              <option value="august">August</option>
+              <option value="september">September</option>
+              <option value="october">October</option>
+              <option value="november">November</option>
+              <option value="december">December</option>
+            </select>
+            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-1.5 text-charcoal/40">
+              <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
+            </div>
+          </div>
+
+          <!-- Category Dropdown -->
+          <div class="relative">
+            <select x-model="selectedCategory"
+                    class="appearance-none bg-ivory/70 border border-stone/70 rounded-xl px-3 py-1.5 pr-7 text-xs font-medium text-charcoal focus:outline-none focus:border-terracotta cursor-pointer">
+              <option value="all">All Categories</option>
+              <option value="religious">Religious</option>
+              <option value="cultural">Cultural</option>
+              <option value="harvest">Harvest</option>
+              <option value="fair">Fairs & Melas</option>
+            </select>
+            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-1.5 text-charcoal/40">
+              <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
+            </div>
+          </div>
+
+          <!-- Season Dropdown -->
+          <div class="relative">
+            <select x-model="selectedSeason"
+                    class="appearance-none bg-ivory/70 border border-stone/70 rounded-xl px-3 py-1.5 pr-7 text-xs font-medium text-charcoal focus:outline-none focus:border-terracotta cursor-pointer">
+              <option value="all">All Seasons</option>
+              <option value="spring">Spring (Mar – Apr)</option>
+              <option value="summer">Summer (May – Jun)</option>
+              <option value="monsoon">Monsoon (Jul – Aug)</option>
+              <option value="autumn">Autumn (Sep – Nov)</option>
+              <option value="winter">Winter (Dec – Feb)</option>
+            </select>
+            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-1.5 text-charcoal/40">
+              <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
+            </div>
+          </div>
+
+          <!-- Reset Button -->
+          <button type="button"
+                  x-show="region !== 'all' || activeTab !== 'all' || selectedMonth !== 'all' || selectedCategory !== 'all' || happeningSoon || selectedSeason !== 'all' || selectedMapPin !== null || searchQuery !== ''"
+                  @click="clearAllFilters()"
+                  class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-semibold text-terracotta hover:bg-terracotta/10 border border-terracotta/30 transition-colors">
+            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+            <span>Reset</span>
+          </button>
+        </div>
+
+      </div>
+
+    </nav>
+
+    <!-- Filter Counter & Context Strip -->
+    <div class="flex items-center justify-between mb-6 px-1 text-xs text-charcoal/70">
+      <div>
+        Showing <span class="font-bold text-charcoal" x-text="filteredFestivals.length"></span> of <span x-text="festivals.length"></span> documented celebrations
+        <span x-show="activeTab !== 'all'" class="text-charcoal/50">· filtered by <strong class="capitalize" x-text="activeTab.replace('_', ' ')"></strong></span>
+        <span x-show="selectedSeason !== 'all'" class="text-charcoal/50">· in <strong class="capitalize" x-text="selectedSeason"></strong></span>
+        <span x-show="selectedMapPin" class="text-charcoal/50">· around <strong class="text-terracotta" x-text="activePinObject ? activePinObject.name : ''"></strong></span>
+      </div>
+
+      <div class="hidden sm:flex items-center gap-3 text-[11px] text-charcoal/50">
+        <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-pine"></span> Verified Cultural Records</span>
+      </div>
+    </div>
+
+    <!-- Empty State Message -->
+    <div x-show="filteredFestivals.length === 0"
+         class="p-12 text-center bg-surface rounded-3xl border border-stone/50 my-10 space-y-4">
+      <div class="w-12 h-12 rounded-full bg-terracotta/10 text-terracotta flex items-center justify-center mx-auto">
+        <i data-lucide="search-x" class="w-6 h-6"></i>
+      </div>
+      <h3 class="font-serif text-xl font-bold text-charcoal">No celebrations match your current filters</h3>
+      <p class="text-xs text-charcoal/65 max-w-md mx-auto font-light">
+        Try broadening your search term, switching the season selector, or clearing the map pin.
+      </p>
+      <button type="button"
+              @click="clearAllFilters()"
+              class="px-5 py-2.5 rounded-full bg-terracotta text-white text-xs font-bold hover:bg-terracotta-hover transition-colors">
+        Reset All Filters
+      </button>
+    </div>
+
+    <!-- ============================================================
+         3. FEATURED CULTURAL EXPERIENCES (12 Specific Festivals Grid)
+         ============================================================ -->
+    <section id="festivals-grid" aria-label="Featured Cultural Experiences" class="mb-24">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        
+        <template x-for="fest in filteredFestivals" :key="fest.id">
+          <article class="bg-surface rounded-3xl border border-stone/60 shadow-card overflow-hidden flex flex-col transition-all duration-300 hover:-translate-y-1.5 hover:shadow-card-hover group">
+            
+            <div class="relative aspect-video w-full overflow-hidden bg-stone/20 block cursor-pointer group/img"
+                 @click="openModal(fest)">
+              <img :src="fest.image"
+                   :alt="fest.title + ' in ' + fest.location"
+                   class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                   loading="lazy">
+              
+              <div class="absolute inset-0 bg-gradient-to-t from-charcoal/90 via-transparent to-black/30 pointer-events-none"></div>
+
+              <div class="absolute top-3.5 left-3.5 z-10">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-pine/90 text-ivory text-[10px] font-bold uppercase tracking-wider backdrop-blur-md shadow-sm">
+                  <i data-lucide="shield-check" class="w-3 h-3 text-emerald-300"></i>
+                  <span>Verified Cultural Info</span>
+                </span>
+              </div>
+
+              <div class="absolute top-3.5 right-3.5 z-10">
+                <span class="inline-block px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider shadow-sm"
+                      :class="fest.region === 'garhwal' ? 'bg-amber-600 text-white' : 'bg-terracotta text-white'"
+                      x-text="fest.region_name"></span>
+              </div>
+
+              <div class="absolute inset-x-0 bottom-0 p-3.5 text-white flex items-center justify-between text-xs font-medium">
+                <div class="flex items-center gap-1.5 truncate">
+                  <i data-lucide="map-pin" class="w-3.5 h-3.5 text-terracotta flex-shrink-0"></i>
+                  <span class="truncate" x-text="fest.location"></span>
+                </div>
+                <div class="flex items-center gap-1 text-[11px] text-white/90 flex-shrink-0">
+                  <i data-lucide="calendar" class="w-3 h-3 text-terracotta"></i>
+                  <span x-text="fest.season_name.split('/')[0]"></span>
+                </div>
+              </div>
+
+              <div class="absolute bottom-1 right-2 z-10 pointer-events-none">
+                <span class="text-[8px] text-white/50 tracking-tight" x-text="'Photo: ' + fest.image_attribution.split('/')[0]"></span>
+              </div>
+            </div>
+
+            <div class="p-6 flex flex-col flex-1">
+              
+              <div class="flex items-center justify-between gap-2 mb-1.5">
+                <span class="text-[10px] font-bold uppercase tracking-wider text-terracotta"
+                      x-text="fest.category"></span>
+                <span class="text-[11px] font-medium text-charcoal/50"
+                      x-text="fest.date_display"></span>
+              </div>
+
+              <h3 class="font-serif text-2xl font-bold text-charcoal group-hover:text-terracotta transition-colors mb-1 leading-snug cursor-pointer"
+                  @click="openModal(fest)"
+                  x-text="fest.title"></h3>
+
+              <p class="text-xs text-charcoal/60 font-medium italic mb-3"
+                 x-text="fest.subtitle"></p>
+
+              <div class="mb-4 p-2.5 rounded-xl bg-ivory border border-stone/50 flex items-start gap-2 text-[11px] text-charcoal/70">
+                <i data-lucide="info" class="w-3.5 h-3.5 text-terracotta flex-shrink-0 mt-0.5"></i>
+                <span class="leading-tight font-light" x-text="fest.date_note"></span>
+              </div>
+
+              <p class="text-xs sm:text-sm text-charcoal/80 leading-relaxed font-light mb-5 flex-1"
+                 x-text="fest.short_story"></p>
+
+              <div class="pt-3 border-t border-stone/30 mb-5">
+                <span class="text-[10px] font-bold uppercase tracking-wider text-charcoal/50 block mb-2">
+                  What Tourists Experience
+                </span>
+                <div class="flex flex-wrap gap-1.5">
+                  <template x-for="exp in fest.visitor_experience.slice(0, 3)" :key="exp">
+                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-ivory border border-stone/60 text-[11px] font-medium text-charcoal/80">
+                      <span class="w-1 h-1 rounded-full bg-terracotta"></span>
+                      <span x-text="exp"></span>
+                    </span>
+                  </template>
+                  <span x-show="fest.visitor_experience.length > 3"
+                        class="text-[10px] text-charcoal/50 self-center pl-1 italic">
+                    + <span x-text="fest.visitor_experience.length - 3"></span> more
+                  </span>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-2 pt-2 mt-auto">
+                <a :href="'/culture/festivals/' + fest.slug"
+                   class="flex-1 inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-terracotta hover:bg-terracotta-hover text-white text-xs font-bold shadow-sm transition-all duration-300 group/btn">
+                  <span>Explore Festival</span>
+                  <i data-lucide="arrow-right" class="w-4 h-4 transition-transform duration-300 group-hover/btn:translate-x-1"></i>
+                </a>
+
+                <button type="button"
+                        @click="openModal(fest)"
+                        title="Quick View Details"
+                        class="p-2.5 rounded-xl bg-ivory border border-stone/70 text-charcoal hover:text-terracotta hover:border-terracotta transition-colors flex items-center justify-center">
+                  <i data-lucide="eye" class="w-4 h-4"></i>
+                </button>
+              </div>
+
+            </div>
+
+          </article>
+        </template>
+
+      </div>
+    </section>
+
+    <!-- ============================================================
+         4. LIVING CULTURE OF UTTARAKHAND (DEDICATED 6-CARD SECTION)
+         ============================================================ -->
+    <section id="living-culture-section" aria-label="Living Culture of Uttarakhand" class="mb-24 pt-8 border-t border-stone/40">
+      
+      <div class="text-center max-w-3xl mx-auto mb-12">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-terracotta/10 border border-terracotta/20 text-terracotta text-xs font-bold uppercase tracking-wider mb-3">
+          <i data-lucide="heart-handshake" class="w-3.5 h-3.5"></i>
+          <span>Intangible Heritage</span>
+        </div>
+        <h2 class="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-charcoal tracking-tight mb-3">
+          Living Culture of Uttarakhand
+        </h2>
+        <p class="text-charcoal/75 text-sm sm:text-base leading-relaxed font-light">
+          Beyond seasonal fairs, the spiritual and communal life of Uttarakhand is woven into ritual arts, martial folk dances, sacred mountain music, and indigenous millet cuisine.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        <template x-for="item in livingCulture" :key="item.id">
+          <article class="bg-surface rounded-3xl border border-stone/60 shadow-card overflow-hidden flex flex-col group hover:-translate-y-1.5 hover:shadow-card-hover transition-all duration-300">
+            
+            <div class="relative aspect-video w-full overflow-hidden bg-stone/20">
+              <img :src="item.image"
+                   :alt="item.title + ' — ' + item.subtitle"
+                   class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                   loading="lazy">
+              
+              <div class="absolute inset-0 bg-gradient-to-t from-charcoal/80 via-transparent to-transparent"></div>
+
+              <div class="absolute top-3.5 left-3.5 z-10">
+                <span class="inline-block px-2.5 py-1 rounded-lg bg-charcoal/80 text-white text-[10px] font-bold uppercase tracking-wider backdrop-blur-md"
+                      x-text="item.region"></span>
+              </div>
+
+              <div class="absolute bottom-2 right-3 z-10 pointer-events-none">
+                <span class="text-[8px] text-white/50 tracking-tight" x-text="'Photo: ' + item.image_attribution.split('/')[0]"></span>
+              </div>
+            </div>
+
+            <div class="p-6 flex flex-col flex-1">
+              <span class="text-[10px] font-bold uppercase tracking-widest text-terracotta mb-1 block"
+                    x-text="item.subtitle"></span>
+
+              <h3 class="font-serif text-2xl font-bold text-charcoal group-hover:text-terracotta transition-colors mb-2">
+                <a :href="item.link_url" x-text="item.title"></a>
+              </h3>
+
+              <p class="text-xs sm:text-sm text-charcoal/75 leading-relaxed font-light mb-4 flex-1 line-clamp-3"
+                 x-text="item.explanation"></p>
+
+              <div class="flex flex-wrap gap-1.5 mb-5">
+                <template x-for="tag in item.tags" :key="tag">
+                  <span class="px-2.5 py-0.5 rounded-md bg-ivory border border-stone/50 text-[10px] font-medium text-charcoal/70"
+                        x-text="tag"></span>
+                </template>
+              </div>
+
+              <a :href="item.link_url"
+                 class="inline-flex items-center justify-between w-full py-2.5 px-4 rounded-xl bg-ivory border border-stone/70 text-xs font-bold text-charcoal hover:bg-terracotta hover:text-white hover:border-terracotta transition-colors mt-auto group/lnk">
+                <span>Discover Tradition</span>
+                <i data-lucide="arrow-right" class="w-4 h-4 transition-transform group-hover/lnk:translate-x-1"></i>
+              </a>
+            </div>
+
+          </article>
+        </template>
+      </div>
+
+    </section>
+
+    <!-- ============================================================
+         DETAILED FESTIVAL MODAL (Quick View & Deep Story)
+         ============================================================ -->
+    <div x-show="modalOpen"
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         @keydown.escape.window="closeModal()"
+         class="fixed inset-0 z-50 overflow-y-auto bg-black/80 backdrop-blur-md p-3 sm:p-6 lg:p-10 flex items-center justify-center"
+         style="display: none;">
+
+      <div @click.away="closeModal()"
+           x-show="modalOpen"
+           x-transition:enter="transition ease-out duration-300 transform"
+           x-transition:enter-start="opacity-0 scale-95"
+           x-transition:enter-end="opacity-100 scale-100"
+           class="bg-surface rounded-3xl border border-stone max-w-4xl w-full shadow-2xl overflow-hidden relative max-h-[92vh] flex flex-col">
+
+        <button type="button"
+                @click="closeModal()"
+                aria-label="Close modal"
+                class="absolute top-4 right-4 z-30 w-10 h-10 rounded-full bg-black/60 hover:bg-black/80 text-white flex items-center justify-center backdrop-blur-sm transition-all shadow-md">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+
+        <div class="overflow-y-auto flex-1" x-show="activeModal">
+          <template x-if="activeModal">
+            <div>
+              <div class="relative aspect-video sm:aspect-[21/9] w-full overflow-hidden bg-charcoal">
+                <img :src="activeModal.image"
+                     :alt="activeModal.title"
+                     class="w-full h-full object-cover">
+                <div class="absolute inset-0 bg-gradient-to-t from-charcoal via-charcoal/40 to-transparent"></div>
+
+                <div class="absolute top-6 left-6 flex flex-wrap gap-2 z-10">
+                  <span class="px-3 py-1 rounded-lg bg-pine text-ivory text-xs font-bold uppercase tracking-wider shadow-sm flex items-center gap-1.5">
+                    <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-300"></i>
+                    <span>Verified Cultural Information</span>
+                  </span>
+                  <span class="px-3 py-1 rounded-lg bg-terracotta text-white text-xs font-bold uppercase tracking-wider shadow-sm"
+                        x-text="activeModal.region_name"></span>
+                </div>
+
+                <div class="absolute bottom-6 left-6 right-6 text-white">
+                  <span class="text-xs uppercase tracking-widest text-terracotta font-semibold block mb-1"
+                        x-text="activeModal.subtitle"></span>
+                  <h2 class="font-serif text-2xl sm:text-4xl font-bold leading-tight mb-2"
+                      x-text="activeModal.title"></h2>
+                  <p class="text-xs sm:text-sm text-white/85 flex items-center gap-3">
+                    <span class="flex items-center gap-1">
+                      <i data-lucide="map-pin" class="w-4 h-4 text-terracotta"></i>
+                      <span x-text="activeModal.location"></span>
+                    </span>
+                    <span>·</span>
+                    <span class="flex items-center gap-1">
+                      <i data-lucide="calendar" class="w-4 h-4 text-terracotta"></i>
+                      <span x-text="activeModal.date_display"></span>
+                    </span>
+                  </p>
+                </div>
+              </div>
+
+              <div class="p-6 sm:p-10 space-y-8">
+                <div class="p-4 rounded-2xl bg-terracotta/10 border border-terracotta/25 flex items-start gap-3 text-xs text-charcoal">
+                  <div class="w-8 h-8 rounded-xl bg-terracotta/20 text-terracotta flex items-center justify-center flex-shrink-0">
+                    <i data-lucide="calendar-clock" class="w-4 h-4"></i>
+                  </div>
+                  <div>
+                    <strong class="font-bold text-terracotta block uppercase tracking-wider text-[10px]">Date & Schedule Advisory</strong>
+                    <p class="font-medium text-xs text-charcoal/85 mt-0.5" x-text="activeModal.date_note"></p>
+                  </div>
+                </div>
+
+                <div>
+                  <h4 class="font-serif text-xl font-bold text-charcoal mb-3 flex items-center gap-2">
+                    <i data-lucide="book-open" class="w-5 h-5 text-terracotta"></i>
+                    <span>The Legend, History & Cultural Story</span>
+                  </h4>
+                  <div class="text-xs sm:text-sm text-charcoal/85 leading-relaxed font-light whitespace-pre-line space-y-3"
+                       x-text="activeModal.full_story"></div>
+                </div>
+
+                <div class="p-5 rounded-2xl bg-ivory border border-stone/60 space-y-2">
+                  <span class="text-[10px] font-bold uppercase tracking-widest text-pine flex items-center gap-1.5">
+                    <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                    <span>What Makes This Tradition Unique to Uttarakhand</span>
+                  </span>
+                  <p class="text-xs sm:text-sm text-charcoal/85 leading-relaxed font-light"
+                     x-text="activeModal.cultural_significance"></p>
+                </div>
+
+                <div>
+                  <h4 class="font-serif text-lg font-bold text-charcoal mb-3 flex items-center gap-2">
+                    <i data-lucide="check-circle-2" class="w-5 h-5 text-pine"></i>
+                    <span>What Tourists Can Experience & Witness</span>
+                  </h4>
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <template x-for="item in activeModal.visitor_experience" :key="item">
+                      <div class="p-3 rounded-xl bg-ivory border border-stone/50 flex items-center gap-2.5 text-xs text-charcoal font-medium">
+                        <span class="w-2 h-2 rounded-full bg-terracotta flex-shrink-0"></span>
+                        <span x-text="item"></span>
+                      </div>
+                    </template>
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div class="p-5 rounded-2xl bg-ivory/80 border border-stone/60 space-y-1.5">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-charcoal/60 flex items-center gap-1">
+                      <i data-lucide="navigation" class="w-3.5 h-3.5 text-terracotta"></i>
+                      <span>Where It Is Celebrated</span>
+                    </span>
+                    <p class="text-xs text-charcoal/80 font-medium" x-text="activeModal.where_to_experience"></p>
+                  </div>
+
+                  <div class="p-5 rounded-2xl bg-ivory/80 border border-stone/60 space-y-1.5">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-charcoal/60 flex items-center gap-1">
+                      <i data-lucide="lightbulb" class="w-3.5 h-3.5 text-amber-600"></i>
+                      <span>Traveler Guidelines & Tips</span>
+                    </span>
+                    <p class="text-xs text-charcoal/80 font-light" x-text="activeModal.local_tips"></p>
+                  </div>
+                </div>
+
+                <!-- Connected Homestays & Stays -->
+                <div x-show="activeModal.hotels && activeModal.hotels.length > 0" class="pt-4 border-t border-stone/40">
+                  <div class="flex items-center justify-between gap-2 mb-4">
+                    <h4 class="font-serif text-lg font-bold text-charcoal flex items-center gap-2">
+                      <i data-lucide="home" class="w-4 h-4 text-terracotta"></i>
+                      <span>Authentic Homestays Near <span x-text="activeModal.district"></span></span>
+                    </h4>
+                    <a :href="'/hotels?district=' + (activeModal.map_location_key || 'kumaon')"
+                       class="text-xs font-semibold text-terracotta hover:underline">
+                      View All Stays →
+                    </a>
+                  </div>
+
+                  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <template x-for="stay in activeModal.hotels" :key="stay.id">
+                      <a :href="'/hotels/' + stay.id"
+                         class="p-3 bg-ivory rounded-2xl border border-stone/60 hover:border-terracotta/50 transition-all flex flex-col group/stay">
+                        <div class="relative aspect-video rounded-xl overflow-hidden bg-stone/20 mb-2">
+                          <img :src="stay.cover_image_url || '/static/images/festivals/nanda_devi_mela.jpg'"
+                               :alt="stay.name"
+                               class="w-full h-full object-cover group-hover/stay:scale-105 transition-transform duration-300">
+                          <div class="absolute top-2 left-2 px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-pine text-ivory"
+                               x-text="stay.hotel_type"></div>
+                          <div class="absolute bottom-2 right-2 px-2 py-0.5 rounded text-[10px] font-semibold bg-black/70 text-white"
+                               x-show="stay.price_min"
+                               x-text="'₹' + stay.price_min + '/n'"></div>
+                        </div>
+                        <h5 class="text-xs font-bold text-charcoal group-hover/stay:text-terracotta transition-colors line-clamp-1"
+                            x-text="stay.name"></h5>
+                        <p class="text-[10px] text-charcoal/60 mt-0.5 flex items-center gap-1">
+                          <i data-lucide="map-pin" class="w-3 h-3 text-terracotta"></i>
+                          <span x-text="stay.district"></span>
+                        </p>
+                      </a>
+                    </template>
+                  </div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-6 border-t border-stone/40">
+                  <span class="text-[11px] text-charcoal/50 italic">
+                    Source: Verified by Himalayan Cultural Preservation Societies.
+                  </span>
+
+                  <div class="flex items-center gap-3">
+                    <button type="button"
+                            @click="closeModal()"
+                            class="px-5 py-2 rounded-full border border-stone text-xs font-semibold text-charcoal hover:bg-stone/20 transition-colors">
+                      Close
+                    </button>
+                    <a :href="'/culture/festivals/' + activeModal.slug"
+                       class="px-6 py-2 rounded-full bg-terracotta hover:bg-terracotta-hover text-white text-xs font-bold shadow-sm transition-colors inline-flex items-center gap-1.5">
+                      <span>Full Guide Page</span>
+                      <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </a>
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+          </template>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ============================================================
+         2026–27 CULTURAL CALENDAR MODAL
+         ============================================================ -->
+    <div x-show="calendarModalOpen"
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         @keydown.escape.window="closeCalendarModal()"
+         class="fixed inset-0 z-50 overflow-y-auto bg-black/80 backdrop-blur-md p-4 sm:p-6 lg:p-8 flex items-center justify-center"
+         style="display: none;">
+
+      <div @click.away="closeCalendarModal()"
+           x-show="calendarModalOpen"
+           x-transition:enter="transition ease-out duration-300 transform"
+           x-transition:enter-start="opacity-0 scale-95"
+           x-transition:enter-end="opacity-100 scale-100"
+           class="bg-surface rounded-3xl border border-stone max-w-3xl w-full shadow-2xl overflow-hidden relative max-h-[90vh] flex flex-col p-6 sm:p-8">
+
+        <div class="flex items-center justify-between pb-4 border-b border-stone/40 mb-6">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-terracotta/10 flex items-center justify-center text-terracotta">
+              <i data-lucide="calendar" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h3 class="font-serif text-2xl font-bold text-charcoal">Uttarakhand Himalayan Cultural Calendar</h3>
+              <p class="text-xs text-charcoal/60">Chronological travel guide for traditional festivals across Garhwal & Kumaon</p>
+            </div>
+          </div>
+          <button type="button"
+                  @click="closeCalendarModal()"
+                  class="w-8 h-8 rounded-full bg-stone/20 hover:bg-stone/40 flex items-center justify-center text-charcoal transition-colors">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+        <div class="overflow-y-auto space-y-3.5 pr-1 flex-1">
+          <template x-for="item in festivals" :key="item.id">
+            <div class="p-4 rounded-2xl bg-ivory/80 border border-stone/50 hover:border-terracotta/50 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 cursor-pointer group"
+                 @click="closeCalendarModal(); openModal(item);">
+              <div class="flex items-start gap-3.5">
+                <div class="w-16 h-12 rounded-xl overflow-hidden bg-stone/20 flex-shrink-0 aspect-video">
+                  <img :src="item.image" :alt="item.title" class="w-full h-full object-cover">
+                </div>
+                <div>
+                  <div class="flex items-center gap-2 mb-0.5">
+                    <span class="text-[9px] font-bold uppercase tracking-wider text-terracotta bg-terracotta/10 px-2 py-0.5 rounded"
+                          x-text="item.region_name"></span>
+                    <span class="text-sm font-bold text-charcoal group-hover:text-terracotta transition-colors"
+                          x-text="item.title"></span>
+                  </div>
+                  <div class="flex flex-wrap items-center gap-3 text-xs text-charcoal/70">
+                    <span class="flex items-center gap-1 font-medium text-terracotta">
+                      <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
+                      <span x-text="item.date_display"></span>
+                    </span>
+                    <span>·</span>
+                    <span class="flex items-center gap-1">
+                      <i data-lucide="map-pin" class="w-3.5 h-3.5 text-charcoal/40"></i>
+                      <span x-text="item.location"></span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <span class="inline-flex items-center gap-1 text-xs font-semibold text-terracotta group-hover:translate-x-1 transition-transform self-end sm:self-center">
+                <span>View Details</span>
+                <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+              </span>
+            </div>
+          </template>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/culture-directory.js') }}"></script>
+{% endblock %}

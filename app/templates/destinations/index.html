@@ -1,0 +1,91 @@
+{% extends '_base.html' %}
+{% block title %}Destinations and Districts — Beyond Tour{% endblock %}
+{% block meta_description %}Explore sacred temples, high mountain passes, emerald lakes, and tranquil heritage districts of Uttarakhand.{% endblock %}
+
+{% block content %}
+<div class="pt-4 sm:pt-6 pb-20">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+    <!-- Header -->
+    <div class="mb-8 text-center">
+      <h1 class="font-serif text-4xl sm:text-5xl font-bold text-charcoal flex items-center justify-center gap-3">
+        <i data-lucide="compass" class="w-9 h-9 text-terracotta stroke-[1.5]"></i>
+        <span>Destinations and Districts</span>
+      </h1>
+    </div>
+
+    <!-- Compact Zero-Scroll District Pill Bar -->
+    <div class="mb-6 bg-white/60 p-3.5 sm:p-4 rounded-2xl border border-stone/40 shadow-xs backdrop-blur-sm">
+      <div class="flex items-center justify-between mb-2.5 px-1">
+        <span class="text-[11px] uppercase font-bold tracking-widest text-terracotta flex items-center gap-1.5">
+          <i data-lucide="map-pin" class="w-3.5 h-3.5 text-terracotta"></i>
+          <span>Filter By District</span>
+        </span>
+        <span class="text-xs text-charcoal/50">4 Core districts: Almora, Nainital, Pithoragarh & Uttarkashi</span>
+      </div>
+
+      <div class="flex items-center gap-2 overflow-x-auto pb-1.5 scrollbar-none no-scrollbar">
+        <!-- All Destinations Pill -->
+        <a href="{{ url_for('destinations.index') }}"
+           class="flex-shrink-0 inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold bg-pine text-white shadow-md ring-2 ring-pine/30">
+          <i data-lucide="globe" class="w-3.5 h-3.5"></i>
+          <span>All Destinations</span>
+        </a>
+
+        {% for key, d in districts.items() %}
+        <div class="flex-shrink-0 flex items-center bg-white rounded-full border border-stone/50 overflow-hidden shadow-xs hover:border-terracotta/50 transition-all">
+          <a href="{{ url_for('destinations.index', district=key) }}"
+             class="px-3.5 py-1.5 text-xs font-semibold text-charcoal/80 hover:text-terracotta hover:bg-stone/10 transition-colors">
+            {{ d.name }}
+          </a>
+          <a href="{{ url_for('destinations.district_detail', slug=key) }}"
+             title="View {{ d.name }} full district guide"
+             class="px-2 py-1.5 text-[10px] uppercase font-bold text-terracotta/80 hover:text-terracotta hover:bg-terracotta/10 border-l border-stone/30 transition-colors flex items-center gap-0.5">
+            <span>Guide</span>
+            <i data-lucide="arrow-up-right" class="w-2.5 h-2.5"></i>
+          </a>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Filters (HTMX-powered) -->
+    <div class="bg-surface rounded-card shadow-card p-5 mb-10 border border-stone/50"
+         hx-get="{{ url_for('destinations.index') }}"
+         hx-target="#destinations-grid"
+         hx-trigger="change from:.filter-select"
+         hx-include=".filter-select">
+      <div class="flex flex-wrap gap-4 items-center">
+        <div>
+          <label class="text-xs font-semibold text-charcoal/60 uppercase tracking-wide mb-1 block">Region</label>
+          <select name="region" class="filter-select bg-ivory border border-stone rounded-xl px-4 py-2.5 text-sm font-medium text-charcoal focus:outline-none focus:border-terracotta">
+            <option value="" {% if not active_region %}selected{% endif %}>All Regions</option>
+            <option value="kumaon" {% if active_region == 'kumaon' %}selected{% endif %}>Kumaon</option>
+            <option value="garhwal" {% if active_region == 'garhwal' %}selected{% endif %}>Garhwal</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-charcoal/60 uppercase tracking-wide mb-1 block">Category</label>
+          <select name="category" class="filter-select bg-ivory border border-stone rounded-xl px-4 py-2.5 text-sm font-medium text-charcoal focus:outline-none focus:border-terracotta">
+            <option value="" {% if not active_category %}selected{% endif %}>All Categories</option>
+            <option value="trek" {% if active_category == 'trek' %}selected{% endif %}>Trek & Mountain</option>
+            <option value="temple" {% if active_category == 'temple' %}selected{% endif %}>Temple & Sacred</option>
+            <option value="lake" {% if active_category == 'lake' %}selected{% endif %}>Lake & Water</option>
+            <option value="heritage" {% if active_category == 'heritage' %}selected{% endif %}>Heritage & Village</option>
+            <option value="wildlife" {% if active_category == 'wildlife' %}selected{% endif %}>Wildlife Sanctuary</option>
+          </select>
+        </div>
+        <div class="ml-auto text-sm text-charcoal/60 font-medium">
+          {{ destinations | length }} destinations found
+        </div>
+      </div>
+    </div>
+
+    <!-- Destinations Grid (HTMX target) -->
+    <div id="destinations-grid">
+      {% include 'destinations/_grid.html' %}
+    </div>
+
+  </div>
+</div>
+{% endblock %}

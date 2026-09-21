@@ -1,0 +1,44 @@
+{% extends '_base.html' %}
+{% block title %}Server Error (500) — Beyond Tour{% endblock %}
+
+{% block content %}
+<div class="min-h-[70vh] flex items-center justify-center py-16 px-4 sm:px-6 lg:px-8 bg-ivory">
+  <div class="max-w-xl w-full text-center space-y-6">
+    
+    <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/25 text-amber-700 text-xs font-bold uppercase tracking-wider">
+      <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+      <span>Temporary Mountain Fog · Error 500</span>
+    </div>
+
+    <div class="relative">
+      <div class="font-serif text-7xl sm:text-8xl font-black text-charcoal/15 select-none tracking-widest">
+        500
+      </div>
+      <div class="absolute inset-0 flex items-center justify-center">
+        <h1 class="font-serif text-2xl sm:text-3xl lg:text-4xl font-bold text-charcoal tracking-tight">
+          Temporary Server Weather
+        </h1>
+      </div>
+    </div>
+
+    <p class="text-charcoal/70 text-xs sm:text-sm leading-relaxed font-light max-w-md mx-auto">
+      Something unexpected happened while reaching our mountain servers. Our guides are already working to clear the route.
+    </p>
+
+    <div class="flex items-center justify-center gap-3 pt-2">
+      <a href="{{ url_for('main.index') }}"
+         class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-pine text-white text-xs font-bold hover:bg-pine-dark transition-all shadow-sm">
+        <i data-lucide="home" class="w-4 h-4"></i>
+        <span>Return to Home</span>
+      </a>
+
+      <button onclick="window.location.reload()"
+              class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-terracotta text-white text-xs font-bold hover:bg-terracotta-hover transition-all shadow-sm">
+        <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+        <span>Retry Page</span>
+      </button>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

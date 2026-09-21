@@ -1,0 +1,120 @@
+{% extends 'admin/base.html' %}
+{% block title %}Site Copy Strings & Content — Beyond Tour Admin{% endblock %}
+
+{% block admin_content %}
+<div x-data="{ editingKey: null, editingValue: '', editingDesc: '' }">
+
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+    <div>
+      <h2 class="font-serif text-2xl font-bold text-charcoal">Editable Site Copy Strings</h2>
+      <p class="text-xs text-charcoal/60 mt-0.5">Manage live marketing headlines, culture badges, and promotional copy without developer deployment</p>
+    </div>
+  </div>
+
+  <!-- Content Table -->
+  <div class="bg-surface rounded-3xl border border-stone/60 shadow-card overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-xs">
+        <thead class="bg-ivory/60 text-[11px] uppercase tracking-wider text-charcoal/70 border-b border-stone/30">
+          <tr>
+            <th class="py-3.5 px-5">Setting Key</th>
+            <th class="py-3.5 px-5">Live Text / Value</th>
+            <th class="py-3.5 px-4">Usage Purpose</th>
+            <th class="py-3.5 px-4">Last Updated</th>
+            <th class="py-3.5 px-5 text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-stone/20">
+          {% for item in items %}
+          <tr class="hover:bg-ivory/30 transition-colors">
+            <td class="py-4 px-5 font-mono font-bold text-xs text-charcoal">
+              {{ item.key }}
+            </td>
+
+            <td class="py-4 px-5 text-charcoal max-w-md">
+              <p class="line-clamp-2">{{ item.value }}</p>
+            </td>
+
+            <td class="py-4 px-4 text-charcoal/60">
+              {{ item.description or '-' }}
+            </td>
+
+            <td class="py-4 px-4 text-charcoal/50 whitespace-nowrap">
+              {{ item.updated_at.strftime('%d %b %Y, %H:%M') if item.updated_at else '-' }}
+            </td>
+
+            <td class="py-4 px-5 text-right whitespace-nowrap">
+              <button type="button"
+                      @click="editingKey = '{{ item.key }}'; editingValue = `{{ item.value|replace('`', '\\`') }}`; editingDesc = `{{ item.description or '' }}`"
+                      class="px-3 py-1.5 rounded-xl bg-stone/20 hover:bg-stone/40 text-charcoal font-semibold text-xs transition-colors">
+                Edit Copy
+              </button>
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="5" class="py-12 text-center text-charcoal/50">
+              No site content entries configured.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Edit Copy Modal -->
+  <div x-show="editingKey !== null"
+       x-cloak
+       class="fixed inset-0 z-50 overflow-y-auto bg-charcoal/60 backdrop-blur-xs flex items-center justify-center p-4"
+       @keydown.escape.window="editingKey = null">
+    <div class="bg-surface rounded-3xl border border-stone/60 shadow-hero max-w-lg w-full p-6 text-left"
+         @click.away="editingKey = null">
+      
+      <div class="flex items-center justify-between pb-4 border-b border-stone/30 mb-4">
+        <div>
+          <h3 class="font-serif text-lg font-bold text-charcoal">Update Live Site Copy</h3>
+          <span class="font-mono text-xs text-charcoal/60" x-text="editingKey"></span>
+        </div>
+        <button type="button" @click="editingKey = null" class="text-charcoal/60 hover:text-charcoal">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <form action="{{ url_for('admin.site_content_update') }}" method="POST" class="space-y-4">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="key" :value="editingKey">
+        <input type="hidden" name="description" :value="editingDesc">
+
+        <div>
+          <label class="block text-xs font-bold text-charcoal mb-1">Content / Copy String</label>
+          <textarea name="value"
+                    rows="4"
+                    required
+                    x-model="editingValue"
+                    class="w-full text-xs rounded-xl border border-stone/70 p-3 focus:outline-hidden focus:border-terracotta focus:ring-1 focus:ring-terracotta"></textarea>
+        </div>
+
+        <p class="text-[11px] text-charcoal/50 font-light" x-text="editingDesc"></p>
+
+        <div class="flex items-center justify-end gap-3 pt-3 border-t border-stone/30">
+          <button type="button"
+                  @click="editingKey = null"
+                  class="px-4 py-2 rounded-xl bg-stone/20 text-charcoal text-xs font-semibold hover:bg-stone/40 transition-colors">
+            Cancel
+          </button>
+          <button type="submit"
+                  class="px-5 py-2 rounded-xl bg-terracotta hover:bg-terracotta-hover text-white text-xs font-bold transition-colors shadow-sm">
+            Save & Publish Live
+          </button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+
+</div>
+{% endblock %}

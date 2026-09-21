@@ -1,0 +1,42 @@
+{% extends '_base.html' %}
+{% block title %}My Trips — Beyond Tour{% endblock %}
+{% block content %}
+<div class="pt-4 sm:pt-6 pb-16 bg-ivory min-h-screen">
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 pt-2 pb-12">
+    <div class="text-center mb-8">
+      <p class="text-terracotta font-semibold text-sm uppercase tracking-widest mb-1">Your Itineraries</p>
+      <h1 class="font-serif text-4xl font-bold text-charcoal mb-4">My Trips</h1>
+      <div class="flex justify-center">
+        <a href="{{ url_for('trip_planner.index') }}" class="inline-flex items-center gap-2 px-5 py-2.5 bg-terracotta text-white text-sm font-semibold rounded-xl hover:bg-terracotta-dark transition-colors shadow-sm">
+          <i data-lucide="plus" class="w-4 h-4"></i> Plan New Trip
+        </a>
+      </div>
+    </div>
+    {% if trips %}
+    <div class="space-y-4">
+      {% for trip in trips %}
+      <a href="{{ url_for('my_trips.detail', trip_id=trip.id) }}" class="flex items-center gap-5 bg-white rounded-card shadow-card p-5 card-hover reveal border border-stone/40">
+        <div class="w-12 h-12 rounded-2xl bg-pine flex items-center justify-center text-ivory text-lg flex-shrink-0">
+          <i data-lucide="map" class="w-6 h-6 text-terracotta"></i>
+        </div>
+        <div class="flex-1">
+          <h3 class="font-serif text-lg font-semibold text-charcoal">{{ trip.title }}</h3>
+          <p class="text-sm text-charcoal/60">{{ trip.days }} days · {{ trip.group_type }} · starting from {{ trip.start_city }}</p>
+        </div>
+        <span class="px-3 py-1 rounded-full text-xs font-semibold {% if trip.status == 'confirmed' %}tag-sage{% else %}tag-terracotta{% endif %}">{{ trip.status | capitalize }}</span>
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-20 bg-white rounded-card border border-stone/40 shadow-sm max-w-lg mx-auto p-8">
+      <i data-lucide="map" class="w-14 h-14 text-stone mx-auto mb-4"></i>
+      <h2 class="font-serif text-2xl text-charcoal mb-2">No trips planned yet</h2>
+      <p class="text-charcoal/60 mb-6 text-sm">Use our AI planner to create your first customized Himalayan itinerary.</p>
+      <a href="{{ url_for('trip_planner.index') }}" class="inline-flex items-center gap-2 px-6 py-3 bg-terracotta text-white rounded-xl font-medium hover:bg-terracotta-dark transition-colors text-sm">
+        <i data-lucide="compass" class="w-4 h-4"></i> Plan a Trip
+      </a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,460 @@
+{% extends '_base.html' %}
+{% block title %}Local Guides — Beyond Tour{% endblock %}
+{% block meta_description %}Connect with verified local mountain guides, naturalists, and folklore historians native to Kumaon and Garhwal.{% endblock %}
+
+{% block extra_head %}
+<script src="{{ url_for('static', filename='js/guide-booking.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="pt-4 sm:pt-6 pb-20 bg-ivory min-h-screen"
+     x-data="guideBooking()"
+     @keydown.escape.window="closeModal()">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    
+    <!-- Header -->
+    <div class="text-center max-w-3xl mx-auto mb-8">
+      <h1 class="font-serif text-4xl sm:text-5xl font-bold text-charcoal flex items-center justify-center gap-3">
+        <i data-lucide="compass" class="w-9 h-9 text-terracotta stroke-[1.5]"></i>
+        <span>Verified Local Guides</span>
+      </h1>
+      <p class="text-xs sm:text-sm text-charcoal/70 mt-2 font-light">
+        Native mountain guides, folklore historians, and trail experts across Uttarakhand
+      </p>
+    </div>
+
+    <!-- Compact Zero-Scroll Guide Destination Pill Bar -->
+    <div class="mb-6 bg-white/60 p-3.5 sm:p-4 rounded-2xl border border-stone/40 shadow-xs backdrop-blur-sm">
+      <div class="flex items-center justify-between mb-2.5 px-1">
+        <span class="text-[11px] uppercase font-bold tracking-widest text-terracotta flex items-center gap-1.5">
+          <i data-lucide="compass" class="w-3.5 h-3.5 text-terracotta"></i>
+          <span>Select Guide Location</span>
+        </span>
+        {% if active_district %}
+        <a href="{{ url_for('guides.index') }}" class="text-xs font-semibold text-terracotta hover:underline flex items-center gap-1">
+          <span>Show all guides</span>
+          <i data-lucide="rotate-ccw" class="w-3 h-3"></i>
+        </a>
+        {% else %}
+        <span class="text-xs text-charcoal/50">Verified native guides across Almora & Uttarkashi</span>
+        {% endif %}
+      </div>
+
+      <div class="flex items-center gap-2 overflow-x-auto pb-1.5 scrollbar-none no-scrollbar">
+        <!-- All Guides Pill -->
+        <a href="{{ url_for('guides.index') }}"
+           class="flex-shrink-0 inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold transition-all {% if not active_district %}bg-pine text-white shadow-md ring-2 ring-pine/30{% else %}bg-white text-charcoal/80 hover:bg-stone/20 border border-stone/50 hover:text-charcoal{% endif %}">
+          <i data-lucide="globe" class="w-3.5 h-3.5"></i>
+          <span>All Guides ({{ guides|length }})</span>
+        </a>
+
+        {% for card in location_cards if card.guide_count > 0 %}
+        {% set is_active = (active_district|lower == card.slug or active_district|lower == card.name|lower or card.slug in active_district|lower) %}
+        <a href="{{ url_for('guides.index', district=card.slug) }}"
+           class="flex-shrink-0 inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all {% if is_active %}bg-terracotta text-white shadow-md ring-2 ring-terracotta/30 scale-[1.02]{% else %}bg-white text-charcoal/80 hover:bg-stone/20 border border-stone/50 hover:text-charcoal{% endif %}">
+          <span>{{ card.name }}</span>
+          {% if is_active %}
+          <span class="px-1.5 py-0.2 rounded-full bg-white/20 text-[10px] font-bold">Selected</span>
+          {% else %}
+          <span class="px-1.5 py-0.2 rounded-full bg-stone/20 text-charcoal/60 text-[10px] font-medium">{{ card.guide_count }} Guide{% if card.guide_count != 1 %}s{% endif %}</span>
+          {% endif %}
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Filter Status Bar -->
+    <div class="bg-surface rounded-2xl shadow-card p-4 sm:p-5 mb-8 border border-stone/50 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-terracotta/15 text-terracotta flex items-center justify-center flex-shrink-0">
+          <i data-lucide="compass" class="w-4 h-4"></i>
+        </div>
+        <div>
+          {% if active_district %}
+          <div class="flex items-center gap-2">
+            <span class="text-xs text-charcoal/60 uppercase tracking-wider">Filtered by:</span>
+            <span class="font-bold text-charcoal capitalize text-sm">{{ active_district }}</span>
+            <a href="{{ url_for('guides.index') }}" class="inline-flex items-center gap-1 text-[11px] font-semibold text-terracotta hover:underline ml-1">
+              (Clear <i data-lucide="x" class="w-3 h-3"></i>)
+            </a>
+          </div>
+          <p class="text-xs text-charcoal/60">{{ guides|length }} verified local guides in {{ active_district|capitalize }}</p>
+          {% else %}
+          <p class="font-bold text-charcoal text-sm">All Verified Mountain Guides</p>
+          <p class="text-xs text-charcoal/60">Showing all {{ guides|length }} verified native guides across Almora & Uttarkashi</p>
+          {% endif %}
+        </div>
+      </div>
+
+      {% if active_district %}
+      <a href="{{ url_for('guides.index') }}" class="px-4 py-2 rounded-xl text-xs font-semibold bg-ivory border border-stone/40 text-charcoal hover:border-terracotta transition-all inline-flex items-center gap-1.5">
+        <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+        <span>Show All Guides</span>
+      </a>
+      {% endif %}
+    </div>
+
+    <!-- Guides Grid -->
+    {% if guides %}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
+      {% for guide in guides %}
+      {% set gallery_list = guide.gallery_images|from_json if (guide.gallery_images and guide.gallery_images|from_json) else [] %}
+      {% set banner_img = gallery_list[1] if gallery_list|length > 1 else (gallery_list[0] if gallery_list|length > 0 else '/static/images/hero.jpg') %}
+      <div class="group bg-surface rounded-2xl overflow-hidden shadow-card card-hover border border-stone/40 flex flex-col justify-between transition-all duration-300 hover:shadow-xl hover:border-terracotta/40">
+        <div>
+          <!-- Scenic Header Banner (Compact & Elegant) -->
+          <div class="relative h-20 sm:h-24 w-full overflow-hidden bg-stone/30">
+            <img src="{{ banner_img }}"
+                 alt="{{ guide.district }} landscape"
+                 class="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 brightness-95"
+                 loading="lazy">
+            <div class="absolute inset-0 bg-gradient-to-t from-charcoal/80 via-charcoal/25 to-transparent"></div>
+
+            <!-- Top Badges: Verified Status & Rating -->
+            <div class="absolute top-2 inset-x-2.5 flex items-center justify-between pointer-events-none">
+              {% if guide.verified %}
+              <span class="px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wider uppercase bg-sage text-white shadow-xs flex items-center gap-1 backdrop-blur-xs">
+                <i data-lucide="shield-check" class="w-3 h-3"></i> Verified
+              </span>
+              {% else %}
+              <span class="px-2 py-0.5 rounded-full text-[9px] font-semibold tracking-wider uppercase bg-charcoal/70 text-white shadow-xs">
+                Local Guide
+              </span>
+              {% endif %}
+
+              {% if guide.rating %}
+              <span class="px-2 py-0.5 rounded-lg bg-white/95 text-charcoal shadow-xs font-bold text-[11px] flex items-center gap-1 backdrop-blur-xs">
+                <i data-lucide="star" class="w-3 h-3 text-terracotta fill-terracotta"></i>
+                <span>{{ "%.1f"|format(guide.rating) }}</span>
+                <span class="text-charcoal/50 text-[9px] font-normal">({{ guide.review_count }})</span>
+              </span>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Guide DP Avatar (Circular, Overlapping Header) -->
+          <div class="relative -mt-10 sm:-mt-11 flex flex-col items-center px-4">
+            <div class="relative group/dp">
+              <a href="{{ url_for('guides.detail', guide_id=guide.id) }}" class="block">
+                <div class="w-20 h-20 sm:w-22 sm:h-22 rounded-full ring-4 ring-surface shadow-md overflow-hidden bg-stone/20 border border-stone/30 transition-transform duration-300 group-hover/dp:scale-105">
+                  <img src="{{ guide.profile_image or '/static/images/hero.jpg' }}"
+                       alt="{{ guide.name }}"
+                       class="w-full h-full object-cover object-top"
+                       loading="lazy">
+                </div>
+              </a>
+              {% if guide.verified %}
+              <span class="absolute bottom-0.5 right-0.5 w-5 h-5 sm:w-5.5 sm:h-5.5 rounded-full bg-emerald-600 text-white flex items-center justify-center ring-2 ring-surface shadow-xs" title="Verified Mountain Expert">
+                <i data-lucide="check" class="w-3 h-3 stroke-[3]"></i>
+              </span>
+              {% endif %}
+            </div>
+
+            <!-- Guide Name -->
+            <h3 class="font-serif text-base sm:text-lg font-bold text-charcoal leading-snug group-hover:text-terracotta transition-colors text-center mt-2">
+              <a href="{{ url_for('guides.detail', guide_id=guide.id) }}">{{ guide.name }}</a>
+            </h3>
+
+            <!-- Location with Pin -->
+            <p class="text-[11px] sm:text-xs text-charcoal/70 flex items-center justify-center gap-1 font-medium mt-0.5 text-center">
+              <i data-lucide="map-pin" class="w-3 h-3 text-terracotta flex-shrink-0"></i>
+              <span class="truncate max-w-[220px]">{{ guide.districts_served or guide.district }}</span>
+            </p>
+
+            <!-- Trust & Experience Badges -->
+            <div class="flex items-center justify-center gap-1.5 mt-2 flex-wrap">
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-terracotta/10 text-terracotta border border-terracotta/25 flex items-center gap-1">
+                <i data-lucide="award" class="w-2.5 h-2.5"></i> {{ guide.years_experience }} yrs exp
+              </span>
+              {% if guide.languages %}
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-ivory text-charcoal/70 border border-stone/40 flex items-center gap-1">
+                <i data-lucide="languages" class="w-2.5 h-2.5 text-charcoal/50"></i> {{ (guide.languages|from_json)[0] }}
+              </span>
+              {% endif %}
+            </div>
+
+            <!-- Bio Story Snippet -->
+            {% if guide.bio %}
+            <p class="text-charcoal/75 text-xs leading-relaxed line-clamp-2 text-center mt-2 font-normal">
+              {{ guide.bio }}
+            </p>
+            {% endif %}
+
+            <!-- Specialties Tags -->
+            {% if guide.specialties %}
+            <div class="flex flex-wrap justify-center gap-1 mt-2.5 mb-1">
+              {% for tag in (guide.specialties|from_json)[:3] %}
+                <span class="px-2 py-0.5 rounded-full text-[10px] bg-ivory text-charcoal/75 border border-stone/40 capitalize font-medium">
+                  {{ tag.replace('-', ' ') }}
+                </span>
+              {% endfor %}
+              {% if (guide.specialties|from_json)|length > 3 %}
+                <span class="px-1.5 py-0.5 rounded-full text-[9px] bg-stone/20 text-charcoal/50 border border-stone/30 font-medium">
+                  +{{ (guide.specialties|from_json)|length - 3 }}
+                </span>
+              {% endif %}
+            </div>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Card Footer -->
+        <div class="px-3.5 pb-3.5 pt-2.5 sm:px-4 sm:pb-4 border-t border-stone/30 flex items-center justify-between mt-3 bg-stone/5">
+          <div>
+            <span class="text-[9px] text-charcoal/50 uppercase tracking-wider block font-semibold">Daily Rate</span>
+            <span class="text-sm sm:text-base font-bold text-charcoal">₹{{ guide.daily_rate|format_number }} <span class="text-[10px] font-normal text-charcoal/60">/ day</span></span>
+          </div>
+
+          <div class="flex items-center gap-1.5">
+            <button type="button"
+                    @click="openModal({ id: {{ guide.id }}, name: '{{ guide.name|replace('\'', '\\\'') }}', rate: {{ guide.daily_rate or 2500 }}, district: '{{ guide.district or '' }}' })"
+                    class="px-3 py-1.5 rounded-xl bg-pine hover:bg-pine-dark text-white text-xs font-semibold transition-all shadow-xs hover:shadow-sm flex items-center gap-1 cursor-pointer">
+              <i data-lucide="calendar" class="w-3 h-3"></i> Book
+            </button>
+            <a href="{{ url_for('guides.detail', guide_id=guide.id) }}"
+               class="px-2.5 py-1.5 rounded-xl bg-surface border border-stone/50 hover:border-terracotta text-charcoal text-xs font-semibold transition-all">
+              Profile
+            </a>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="bg-surface rounded-card p-16 text-center border border-stone text-charcoal/60 max-w-md mx-auto">
+      <div class="w-14 h-14 rounded-full bg-terracotta/10 text-terracotta mx-auto mb-4 flex items-center justify-center">
+        <i data-lucide="users" class="w-7 h-7"></i>
+      </div>
+      <h3 class="font-serif text-xl font-bold text-charcoal mb-1">No guides found</h3>
+      <p class="text-xs text-charcoal/60 mb-5">
+        {% if active_district %}
+        No verified guides found for {{ active_district|capitalize }} at this time.
+        {% else %}
+        Guides directory is currently undergoing seasonal verification.
+        {% endif %}
+      </p>
+      <a href="{{ url_for('guides.index') }}" class="px-5 py-2.5 rounded-full bg-terracotta text-white text-xs font-semibold shadow-sm hover:bg-terracotta-hover transition-colors inline-flex items-center gap-1.5">
+        <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+        <span>Show All Guides</span>
+      </a>
+    </div>
+    {% endif %}
+
+    <!-- Accessible Guide Booking Modal -->
+    <div x-show="bookingModalOpen"
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs"
+         role="dialog"
+         aria-modal="true"
+         @click.self="closeModal()"
+         style="display: none;">
+      
+      <div class="relative bg-surface rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-2xl border border-stone/50 overflow-hidden my-6"
+           @click.stop>
+        
+        <!-- Close Button -->
+        <button type="button"
+                @click="closeModal()"
+                class="absolute top-4 right-4 sm:top-5 sm:right-5 w-8 h-8 rounded-full bg-stone/20 hover:bg-stone/35 text-charcoal/80 hover:text-charcoal flex items-center justify-center transition-all focus:outline-none z-20 shadow-xs cursor-pointer group"
+                aria-label="Close modal">
+          <svg class="w-4 h-4 text-charcoal/80 group-hover:text-charcoal transition-transform group-hover:scale-110" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 6L6 18"></path>
+            <path d="M6 6l12 12"></path>
+          </svg>
+        </button>
+
+        <!-- Booking Success Confirmation Screen -->
+        <div x-show="bookingSuccess" class="text-center py-6" style="display: none;">
+          <div class="w-14 h-14 rounded-full bg-emerald-500/15 text-emerald-600 flex items-center justify-center mx-auto mb-3 shadow-xs">
+            <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </div>
+          <h4 class="font-serif font-bold text-2xl text-charcoal mb-1">Booking Request Sent</h4>
+          <p class="text-xs text-charcoal/70 mb-4 font-light max-w-sm mx-auto" x-text="bookingSuccess ? bookingSuccess.message : ''"></p>
+
+          <div class="bg-ivory rounded-2xl p-4 text-xs text-charcoal/80 space-y-2 mb-6 text-left border border-stone/40 shadow-inner">
+            <div class="flex justify-between pb-1 border-b border-stone/20">
+              <span class="text-charcoal/60">Assigned Mountain Guide:</span>
+              <span class="font-bold text-charcoal" x-text="bookingSuccess ? bookingSuccess.guide_name : ''"></span>
+            </div>
+            <div class="flex justify-between pb-1 border-b border-stone/20">
+              <span class="text-charcoal/60">Trek Dates:</span>
+              <span class="font-semibold" x-text="bookingSuccess ? (bookingSuccess.check_in + ' – ' + bookingSuccess.check_out + ' (' + bookingSuccess.num_days + ' days)') : ''"></span>
+            </div>
+            <template x-if="bookingSuccess && bookingSuccess.destinations && bookingSuccess.destinations.length > 0">
+              <div class="pb-1 border-b border-stone/20">
+                <span class="text-charcoal/60 block mb-1">Selected Destinations:</span>
+                <div class="flex flex-wrap gap-1">
+                  <template x-for="d in bookingSuccess.destinations" :key="d">
+                    <span class="px-2 py-0.5 rounded-md bg-pine/10 text-pine font-semibold text-[10px]" x-text="d"></span>
+                  </template>
+                </div>
+              </div>
+            </template>
+            <template x-if="bookingSuccess && bookingSuccess.experiences && bookingSuccess.experiences.length > 0">
+              <div class="pb-1 border-b border-stone/20">
+                <span class="text-charcoal/60 block mb-1">Requested Experiences:</span>
+                <div class="flex flex-wrap gap-1">
+                  <template x-for="e in bookingSuccess.experiences" :key="e">
+                    <span class="px-2 py-0.5 rounded-md bg-terracotta/10 text-terracotta font-semibold text-[10px]" x-text="e"></span>
+                  </template>
+                </div>
+              </div>
+            </template>
+            <div class="flex justify-between pt-1">
+              <span class="font-medium text-charcoal">Estimated Total:</span>
+              <span class="font-bold text-sm text-terracotta" x-text="bookingSuccess ? ('₹' + Number(bookingSuccess.total_amount).toLocaleString('en-IN')) : ''"></span>
+            </div>
+          </div>
+
+          <button type="button" @click="closeModal()"
+                  class="w-full py-2.5 rounded-xl bg-pine hover:bg-pine-dark text-white text-xs font-semibold transition-colors shadow-sm cursor-pointer">
+            Close & Continue Exploring
+          </button>
+        </div>
+
+        <!-- Booking Form Screen -->
+        <div x-show="!bookingSuccess">
+          <div class="mb-4">
+            <span class="text-[10px] uppercase font-bold tracking-widest text-terracotta">Reserve Verified Mountain Guide</span>
+            <h3 class="font-serif text-2xl font-bold text-charcoal mt-0.5" x-text="'Book ' + selectedGuide.name"></h3>
+            <p class="text-xs text-charcoal/70 mt-0.5 font-light">
+              Daily rate: <strong class="text-pine font-semibold" x-text="'₹' + Number(selectedGuide.rate).toLocaleString('en-IN') + ' / day'"></strong>
+            </p>
+          </div>
+
+          <!-- Error Alert -->
+          <div x-show="errorMessage" class="p-3 bg-red-500/10 border border-red-500/30 text-red-600 text-xs rounded-xl mb-3 font-medium flex items-center gap-2" style="display: none;">
+            <svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <span x-text="errorMessage"></span>
+          </div>
+
+          {% if current_user.is_authenticated %}
+          <form @submit.prevent="submitBooking($event)" class="space-y-4 max-h-[70vh] overflow-y-auto pr-1">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <!-- 1. Checklist: What Experiences Do You Want? -->
+            <div class="p-3 bg-ivory/80 rounded-2xl border border-stone/50 space-y-2">
+              <label class="block text-xs font-semibold text-charcoal">
+                What would you like to experience? <span class="text-[10px] text-charcoal/50 font-normal">(Select experiences)</span>
+              </label>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                <template x-for="item in experiencesList" :key="item.id">
+                  <button type="button"
+                          @click="toggleExperience(item.label)"
+                          :class="selectedExperiences.includes(item.label) ? 'bg-terracotta text-white border-terracotta font-semibold shadow-xs' : 'bg-surface border-stone/60 text-charcoal/75 hover:bg-white hover:text-charcoal'"
+                          class="px-2.5 py-1.5 rounded-xl border text-left text-xs transition-all flex items-center justify-between gap-1.5 cursor-pointer">
+                    <span x-text="item.label" class="truncate"></span>
+                    <svg x-show="selectedExperiences.includes(item.label)" class="w-3.5 h-3.5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                  </button>
+                </template>
+              </div>
+            </div>
+
+            <!-- 2. Checklist: Where Do You Want to Travel? -->
+            <div class="p-3 bg-ivory/80 rounded-2xl border border-stone/50 space-y-2">
+              <label class="block text-xs font-semibold text-charcoal">
+                Where do you want to travel? <span class="text-[10px] text-charcoal/50 font-normal">(Target Districts)</span>
+              </label>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                <template x-for="dest in destinationsList" :key="dest.id">
+                  <button type="button"
+                          @click="toggleDestination(dest.id)"
+                          :class="selectedDestinations.includes(dest.id) ? 'bg-pine text-white border-pine font-semibold shadow-xs' : 'bg-surface border-stone/60 text-charcoal/75 hover:bg-white hover:text-charcoal'"
+                          class="px-2.5 py-1.5 rounded-xl border text-left text-xs transition-all flex items-center justify-between gap-1.5 cursor-pointer">
+                    <span x-text="dest.label" class="truncate"></span>
+                    <svg x-show="selectedDestinations.includes(dest.id)" class="w-3.5 h-3.5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                  </button>
+                </template>
+              </div>
+            </div>
+
+            <!-- Dates Selection -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-semibold text-charcoal mb-1">Start Date *</label>
+                <input type="date" name="start_date" x-model="startDate" required
+                       class="w-full px-3 py-2 rounded-xl border border-stone/60 text-xs text-charcoal bg-surface focus:outline-none focus:border-terracotta">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-charcoal mb-1">End Date</label>
+                <input type="date" name="end_date" x-model="endDate"
+                       class="w-full px-3 py-2 rounded-xl border border-stone/60 text-xs text-charcoal bg-surface focus:outline-none focus:border-terracotta">
+              </div>
+            </div>
+
+            <!-- Travelers and Email -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-semibold text-charcoal mb-1">Travelers Count</label>
+                <input type="number" name="guests" min="1" max="20" x-model="guests" required
+                       class="w-full px-3 py-2 rounded-xl border border-stone/60 text-xs text-charcoal bg-surface focus:outline-none focus:border-terracotta">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-charcoal mb-1">Contact Email</label>
+                <input type="email" value="{{ current_user.email }}" readonly
+                       class="w-full px-3 py-2 rounded-xl border border-stone/40 bg-ivory text-xs text-charcoal/60">
+              </div>
+            </div>
+
+            <!-- Additional Route Interests or Notes -->
+            <div>
+              <label class="block text-xs font-semibold text-charcoal mb-1">Route Interests or Requirements</label>
+              <textarea name="message" x-model="message" rows="2"
+                        placeholder="Tell the guide about your group pace, altitude experience, dietary needs, or specific places you want to visit..."
+                        class="w-full px-3 py-2 rounded-xl border border-stone/60 text-xs text-charcoal bg-surface focus:outline-none focus:border-terracotta font-light resize-none"></textarea>
+            </div>
+
+            <!-- Live Estimated Cost Summary -->
+            <div class="px-3 py-2 bg-ivory rounded-xl border border-stone/40 text-xs flex items-center justify-between">
+              <span class="text-charcoal/70" x-text="calculateDays() + ' Day' + (calculateDays() > 1 ? 's' : '') + ' Expedition'"></span>
+              <span class="font-semibold text-terracotta" x-text="'Estimated: ₹' + calculateTotal().toLocaleString('en-IN')"></span>
+            </div>
+
+            <!-- Buttons -->
+            <div class="pt-2 flex items-center justify-end gap-3 border-t border-stone/30">
+              <button type="button" @click="closeModal()"
+                      class="px-4 py-2 rounded-xl border border-stone/60 text-xs font-medium text-charcoal hover:bg-ivory transition-colors cursor-pointer">
+                Cancel
+              </button>
+              <button type="submit" :disabled="isSubmitting"
+                      class="px-5 py-2.5 rounded-xl bg-terracotta hover:bg-terracotta-hover disabled:opacity-60 text-white text-xs font-semibold transition-all shadow-sm flex items-center gap-2 cursor-pointer">
+                <template x-if="isSubmitting">
+                  <span class="flex items-center gap-1.5">
+                    <svg class="animate-spin w-3.5 h-3.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10" stroke-width="4" class="opacity-25"></circle><path fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" class="opacity-75"></path></svg>
+                    <span>Sending Request...</span>
+                  </span>
+                </template>
+                <template x-if="!isSubmitting">
+                  <span>Send Booking Request</span>
+                </template>
+              </button>
+            </div>
+          </form>
+          {% else %}
+          <div class="text-center py-6 bg-ivory rounded-2xl p-6 border border-stone/40">
+            <h4 class="font-serif font-bold text-lg text-charcoal mb-1">Sign In to Book</h4>
+            <p class="text-xs text-charcoal/70 mb-5 font-light">
+              An authenticated account is required to verify traveler contact details with local guides.
+            </p>
+            <a href="{{ url_for('auth.login') }}"
+               class="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-terracotta hover:bg-terracotta-hover text-white text-xs font-semibold transition-all shadow-sm">
+              <span>Sign In with Email</span>
+            </a>
+          </div>
+          {% endif %}
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+<script src="{{ url_for('static', filename='js/guide-booking.js') }}"></script>
+{% endblock %}

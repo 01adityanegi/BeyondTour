@@ -1,0 +1,32 @@
+{% extends '_base.html' %}
+{% block title %}Shared Location — Beyond Tour{% endblock %}
+{% block content %}
+<div class="pt-20 pb-20 min-h-screen bg-ivory flex items-center justify-center">
+  <div class="max-w-md w-full mx-auto px-4 text-center">
+    <div class="bg-white rounded-card shadow-card p-8 border border-stone/40">
+      <div class="w-16 h-16 rounded-full bg-terracotta/10 flex items-center justify-center mx-auto mb-5">
+        <i data-lucide="map-pin" class="w-8 h-8 text-terracotta"></i>
+      </div>
+      <h1 class="font-serif text-2xl font-bold text-charcoal mb-2">{{ user_name }}'s Location</h1>
+      <p class="text-charcoal/60 text-xs mb-6">Shared via BeyondTour · Expires {{ expiry }}</p>
+
+      <div class="bg-ivory rounded-xl p-4 mb-6 text-sm font-mono text-charcoal/70 text-left">
+        <p>Latitude: {{ "%.5f"|format(lat) }}</p>
+        <p>Longitude: {{ "%.5f"|format(lng) }}</p>
+      </div>
+
+      <a href="https://www.google.com/maps?q={{ lat }},{{ lng }}" target="_blank" rel="noopener"
+         class="block w-full py-3 bg-pine text-ivory font-semibold rounded-xl text-sm hover:bg-pine/90 transition-colors mb-3">
+        <i data-lucide="map" class="w-4 h-4 inline mr-2"></i>
+        Open in Google Maps
+      </a>
+      <a href="https://maps.apple.com/?ll={{ lat }},{{ lng }}" target="_blank" rel="noopener"
+         class="block w-full py-3 border border-stone/40 text-charcoal font-semibold rounded-xl text-sm hover:bg-ivory transition-colors">
+        Open in Apple Maps
+      </a>
+
+      <p class="text-charcoal/40 text-xs mt-5">This link is temporary and will stop working after the expiry time.</p>
+    </div>
+  </div>
+</div>
+{% endblock %}

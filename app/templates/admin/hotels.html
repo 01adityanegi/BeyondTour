@@ -1,0 +1,209 @@
+{% extends 'admin/base.html' %}
+{% block title %}Hotels & Homestays Approval — Beyond Tour Admin{% endblock %}
+
+{% block admin_content %}
+<div x-data="{ activeModal: null, adminNote: '', deleteModal: null, deleteName: '', deleteUrl: '' }">
+
+  <!-- Header & Status Filter Bar -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+    <div>
+      <h2 class="font-serif text-2xl font-bold text-charcoal">Hotels & Homestays Approval Queue</h2>
+      <p class="text-xs text-charcoal/60 mt-0.5">Moderate vendor-submitted village homestays, lodges, and heritage stays</p>
+    </div>
+
+    <!-- Status Tabs -->
+    <div class="inline-flex items-center bg-surface rounded-2xl p-1 gap-1 border border-stone/60 shadow-2xs">
+      <a href="{{ url_for('admin.hotels') }}?status=all"
+         class="px-4 py-2 rounded-xl text-xs font-bold transition-all
+         {% if status_filter == 'all' or not status_filter %}bg-terracotta text-white shadow-sm{% else %}text-charcoal/70 hover:text-charcoal{% endif %}">
+        All Stays
+      </a>
+      <a href="{{ url_for('admin.hotels') }}?status=pending"
+         class="px-4 py-2 rounded-xl text-xs font-bold transition-all
+         {% if status_filter == 'pending' %}bg-terracotta text-white shadow-sm{% else %}text-charcoal/70 hover:text-charcoal{% endif %}">
+        Pending Review
+      </a>
+      <a href="{{ url_for('admin.hotels') }}?status=live"
+         class="px-4 py-2 rounded-xl text-xs font-bold transition-all
+         {% if status_filter == 'live' %}bg-terracotta text-white shadow-sm{% else %}text-charcoal/70 hover:text-charcoal{% endif %}">
+        Live
+      </a>
+      <a href="{{ url_for('admin.hotels') }}?status=changes_requested"
+         class="px-4 py-2 rounded-xl text-xs font-bold transition-all
+         {% if status_filter == 'changes_requested' %}bg-terracotta text-white shadow-sm{% else %}text-charcoal/70 hover:text-charcoal{% endif %}">
+        Changes Requested
+      </a>
+    </div>
+  </div>
+
+  <!-- Hotels Table -->
+  <div class="bg-surface rounded-3xl border border-stone/60 shadow-card overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-xs">
+        <thead class="bg-ivory/60 text-[11px] uppercase tracking-wider text-charcoal/70 border-b border-stone/30">
+          <tr>
+            <th class="py-3.5 px-5">Stay & Host</th>
+            <th class="py-3.5 px-4">Location</th>
+            <th class="py-3.5 px-4">Category</th>
+            <th class="py-3.5 px-4">Rates (INR)</th>
+            <th class="py-3.5 px-4">Status & Decision</th>
+            <th class="py-3.5 px-5 text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-stone/20">
+          {% for hotel in hotels %}
+          <tr class="hover:bg-ivory/30 transition-colors">
+            <!-- Stay & Host -->
+            <td class="py-4 px-5">
+              <div class="flex items-center gap-3">
+                <img src="{{ hotel.cover_image_url or 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=200&q=75' }}"
+                     alt="{{ hotel.name }}"
+                     class="w-12 h-12 rounded-xl object-cover border border-stone/40 flex-shrink-0">
+                <div class="min-w-0">
+                  <h3 class="font-bold text-sm text-charcoal truncate">{{ hotel.name }}</h3>
+                  <p class="text-[11px] text-charcoal/60">Host: {{ hotel.host_name or 'Not specified' }}</p>
+                </div>
+              </div>
+            </td>
+
+            <!-- Location -->
+            <td class="py-4 px-4 text-charcoal">
+              <span class="font-semibold">{{ hotel.district }}</span>
+            </td>
+
+            <!-- Category -->
+            <td class="py-4 px-4">
+              <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase bg-pine/10 text-pine">
+                {{ hotel.hotel_type|capitalize }}
+              </span>
+            </td>
+
+            <!-- Rates -->
+            <td class="py-4 px-4 text-charcoal font-semibold whitespace-nowrap">
+              ₹{{ hotel.price_min }} – ₹{{ hotel.price_max }}
+            </td>
+
+            <!-- Status & Decision Cell (Live HTMX swap) -->
+            <td class="py-4 px-4">
+              {% include 'admin/_hotel_status_cell.html' %}
+            </td>
+
+            <!-- Actions -->
+            <td class="py-4 px-5 text-right whitespace-nowrap">
+              <div class="inline-flex items-center gap-1.5">
+                <a href="{{ url_for('hotels.detail', hotel_id=hotel.id) }}"
+                   target="_blank"
+                   class="px-2.5 py-1.5 rounded-xl border border-stone/60 text-charcoal hover:bg-stone/20 font-semibold text-xs transition-colors inline-flex items-center gap-1">
+                  <span>View</span>
+                  <i data-lucide="external-link" class="w-3 h-3"></i>
+                </a>
+
+                <button type="button"
+                        @click="deleteModal = {{ hotel.id }}; deleteName = '{{ hotel.name|replace('\'', '\\\'') }}'; deleteUrl = '{{ url_for('admin.hotel_delete', hotel_id=hotel.id) }}'; $nextTick(() => { if (window.lucide) lucide.createIcons(); })"
+                        class="px-2.5 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-semibold text-xs transition-colors inline-flex items-center gap-1">
+                  <i data-lucide="trash-2" class="w-3 h-3"></i>
+                  <span>Delete</span>
+                </button>
+              </div>
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="6" class="py-12 text-center text-charcoal/50">
+              No stays matching the selected status filter.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Request Changes Modal -->
+  <div x-show="activeModal !== null"
+       x-cloak
+       class="fixed inset-0 z-50 overflow-y-auto bg-charcoal/60 backdrop-blur-xs flex items-center justify-center p-4"
+       @keydown.escape.window="activeModal = null">
+    <div class="bg-surface rounded-3xl border border-stone/60 shadow-hero max-w-md w-full p-6 text-left"
+         @click.away="activeModal = null">
+      
+      <div class="flex items-center justify-between pb-4 border-b border-stone/30 mb-4">
+        <h3 class="font-serif text-lg font-bold text-charcoal">Request Vendor Modifications</h3>
+        <button type="button" @click="activeModal = null" class="text-charcoal/60 hover:text-charcoal">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <p class="text-xs text-charcoal/70 leading-relaxed mb-4">
+        Provide clear guidance for the property owner. This note will appear on their vendor dashboard until addressed.
+      </p>
+
+      <form :action="'/admin/hotels/' + activeModal + '/request-changes'" method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="mb-4">
+          <label class="block text-xs font-bold text-charcoal mb-1">Required Corrections / Note</label>
+          <textarea name="admin_note"
+                    rows="4"
+                    required
+                    placeholder="e.g., Please upload higher resolution photos of the guest room, or specify whether breakfast is included in the base rate."
+                    class="w-full text-xs rounded-xl border border-stone/70 p-3 focus:outline-hidden focus:border-terracotta focus:ring-1 focus:ring-terracotta"></textarea>
+        </div>
+
+        <div class="flex items-center justify-end gap-3 pt-2">
+          <button type="button"
+                  @click="activeModal = null"
+                  class="px-4 py-2 rounded-xl bg-stone/20 text-charcoal text-xs font-semibold hover:bg-stone/40 transition-colors">
+            Cancel
+          </button>
+          <button type="submit"
+                  class="px-5 py-2 rounded-xl bg-terracotta hover:bg-terracotta-hover text-white text-xs font-bold transition-colors shadow-sm">
+            Send Feedback to Vendor
+          </button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+
+  <!-- Delete Stay Confirmation Modal -->
+  <div x-show="deleteModal !== null"
+       x-cloak
+       class="fixed inset-0 z-50 overflow-y-auto bg-charcoal/60 backdrop-blur-xs flex items-center justify-center p-4"
+       @keydown.escape.window="deleteModal = null">
+    <div class="bg-surface rounded-3xl border border-stone/60 shadow-hero max-w-md w-full p-6 text-left"
+         @click.away="deleteModal = null">
+      
+      <div class="flex items-center gap-3 pb-4 border-b border-stone/30 mb-4">
+        <div class="w-10 h-10 rounded-2xl bg-rose-100 text-rose-700 flex items-center justify-center flex-shrink-0">
+          <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h3 class="font-serif font-bold text-lg text-charcoal">Delete Stay Listing</h3>
+          <p class="text-xs text-charcoal/60">Permanent removal from directory</p>
+        </div>
+      </div>
+
+      <p class="text-xs text-charcoal/80 mb-4 leading-relaxed">
+        Are you sure you want to permanently delete <strong class="text-charcoal" x-text="deleteName"></strong>? This will immediately remove the stay, room options, and all related booking records from the website.
+      </p>
+
+      <form :action="deleteUrl" method="POST" class="flex items-center justify-end gap-3 pt-2">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="button"
+                @click="deleteModal = null"
+                class="px-4 py-2 rounded-xl border border-stone/60 text-xs font-semibold text-charcoal hover:bg-stone/20 transition-colors">
+          Cancel
+        </button>
+        <button type="submit"
+                class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition-colors inline-flex items-center gap-1.5 shadow-sm">
+          <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+          <span>Confirm Delete</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

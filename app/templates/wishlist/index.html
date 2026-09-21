@@ -1,0 +1,32 @@
+{% extends '_base.html' %}
+{% block title %}Wishlist — Beyond Tour{% endblock %}
+{% block content %}
+<div class="pt-4 sm:pt-6 pb-16 bg-ivory min-h-screen">
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 pt-2 pb-12">
+    <h1 class="font-serif text-4xl font-bold text-charcoal mb-8 text-center">My Wishlist</h1>
+    {% if items %}
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {% for item in items %}
+      <div class="bg-white rounded-card shadow-card p-5 flex items-center justify-between border border-stone/40">
+        <div>
+          <p class="text-xs text-charcoal/50 uppercase tracking-wide">{{ item.target_type }}</p>
+          <p class="font-semibold text-charcoal">{{ item.target_type | capitalize }} #{{ item.target_id }}</p>
+          <p class="text-xs text-charcoal/40 mt-0.5">Saved {{ item.created_at.strftime('%b %d') }}</p>
+        </div>
+        <button class="text-sm text-terracotta hover:underline font-medium" hx-post="{{ url_for('wishlist.toggle') }}" hx-vals='{"target_type":"{{ item.target_type }}","target_id":{{ item.target_id }}}' hx-swap="outerHTML">Remove</button>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-20 bg-white rounded-card border border-stone/40 shadow-sm max-w-lg mx-auto p-8">
+      <i data-lucide="heart" class="w-14 h-14 text-stone mx-auto mb-4"></i>
+      <h2 class="font-serif text-2xl text-charcoal mb-2">Nothing saved yet</h2>
+      <p class="text-charcoal/60 mb-6 text-sm">Explore destinations and homestays to save them here for your journey.</p>
+      <a href="{{ url_for('destinations.index') }}" class="inline-flex items-center gap-2 px-6 py-3 bg-terracotta text-white rounded-xl font-medium hover:bg-terracotta-dark transition-colors text-sm">
+        <i data-lucide="compass" class="w-4 h-4"></i> Explore Destinations
+      </a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

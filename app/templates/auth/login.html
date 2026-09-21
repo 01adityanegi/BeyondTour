@@ -1,0 +1,167 @@
+{% extends '_base.html' %}
+{% block title %}Log in — Beyond Tour{% endblock %}
+{% block meta_description %}Log in to your Beyond Tour account to access custom itineraries, wishlists, and bookings.{% endblock %}
+
+{% block content %}
+<div class="min-h-[85vh] flex items-center justify-center py-12 px-4 sm:px-6">
+  <div class="w-full max-w-md">
+
+    <!-- Brand Symbol & Header -->
+    <div class="text-center mb-8">
+      <div class="w-12 h-12 rounded-2xl bg-pine flex items-center justify-center mx-auto mb-3 shadow-md">
+        <svg class="w-8 h-8" viewBox="0 0 32 32" fill="none">
+          <circle cx="23" cy="9" r="2.5" fill="#C1622D" />
+          <path d="M3 24L11.5 11L18 20L22.5 13.5L29 24H3Z" stroke="#F7F3EC" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </div>
+      <h1 class="font-serif text-3xl font-bold text-charcoal">Welcome back</h1>
+      <p class="text-charcoal/60 text-xs mt-1">Sign in to your Beyond Tour account</p>
+    </div>
+
+    <!-- Login Card -->
+    <div class="bg-surface rounded-card shadow-card border border-stone/50 p-8 sm:p-10"
+         x-data="{
+           method: 'email',
+           phone: '',
+           otpSent: false,
+           demoCode: '',
+           sendOtp() {
+             if (this.phone.length < 10) { alert('Please enter a valid 10-digit number.'); return; }
+             const formData = new FormData();
+             formData.append('phone', this.phone);
+             formData.append('csrf_token', '{{ csrf_token() }}');
+             fetch('{{ url_for('auth.send_otp') }}', { method: 'POST', body: formData })
+               .then(res => res.json())
+               .then(data => {
+                 this.otpSent = true;
+                 this.demoCode = data.demo_code || '';
+               });
+           }
+         }">
+
+      <!-- One-Click Google OAuth (Icon-Only) -->
+      <div class="flex justify-center mb-6">
+        <form action="{{ url_for('auth.google_auth') }}" method="POST">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit"
+                  title="Continue with Google"
+                  aria-label="Continue with Google"
+                  class="w-14 h-14 rounded-2xl border border-stone/60 hover:border-terracotta hover:bg-ivory flex items-center justify-center shadow-xs transition-all hover:scale-105 active:scale-95 cursor-pointer">
+            <svg class="w-6 h-6" viewBox="0 0 24 24">
+              <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.7l3.1-3.1C17.3 1.8 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.3l3.7 2.9C6.5 7.3 9 5 12 5z"/>
+              <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.6h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.9z"/>
+              <path fill="#FBBC05" d="M5.6 14.8c-.2-.7-.4-1.5-.4-2.8s.2-2.1.4-2.8L1.9 6.3C.7 8.7 0 10.3 0 12s.7 3.3 1.9 5.7l3.7-2.9z"/>
+              <path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.5-2.3-6.4-5.2L1.9 16c1.8 3.7 5.6 7 10.1 7z"/>
+            </svg>
+          </button>
+        </form>
+      </div>
+
+      <!-- Divider -->
+      <div class="relative flex items-center justify-center mb-6">
+        <div class="border-t border-stone/50 w-full"></div>
+        <span class="bg-surface px-3 text-[11px] uppercase tracking-wider text-charcoal/40 font-semibold absolute">Or continue with</span>
+      </div>
+
+      <!-- Auth Method Tabs: Email vs Phone OTP -->
+      <div class="grid grid-cols-2 gap-2 p-1 bg-ivory rounded-xl border border-stone/50 mb-6 text-xs font-medium">
+        <button type="button" @click="method = 'email'"
+                :class="method === 'email' ? 'bg-surface text-charcoal font-semibold shadow-sm' : 'text-charcoal/60 hover:text-charcoal'"
+                class="py-2 rounded-lg transition-all flex items-center justify-center gap-1.5">
+          <i data-lucide="mail" class="w-3.5 h-3.5"></i>
+          <span>Email</span>
+        </button>
+        <button type="button" @click="method = 'phone'"
+                :class="method === 'phone' ? 'bg-surface text-charcoal font-semibold shadow-sm' : 'text-charcoal/60 hover:text-charcoal'"
+                class="py-2 rounded-lg transition-all flex items-center justify-center gap-1.5">
+          <i data-lucide="phone" class="w-3.5 h-3.5"></i>
+          <span>Phone OTP</span>
+        </button>
+      </div>
+
+      <!-- Form 1: Email + Password -->
+      <form method="POST" x-show="method === 'email'" class="space-y-4">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="login_type" value="email">
+
+        <div>
+          <label class="block text-xs font-semibold text-charcoal/80 mb-1.5">Email Address</label>
+          <input type="email" name="email" required
+                 placeholder="name@example.com"
+                 class="w-full bg-ivory border border-stone rounded-xl px-4 py-3 text-sm text-charcoal placeholder-charcoal/40 focus:outline-none focus:border-terracotta focus:ring-1 focus:ring-terracotta">
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between mb-1.5">
+            <label class="block text-xs font-semibold text-charcoal/80">Password</label>
+            <a href="{{ url_for('auth.forgot_password') }}" class="text-[11px] text-terracotta hover:underline font-medium">Forgot password?</a>
+          </div>
+          <input type="password" name="password" required
+                 placeholder="••••••••"
+                 class="w-full bg-ivory border border-stone rounded-xl px-4 py-3 text-sm text-charcoal placeholder-charcoal/40 focus:outline-none focus:border-terracotta focus:ring-1 focus:ring-terracotta">
+        </div>
+
+        <div class="flex items-center justify-between pt-1">
+          <label class="flex items-center gap-2 cursor-pointer text-xs text-charcoal/70">
+            <input type="checkbox" name="remember" class="accent-terracotta rounded">
+            <span>Remember me (30 days)</span>
+          </label>
+        </div>
+
+        <button type="submit"
+                class="w-full py-3.5 bg-terracotta hover:bg-terracotta-hover text-white text-sm font-semibold rounded-full transition-colors shadow-sm mt-4">
+          Sign In
+        </button>
+      </form>
+
+      <!-- Form 2: Phone + OTP -->
+      <form method="POST" x-show="method === 'phone'" class="space-y-4" style="display: none;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="login_type" value="phone">
+
+        <div>
+          <label class="block text-xs font-semibold text-charcoal/80 mb-1.5">Mobile Number</label>
+          <div class="flex gap-2">
+            <input type="tel" name="phone" x-model="phone" required
+                   placeholder="10-digit mobile number"
+                   class="flex-1 bg-ivory border border-stone rounded-xl px-4 py-2.5 text-sm text-charcoal placeholder-charcoal/40 focus:outline-none focus:border-terracotta">
+            <button type="button" @click="sendOtp()"
+                    class="px-4 py-2.5 bg-pine text-ivory text-xs font-medium rounded-xl hover:bg-pine-dark transition-colors">
+              Send OTP
+            </button>
+          </div>
+        </div>
+
+        <div x-show="otpSent">
+          <div class="p-3 mb-2 rounded-xl bg-sage/15 border border-sage/30 text-xs text-pine" x-show="demoCode">
+            <span>Demo Testing Code: <strong x-text="demoCode"></strong></span>
+          </div>
+          <label class="block text-xs font-semibold text-charcoal/80 mb-1.5">Enter 6-Digit OTP</label>
+          <input type="text" name="otp" maxlength="6"
+                 placeholder="6-digit code"
+                 class="w-full bg-ivory border border-stone rounded-xl px-4 py-2.5 text-sm text-center font-mono tracking-widest text-charcoal focus:outline-none focus:border-terracotta">
+        </div>
+
+        <button type="submit" :disabled="!otpSent"
+                class="w-full py-3.5 bg-terracotta hover:bg-terracotta-hover disabled:opacity-50 text-white text-sm font-semibold rounded-full transition-colors shadow-sm mt-4">
+          Verify & Sign In
+        </button>
+      </form>
+
+      <!-- Sign up redirect -->
+      <div class="pt-6 mt-6 border-t border-stone/40 text-center">
+        <p class="text-xs text-charcoal/60">
+          Don't have an account?
+          <a href="{{ url_for('auth.signup') }}" class="font-semibold text-terracotta hover:underline ml-1">Create account</a>
+        </p>
+      </div>
+
+    </div>
+
+    <!-- Demo login tips -->
+    <div class="mt-6 text-center text-xs text-charcoal/50">
+      <span>Demo credentials: <strong>admin@beyondtour.in</strong> / <strong>admin@123</strong></span>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,82 @@
+{% extends 'admin/base.html' %}
+{% block title %}{{ title or 'Food Form — Admin' }}{% endblock %}
+
+{% block admin_content %}
+<div class="max-w-3xl mx-auto">
+
+  <!-- Breadcrumb -->
+  <div class="flex items-center gap-2 text-xs text-charcoal/60 mb-6">
+    <a href="{{ url_for('admin.food') }}" class="hover:text-terracotta transition-colors">Food Directory</a>
+    <span>/</span>
+    <span class="text-charcoal font-semibold">{{ 'Edit ' ~ food.name if food else 'New Food Item' }}</span>
+  </div>
+
+  <div class="bg-surface rounded-3xl border border-stone/60 p-6 sm:p-8 shadow-card">
+    <h2 class="font-serif text-2xl font-bold text-charcoal mb-6">
+      {{ 'Edit Dish: ' ~ food.name if food else 'Add Traditional Himalayan Dish' }}
+    </h2>
+
+    <form method="POST" class="space-y-6">
+      {{ form.hidden_tag() }}
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+        <div class="sm:col-span-2">
+          <label class="block text-xs font-bold text-charcoal mb-1">Dish Name *</label>
+          {{ form.name(class="w-full text-xs rounded-xl border border-stone/70 p-3 bg-ivory/20 focus:bg-white focus:outline-hidden focus:border-terracotta") }}
+          {% for error in form.name.errors %}
+          <p class="text-[11px] text-rose-600 mt-1">{{ error }}</p>
+          {% endfor %}
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-charcoal mb-1">Region *</label>
+          {{ form.region(class="w-full text-xs rounded-xl border border-stone/70 p-3 bg-ivory/20 focus:bg-white focus:outline-hidden focus:border-terracotta") }}
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <div>
+          <label class="block text-xs font-bold text-charcoal mb-1">Meal Category *</label>
+          {{ form.category(class="w-full text-xs rounded-xl border border-stone/70 p-3 bg-ivory/20 focus:bg-white focus:outline-hidden focus:border-terracotta") }}
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-charcoal mb-1">Where to Savor / Authentic Location</label>
+          {{ form.where_to_try(class="w-full text-xs rounded-xl border border-stone/70 p-3 bg-ivory/20 focus:bg-white focus:outline-hidden focus:border-terracotta", placeholder="e.g. Almora bazaar dhabas, Joshimath roadside cafes") }}
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-charcoal mb-1">Culinary Description & Story *</label>
+        {{ form.description(rows="4", class="w-full text-xs rounded-xl border border-stone/70 p-3 bg-ivory/20 focus:bg-white focus:outline-hidden focus:border-terracotta", placeholder="Cooking technique, cultural context, festival associations...") }}
+        {% for error in form.description.errors %}
+        <p class="text-[11px] text-rose-600 mt-1">{{ error }}</p>
+        {% endfor %}
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-charcoal mb-1">Key Local Ingredients</label>
+        {{ form.ingredients(rows="2", class="w-full text-xs rounded-xl border border-stone/70 p-3 bg-ivory/20 focus:bg-white focus:outline-hidden focus:border-terracotta", placeholder="e.g. Black soybeans (bhatt), jamboo herb, mountain ghee, jakhiya seeds") }}
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-charcoal mb-1">Food Image URL</label>
+        {{ form.image_url(class="w-full text-xs rounded-xl border border-stone/70 p-3 bg-ivory/20 focus:bg-white focus:outline-hidden focus:border-terracotta", placeholder="https://...") }}
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center justify-end gap-3 pt-6 border-t border-stone/30">
+        <a href="{{ url_for('admin.food') }}"
+           class="px-5 py-2.5 rounded-xl bg-stone/20 text-charcoal text-xs font-semibold hover:bg-stone/40 transition-colors">
+          Cancel
+        </a>
+        <button type="submit"
+                class="px-6 py-2.5 rounded-xl bg-terracotta hover:bg-terracotta-hover text-white text-xs font-bold transition-colors shadow-sm">
+          {{ 'Save Changes' if food else 'Add Food Item' }}
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>
+{% endblock %}

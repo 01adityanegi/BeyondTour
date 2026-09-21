@@ -1,0 +1,287 @@
+{% extends '_base.html' %}
+{% block title %}{{ 'गाइड प्रोफ़ाइल संपादित करें' if lang == 'hi' else 'Edit Guide Profile' }} — {{ guide.name }}{% endblock %}
+
+{% block content %}
+<div class="pt-6 sm:pt-10 pb-20 bg-ivory min-h-screen"
+     x-data="vendorGuideEditor({{ guide.id }}, '{{ csrf_token() }}', {{ 'true' if lang == 'hi' else 'false' }})"
+     x-cloak>
+  <div class="max-w-2xl mx-auto px-4 sm:px-6">
+
+    <!-- Top Navigation & Language Switcher -->
+    <div class="flex items-center justify-between gap-4 mb-6">
+      <a href="{{ url_for('business_dashboard.index') }}"
+         class="inline-flex items-center gap-1.5 text-xs font-semibold text-charcoal/70 hover:text-charcoal transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="m15 18-6-6 6-6"/>
+        </svg>
+        <span>{{ 'डैशबोर्ड पर वापस जाएं' if lang == 'hi' else 'Back to Dashboard' }}</span>
+      </a>
+
+      <!-- Language Toggle -->
+      <div class="inline-flex items-center bg-surface rounded-xl p-1 gap-1 border border-stone/60 shadow-2xs text-xs">
+        <a href="{{ url_for('business_dashboard.guide_edit') }}?lang=en"
+           class="px-2.5 py-1 rounded-lg font-bold transition-all {% if lang != 'hi' %}bg-pine text-ivory{% else %}text-charcoal/60 hover:text-charcoal{% endif %}">
+          English
+        </a>
+        <a href="{{ url_for('business_dashboard.guide_edit') }}?lang=hi"
+           class="px-2.5 py-1 rounded-lg font-bold transition-all {% if lang == 'hi' %}bg-pine text-ivory{% else %}text-charcoal/60 hover:text-charcoal{% endif %}">
+          हिंदी
+        </a>
+      </div>
+    </div>
+
+    <!-- Status & Header Card -->
+    <div class="bg-surface rounded-3xl border border-stone/60 p-6 shadow-card mb-6">
+      <div class="flex items-center justify-between gap-4 pb-4 border-b border-stone/30 mb-4">
+        <div>
+          <span class="text-[10px] font-bold uppercase tracking-widest text-charcoal/50 block mb-1">
+            {{ 'प्रमाणित गाइड प्रोफ़ाइल' if lang == 'hi' else 'Certified Mountain Guide Profile' }}
+          </span>
+          <h1 class="font-serif text-2xl sm:text-3xl font-bold text-charcoal">{{ guide.name }}</h1>
+        </div>
+
+        <div>
+          {% if guide.status == 'live' %}
+          <span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            <span>{{ 'सत्यापित व लाइव' if lang == 'hi' else 'Verified & Live' }}</span>
+          </span>
+          {% elif guide.status == 'changes_requested' %}
+          <span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold bg-rose-100 text-rose-800 border border-rose-300">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/>
+            </svg>
+            <span>{{ 'संशोधन आवश्यक' if lang == 'hi' else 'Changes Requested' }}</span>
+          </span>
+          {% else %}
+          <span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-300">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+            </svg>
+            <span>{{ 'समीक्षा लंबित' if lang == 'hi' else 'Pending Review' }}</span>
+          </span>
+          {% endif %}
+        </div>
+      </div>
+
+      {% if guide.status == 'changes_requested' and guide.admin_note %}
+      <div class="p-4 rounded-2xl bg-rose-50 border border-rose-200 mb-4 text-xs">
+        <strong class="font-bold text-rose-900 block mb-1">
+          {{ 'प्रशासक निर्देश:' if lang == 'hi' else 'Tourism Board Note:' }}
+        </strong>
+        <p class="text-rose-800 leading-relaxed">{{ guide.admin_note }}</p>
+      </div>
+      {% endif %}
+
+      <div class="flex items-center justify-between text-xs text-charcoal/60 bg-ivory/60 rounded-xl p-3 border border-stone/40">
+        <div class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full"
+                :class="saveStatus === 'saving' ? 'bg-amber-500 animate-ping' : (saveStatus === 'saved' ? 'bg-emerald-500' : 'bg-stone/60')"></span>
+          <span x-text="statusText"></span>
+        </div>
+        <span class="text-[11px] text-charcoal/50">
+          {{ 'परिवर्तन स्वतः सुरक्षित होते हैं' if lang == 'hi' else 'Autosaves on blur' }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Accordion Form -->
+    <div class="space-y-4">
+
+      <!-- STEP 1: IDENTITY & REGION -->
+      <div class="bg-surface rounded-2xl border border-stone/60 overflow-hidden shadow-2xs">
+        <button type="button"
+                @click="openSection = (openSection === 1 ? null : 1)"
+                class="w-full p-4 sm:p-5 flex items-center justify-between text-left hover:bg-ivory/40 transition-colors">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-xl bg-pine/10 text-pine flex items-center justify-center font-bold text-xs">1</div>
+            <div>
+              <h3 class="font-bold text-sm text-charcoal">{{ 'पहचान व गृह ज़िला' if lang == 'hi' else 'Guide Identity & Base Region' }}</h3>
+              <p class="text-[11px] text-charcoal/50">{{ 'नाम, आधार क्षेत्र और अनुभव' if lang == 'hi' else 'Name, base district and experience' }}</p>
+            </div>
+          </div>
+          <svg class="w-4 h-4 text-charcoal/60 transition-transform duration-200" :class="openSection === 1 ? 'rotate-180' : ''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="m6 9 6 6 6-6"/>
+          </svg>
+        </button>
+
+        <div x-show="openSection === 1" x-collapse class="p-4 sm:p-5 pt-0 border-t border-stone/20 space-y-4 text-xs">
+          <div>
+            <label class="block font-bold text-charcoal mb-1">{{ 'पूरा नाम' if lang == 'hi' else 'Full Name' }} *</label>
+            <input type="text"
+                   name="name"
+                   value="{{ guide.name }}"
+                   @blur="saveField('name', $el.value)"
+                   class="w-full rounded-xl border border-stone/70 p-3 bg-ivory/20 focus:bg-white focus:outline-hidden focus:border-terracotta">
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block font-bold text-charcoal mb-1">{{ 'गृह ज़िला' if lang == 'hi' else 'Base District' }} *</label>
+              <select name="district"
+                      @change="saveField('district', $el.value)"
+                      class="w-full rounded-xl border border-stone/70 p-3 bg-ivory/20 focus:bg-white focus:outline-hidden focus:border-terracotta">
+                {% for dist in ['Chamoli', 'Uttarkashi', 'Rudraprayag', 'Pithoragarh', 'Bageshwar', 'Almora', 'Nainital', 'Dehradun'] %}
+                <option value="{{ dist }}" {% if guide.district == dist %}selected{% endif %}>{{ dist }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div>
+              <label class="block font-bold text-charcoal mb-1">{{ 'अनुभव के वर्ष' if lang == 'hi' else 'Years of Experience' }} *</label>
+              <input type="number"
+                     name="years_experience"
+                     value="{{ guide.years_experience or 1 }}"
+                     min="1"
+                     max="50"
+                     @blur="saveField('years_experience', $el.value)"
+                     class="w-full rounded-xl border border-stone/70 p-3 bg-ivory/20 focus:bg-white focus:outline-hidden focus:border-terracotta">
+            </div>
+          </div>
+
+          <div>
+            <label class="block font-bold text-charcoal mb-1">{{ 'सेवा क्षेत्र (ज़िले)' if lang == 'hi' else 'Districts Served (comma-separated)' }}</label>
+            <input type="text"
+                   name="districts_served"
+                   value="{{ guide.districts_served or '' }}"
+                   placeholder="e.g. Chamoli, Rudraprayag, Uttarkashi"
+                   @blur="saveField('districts_served', $el.value)"
+                   class="w-full rounded-xl border border-stone/70 p-3 bg-ivory/20 focus:bg-white focus:outline-hidden focus:border-terracotta">
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 2: SPECIALTIES & TREK TRAILS -->
+      <div class="bg-surface rounded-2xl border border-stone/60 overflow-hidden shadow-2xs">
+        <button type="button"
+                @click="openSection = (openSection === 2 ? null : 2)"
+                class="w-full p-4 sm:p-5 flex items-center justify-between text-left hover:bg-ivory/40 transition-colors">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-xl bg-pine/10 text-pine flex items-center justify-center font-bold text-xs">2</div>
+            <div>
+              <h3 class="font-bold text-sm text-charcoal">{{ 'विशेषज्ञता व ट्रेक मार्ग' if lang == 'hi' else 'Specialties & Trek Trails' }}</h3>
+              <p class="text-[11px] text-charcoal/50">{{ 'रूपकुंड, फूलों की घाटी, मंदिर गाथा' if lang == 'hi' else 'Roopkund, Valley of Flowers, High altitude trails' }}</p>
+            </div>
+          </div>
+          <svg class="w-4 h-4 text-charcoal/60 transition-transform duration-200" :class="openSection === 2 ? 'rotate-180' : ''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="m6 9 6 6 6-6"/>
+          </svg>
+        </button>
+
+        <div x-show="openSection === 2" x-collapse class="p-4 sm:p-5 pt-0 border-t border-stone/20 space-y-4 text-xs">
+          <div>
+            <label class="block font-bold text-charcoal mb-1">{{ 'ट्रेक मार्ग व विशेषताएं (अल्पविराम द्वारा अलग करें)' if lang == 'hi' else 'Specialties & Certified Routes' }}</label>
+            <input type="text"
+                   name="specialties"
+                   value="{{ guide.specialties or '' }}"
+                   placeholder="e.g. Roopkund Trail, Har Ki Dun, Himalayan Birds, Sacred Temple Lore"
+                   @blur="saveField('specialties', $el.value)"
+                   class="w-full rounded-xl border border-stone/70 p-3 bg-ivory/20 focus:bg-white focus:outline-hidden focus:border-terracotta">
+          </div>
+
+          <div>
+            <label class="block font-bold text-charcoal mb-1">{{ 'भाषा ज्ञान' if lang == 'hi' else 'Languages Spoken' }}</label>
+            <input type="text"
+                   name="languages"
+                   value="{{ guide.languages or 'Hindi, English' }}"
+                   placeholder="e.g. Hindi, Garhwali, English, Kumaoni"
+                   @blur="saveField('languages', $el.value)"
+                   class="w-full rounded-xl border border-stone/70 p-3 bg-ivory/20 focus:bg-white focus:outline-hidden focus:border-terracotta">
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 3: TARIFFS & RATE -->
+      <div class="bg-surface rounded-2xl border border-stone/60 overflow-hidden shadow-2xs">
+        <button type="button"
+                @click="openSection = (openSection === 3 ? null : 3)"
+                class="w-full p-4 sm:p-5 flex items-center justify-between text-left hover:bg-ivory/40 transition-colors">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-xl bg-pine/10 text-pine flex items-center justify-center font-bold text-xs">3</div>
+            <div>
+              <h3 class="font-bold text-sm text-charcoal">{{ 'दैनिक शुल्क (₹ प्रति दिन)' if lang == 'hi' else 'Daily Guiding Tariff (INR/day)' }}</h3>
+              <p class="text-[11px] text-charcoal/50">{{ 'पारदर्शी प्रत्यक्ष मार्गदर्शन शुल्क' if lang == 'hi' else 'Direct fair-trade rate for travelers' }}</p>
+            </div>
+          </div>
+          <svg class="w-4 h-4 text-charcoal/60 transition-transform duration-200" :class="openSection === 3 ? 'rotate-180' : ''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="m6 9 6 6 6-6"/>
+          </svg>
+        </button>
+
+        <div x-show="openSection === 3" x-collapse class="p-4 sm:p-5 pt-0 border-t border-stone/20 space-y-4 text-xs">
+          <div>
+            <label class="block font-bold text-charcoal mb-1">{{ 'दैनिक मार्गदर्शक शुल्क (INR)' if lang == 'hi' else 'Daily Guiding Rate (INR)' }} *</label>
+            <input type="number"
+                   name="daily_rate"
+                   value="{{ guide.daily_rate }}"
+                   min="500"
+                   max="10000"
+                   @blur="saveField('daily_rate', $el.value)"
+                   class="w-full rounded-xl border border-stone/70 p-3 bg-ivory/20 focus:bg-white focus:outline-hidden focus:border-terracotta font-semibold">
+            <span class="text-[10px] text-charcoal/50 mt-1 block">
+              {{ 'प्रमाणित हिमालयी ट्रेक गाइड के लिए ₹1,500 - ₹3,500 मानक है' if lang == 'hi' else 'Standard certified guide tariff is INR 1,500 - 3,500 per day' }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 4: BIOGRAPHY & CERTIFICATIONS -->
+      <div class="bg-surface rounded-2xl border border-stone/60 overflow-hidden shadow-2xs">
+        <button type="button"
+                @click="openSection = (openSection === 4 ? null : 4)"
+                class="w-full p-4 sm:p-5 flex items-center justify-between text-left hover:bg-ivory/40 transition-colors">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-xl bg-pine/10 text-pine flex items-center justify-center font-bold text-xs">4</div>
+            <div>
+              <h3 class="font-bold text-sm text-charcoal">{{ 'परिचय व पर्वतारोहण प्रमाणन' if lang == 'hi' else 'Biography & Certifications' }}</h3>
+              <p class="text-[11px] text-charcoal/50">{{ 'NIM उत्तरकाशी प्रमाण पत्र, आपातकालीन प्राथमिक चिकित्सा' if lang == 'hi' else 'First-aid, lore knowledge, mountaineering training' }}</p>
+            </div>
+          </div>
+          <svg class="w-4 h-4 text-charcoal/60 transition-transform duration-200" :class="openSection === 4 ? 'rotate-180' : ''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="m6 9 6 6 6-6"/>
+          </svg>
+        </button>
+
+        <div x-show="openSection === 4" x-collapse class="p-4 sm:p-5 pt-0 border-t border-stone/20 space-y-4 text-xs">
+          <div>
+            <label class="block font-bold text-charcoal mb-1">{{ 'संक्षिप्त जीवन परिचय' if lang == 'hi' else 'Biography & Lore Knowledge' }}</label>
+            <textarea name="bio"
+                      rows="5"
+                      @blur="saveField('bio', $el.value)"
+                      placeholder="{{ 'मुझे हिमालय में 8 वर्षों का मार्गदर्शन अनुभव है...' if lang == 'hi' else 'Certified at NIM Uttarkashi with 8 years leading trails across Garhwal...' }}"
+                      class="w-full rounded-xl border border-stone/70 p-3 bg-ivory/20 focus:bg-white focus:outline-hidden focus:border-terracotta leading-relaxed">{{ guide.bio or '' }}</textarea>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Bottom Actions -->
+    <div class="mt-8 flex items-center justify-between">
+      <a href="{{ url_for('business_dashboard.index') }}"
+         class="px-5 py-2.5 rounded-xl bg-surface border border-stone/60 text-charcoal text-xs font-semibold hover:bg-stone/20 transition-colors">
+        {{ 'डैशबोर्ड पर लौटें' if lang == 'hi' else 'Return to Dashboard' }}
+      </a>
+
+      <a href="{{ url_for('guides.detail', guide_id=guide.id) }}"
+         target="_blank"
+         class="px-6 py-2.5 rounded-xl bg-terracotta hover:bg-terracotta-hover text-white text-xs font-bold transition-colors shadow-sm inline-flex items-center gap-1.5">
+        <span>{{ 'लाइव पूर्वावलोकन' if lang == 'hi' else 'View Live Profile' }}</span>
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+          <polyline points="15 3 21 3 21 9"/>
+          <line x1="10" x2="21" y1="14" y2="3"/>
+        </svg>
+      </a>
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/vendor-guide-editor.js') }}"></script>
+{% endblock %}

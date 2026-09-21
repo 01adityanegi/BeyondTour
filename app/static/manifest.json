@@ -1,0 +1,16 @@
+{
+  "name": "Beyond Tour — Uttarakhand Tourism",
+  "short_name": "BeyondTour",
+  "description": "Discover authentic Uttarakhand culture, crafts, homestays, and AI-powered trip planning offline across the Himalayas.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F7F3EC",
+  "theme_color": "#16302B",
+  "icons": [
+    {
+      "src": "/static/images/coverpic/kumaon.png",
+      "sizes": "192x192 512x512",
+      "type": "image/png"
+    }
+  ]
+}

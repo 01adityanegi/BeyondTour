@@ -1,0 +1,61 @@
+{# Macro to render 2G-optimized responsive images with LQIP blurred placeholder and lazy loading #}
+{% macro responsive_image(src, alt, class="", sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw", priority=False, aspect="aspect-[16/10]") %}
+{% if not src %}
+  {% set src = "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800&q=80" %}
+{% endif %}
+
+{% if 'cloudinary.com' in src and '/upload/' in src %}
+  {# Cloudinary responsive transformation #}
+  {% set parts = src.split('/upload/') %}
+  {% set base_url = parts[0] ~ '/upload/' %}
+  {% set asset_path = parts[1] %}
+  {% set lqip = base_url ~ 'w_40,c_fill,f_auto,q_10,e_blur:800/' ~ asset_path %}
+  {% set src_400 = base_url ~ 'w_400,c_fill,f_auto,q_auto/' ~ asset_path %}
+  {% set src_800 = base_url ~ 'w_800,c_fill,f_auto,q_auto/' ~ asset_path %}
+  {% set src_1200 = base_url ~ 'w_1200,c_fill,f_auto,q_auto/' ~ asset_path %}
+  {% set src_1600 = base_url ~ 'w_1600,c_fill,f_auto,q_auto/' ~ asset_path %}
+
+  <div class="relative overflow-hidden bg-stone/30 {{ aspect }}" style="background-image: url('{{ lqip }}'); background-size: cover; background-position: center;">
+    <img src="{{ src_800 }}"
+         srcset="{{ src_400 }} 400w, {{ src_800 }} 800w, {{ src_1200 }} 1200w, {{ src_1600 }} 1600w"
+         sizes="{{ sizes }}"
+         alt="{{ alt }}"
+         loading="{% if priority %}eager{% else %}lazy{% endif %}"
+         decoding="async"
+         class="w-full h-full object-cover transition-opacity duration-500 {{ class }}"
+         onload="this.style.opacity='1'"
+         onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800&q=80';">
+  </div>
+
+{% elif 'unsplash.com' in src %}
+  {# Unsplash responsive transformation #}
+  {% set base_clean = src.split('?')[0] %}
+  {% set src_400 = base_clean ~ '?w=400&q=70&auto=format' %}
+  {% set src_800 = base_clean ~ '?w=800&q=75&auto=format' %}
+  {% set src_1200 = base_clean ~ '?w=1200&q=80&auto=format' %}
+  {% set lqip = base_clean ~ '?w=30&q=20&blur=20&auto=format' %}
+
+  <div class="relative overflow-hidden bg-stone/30 {{ aspect }}" style="background-image: url('{{ lqip }}'); background-size: cover; background-position: center;">
+    <img src="{{ src_800 }}"
+         srcset="{{ src_400 }} 400w, {{ src_800 }} 800w, {{ src_1200 }} 1200w"
+         sizes="{{ sizes }}"
+         alt="{{ alt }}"
+         loading="{% if priority %}eager{% else %}lazy{% endif %}"
+         decoding="async"
+         class="w-full h-full object-cover transition-opacity duration-500 {{ class }}"
+         onload="this.style.opacity='1'"
+         onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800&q=80';">
+  </div>
+
+{% else %}
+  {# Standard local or remote image fallback #}
+  <div class="relative overflow-hidden bg-stone/30 {{ aspect }}">
+    <img src="{{ src }}"
+         alt="{{ alt }}"
+         loading="{% if priority %}eager{% else %}lazy{% endif %}"
+         decoding="async"
+         class="w-full h-full object-cover {{ class }}"
+         onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800&q=80';">
+  </div>
+{% endif %}
+{% endmacro %}

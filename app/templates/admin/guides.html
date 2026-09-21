@@ -1,0 +1,225 @@
+{% extends 'admin/base.html' %}
+{% block title %}Local Guides Approval — Beyond Tour Admin{% endblock %}
+
+{% block admin_content %}
+<div x-data="{ activeModal: null, adminNote: '', deleteModal: null, deleteName: '', deleteUrl: '' }">
+
+  <!-- Header & Status Filter Bar -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+    <div>
+      <h2 class="font-serif text-2xl font-bold text-charcoal">Local Guides Verification & Approval Queue</h2>
+      <p class="text-xs text-charcoal/60 mt-0.5">Validate Himalayan mountaineering, wilderness first-aid and local lore credentials</p>
+    </div>
+
+    <!-- Status Tabs -->
+    <div class="inline-flex items-center bg-surface rounded-2xl p-1 gap-1 border border-stone/60 shadow-2xs">
+      <a href="{{ url_for('admin.guides') }}?status=all"
+         class="px-4 py-2 rounded-xl text-xs font-bold transition-all
+         {% if status_filter == 'all' or not status_filter %}bg-terracotta text-white shadow-sm{% else %}text-charcoal/70 hover:text-charcoal{% endif %}">
+        All Guides
+      </a>
+      <a href="{{ url_for('admin.guides') }}?status=pending"
+         class="px-4 py-2 rounded-xl text-xs font-bold transition-all
+         {% if status_filter == 'pending' %}bg-terracotta text-white shadow-sm{% else %}text-charcoal/70 hover:text-charcoal{% endif %}">
+        Pending Review
+      </a>
+      <a href="{{ url_for('admin.guides') }}?status=live"
+         class="px-4 py-2 rounded-xl text-xs font-bold transition-all
+         {% if status_filter == 'live' %}bg-terracotta text-white shadow-sm{% else %}text-charcoal/70 hover:text-charcoal{% endif %}">
+        Live
+      </a>
+      <a href="{{ url_for('admin.guides') }}?status=changes_requested"
+         class="px-4 py-2 rounded-xl text-xs font-bold transition-all
+         {% if status_filter == 'changes_requested' %}bg-terracotta text-white shadow-sm{% else %}text-charcoal/70 hover:text-charcoal{% endif %}">
+        Changes Requested
+      </a>
+    </div>
+  </div>
+
+  <!-- Guides Table -->
+  <div class="bg-surface rounded-3xl border border-stone/60 shadow-card overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-xs">
+        <thead class="bg-ivory/60 text-[11px] uppercase tracking-wider text-charcoal/70 border-b border-stone/30">
+          <tr>
+            <th class="py-3.5 px-5">Guide & Photo</th>
+            <th class="py-3.5 px-4">Base District</th>
+            <th class="py-3.5 px-4">Experience</th>
+            <th class="py-3.5 px-4">Daily Rate</th>
+            <th class="py-3.5 px-4">Badge</th>
+            <th class="py-3.5 px-4">Status & Decision</th>
+            <th class="py-3.5 px-5 text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-stone/20">
+          {% for guide in guides %}
+          <tr class="hover:bg-ivory/30 transition-colors">
+            <!-- Guide & Photo -->
+            <td class="py-4 px-5">
+              <div class="flex items-center gap-3">
+                <img src="{{ guide.profile_image or 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&q=75' }}"
+                     alt="{{ guide.name }}"
+                     class="w-12 h-12 rounded-full object-cover border border-stone/40 flex-shrink-0">
+                <div class="min-w-0">
+                  <h3 class="font-bold text-sm text-charcoal truncate">{{ guide.name }}</h3>
+                  {% set specs = guide.specialties|from_json %}
+                  <p class="text-[11px] text-charcoal/60 capitalize truncate max-w-xs">{{ specs|join(', ')|replace('-', ' ') if specs else 'General Himalayan trekking' }}</p>
+                </div>
+              </div>
+            </td>
+
+            <!-- Base District -->
+            <td class="py-4 px-4 text-charcoal font-medium">
+              {{ guide.district }}
+            </td>
+
+            <!-- Experience -->
+            <td class="py-4 px-4 text-charcoal">
+              {{ guide.years_experience or 1 }} years
+            </td>
+
+            <!-- Daily Rate -->
+            <td class="py-4 px-4 text-charcoal font-semibold whitespace-nowrap">
+              ₹{{ guide.daily_rate }}/day
+            </td>
+
+            <!-- Badge (Verified Toggle) -->
+            <td class="py-4 px-4">
+              <form action="{{ url_for('admin.guide_toggle_verified', guide_id=guide.id) }}" method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit"
+                        class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold transition-all
+                        {% if guide.verified %}bg-pine/10 text-pine border border-pine/30 hover:bg-pine/20{% else %}bg-stone/20 text-charcoal/50 hover:bg-stone/40{% endif %}">
+                  <svg class="w-3 h-3 {% if guide.verified %}text-pine{% else %}text-charcoal/40{% endif %}" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/>
+                    <path d="m9 12 2 2 4-4"/>
+                  </svg>
+                  <span>{{ 'Verified' if guide.verified else 'Unverified' }}</span>
+                </button>
+              </form>
+            </td>
+
+            <!-- Status & Decision -->
+            <td class="py-4 px-4">
+              {% include 'admin/_guide_status_cell.html' %}
+            </td>
+
+            <!-- Actions -->
+            <td class="py-4 px-5 text-right whitespace-nowrap">
+              <div class="inline-flex items-center gap-1.5">
+                <a href="{{ url_for('guides.detail', guide_id=guide.id) }}"
+                   target="_blank"
+                   class="px-2.5 py-1.5 rounded-xl border border-stone/60 text-charcoal hover:bg-stone/20 font-semibold text-xs transition-colors inline-flex items-center gap-1">
+                  <span>View</span>
+                  <i data-lucide="external-link" class="w-3 h-3"></i>
+                </a>
+
+                <button type="button"
+                        @click="deleteModal = {{ guide.id }}; deleteName = '{{ guide.name|replace('\'', '\\\'') }}'; deleteUrl = '{{ url_for('admin.guide_delete', guide_id=guide.id) }}'; $nextTick(() => { if (window.lucide) lucide.createIcons(); })"
+                        class="px-2.5 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-semibold text-xs transition-colors inline-flex items-center gap-1">
+                  <i data-lucide="trash-2" class="w-3 h-3"></i>
+                  <span>Delete</span>
+                </button>
+              </div>
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="7" class="py-12 text-center text-charcoal/50">
+              No guides matching the selected filter.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Request Changes Modal -->
+  <div x-show="activeModal !== null"
+       x-cloak
+       class="fixed inset-0 z-50 overflow-y-auto bg-charcoal/60 backdrop-blur-xs flex items-center justify-center p-4"
+       @keydown.escape.window="activeModal = null">
+    <div class="bg-surface rounded-3xl border border-stone/60 shadow-hero max-w-md w-full p-6 text-left"
+         @click.away="activeModal = null">
+      
+      <div class="flex items-center justify-between pb-4 border-b border-stone/30 mb-4">
+        <h3 class="font-serif text-lg font-bold text-charcoal">Request Guide Document Updates</h3>
+        <button type="button" @click="activeModal = null" class="text-charcoal/60 hover:text-charcoal">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <p class="text-xs text-charcoal/70 leading-relaxed mb-4">
+        Specify what credentials or information the guide needs to upload or clarify before being approved.
+      </p>
+
+      <form :action="'/admin/guides/' + activeModal + '/request-changes'" method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="mb-4">
+          <label class="block text-xs font-bold text-charcoal mb-1">Required Actions / Feedback</label>
+          <textarea name="admin_note"
+                    rows="4"
+                    required
+                    placeholder="e.g., Please upload your NIM Uttarkashi basic mountaineering certification or update your phone number."
+                    class="w-full text-xs rounded-xl border border-stone/70 p-3 focus:outline-hidden focus:border-terracotta focus:ring-1 focus:ring-terracotta"></textarea>
+        </div>
+
+        <div class="flex items-center justify-end gap-3 pt-2">
+          <button type="button"
+                  @click="activeModal = null"
+                  class="px-4 py-2 rounded-xl bg-stone/20 text-charcoal text-xs font-semibold hover:bg-stone/40 transition-colors">
+            Cancel
+          </button>
+          <button type="submit"
+                  class="px-5 py-2 rounded-xl bg-terracotta hover:bg-terracotta-hover text-white text-xs font-bold transition-colors shadow-sm">
+            Send Feedback to Guide
+          </button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+
+  <!-- Delete Guide Confirmation Modal -->
+  <div x-show="deleteModal !== null"
+       x-cloak
+       class="fixed inset-0 z-50 overflow-y-auto bg-charcoal/60 backdrop-blur-xs flex items-center justify-center p-4"
+       @keydown.escape.window="deleteModal = null">
+    <div class="bg-surface rounded-3xl border border-stone/60 shadow-hero max-w-md w-full p-6 text-left"
+         @click.away="deleteModal = null">
+      
+      <div class="flex items-center gap-3 pb-4 border-b border-stone/30 mb-4">
+        <div class="w-10 h-10 rounded-2xl bg-rose-100 text-rose-700 flex items-center justify-center flex-shrink-0">
+          <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h3 class="font-serif font-bold text-lg text-charcoal">Delete Certified Guide</h3>
+          <p class="text-xs text-charcoal/60">Permanent removal from directory</p>
+        </div>
+      </div>
+
+      <p class="text-xs text-charcoal/80 mb-4 leading-relaxed">
+        Are you sure you want to permanently delete guide <strong class="text-charcoal" x-text="deleteName"></strong>? This will remove their verified guide profile, booking availability, and client ratings from the website.
+      </p>
+
+      <form :action="deleteUrl" method="POST" class="flex items-center justify-end gap-3 pt-2">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="button"
+                @click="deleteModal = null"
+                class="px-4 py-2 rounded-xl border border-stone/60 text-xs font-semibold text-charcoal hover:bg-stone/20 transition-colors">
+          Cancel
+        </button>
+        <button type="submit"
+                class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition-colors inline-flex items-center gap-1.5 shadow-sm">
+          <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+          <span>Confirm Delete</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,429 @@
+{% extends '_base.html' %}
+{% block title %}Explore Traveler Stories & Videos — Beyond Tour{% endblock %}
+{% block meta_description %}Explore authentic traveler videos, YouTube Shorts, photography, and Instagram Reels across Almora, Nainital, Pithoragarh, and Uttarkashi.{% endblock %}
+
+{% block content %}
+<div class="pt-4 sm:pt-6 pb-20 bg-ivory min-h-screen"
+     x-data="{
+       modalOpen: false,
+       shareModalOpen: false,
+       activeDistrict: '{{ active_district }}',
+       activeFormat: '{{ active_format }}'
+     }"
+     @keydown.escape.window="modalOpen = false; shareModalOpen = false">
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+    <!-- Top Action Bar & Header -->
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8 pb-6 border-b border-stone/40">
+      <div>
+        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-terracotta/10 text-terracotta text-xs font-bold uppercase tracking-wider mb-2">
+          <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+          <span>Visual Explorer · 4 Core Districts</span>
+        </div>
+        <h1 class="font-serif text-3xl sm:text-4xl md:text-5xl font-bold text-charcoal">
+          Traveler Stories & Videos
+        </h1>
+        <p class="text-xs sm:text-sm text-charcoal/70 mt-1.5 max-w-2xl font-light">
+          Real mountain journeys through traveler lenses — YouTube videos, Shorts, Instagram Reels, and high-altitude photography from Almora, Nainital, Pithoragarh & Uttarkashi.
+        </p>
+      </div>
+
+      <!-- + Share Story Action Button -->
+      <div class="flex-shrink-0 flex items-center gap-3">
+        {% if current_user.is_authenticated %}
+        <button type="button" @click="shareModalOpen = true"
+                class="px-5 py-2.5 rounded-full bg-terracotta hover:bg-terracotta-hover text-white text-xs font-semibold shadow-md hover:shadow-lg transition-all flex items-center gap-2">
+          <i data-lucide="plus-circle" class="w-4 h-4"></i>
+          <span>Share Trip Story</span>
+        </button>
+        {% else %}
+        <a href="{{ url_for('auth.login') }}"
+           class="px-5 py-2.5 rounded-full bg-terracotta hover:bg-terracotta-hover text-white text-xs font-semibold shadow-md hover:shadow-lg transition-all flex items-center gap-2">
+          <i data-lucide="log-in" class="w-4 h-4"></i>
+          <span>Sign in to Share</span>
+        </a>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Filter Bar: Media Types & 4 Core Districts -->
+    <div class="mb-8 bg-white/70 backdrop-blur-md p-3 sm:p-4 rounded-2xl border border-stone/50 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-3">
+      
+      <!-- Media Type Pills -->
+      <div class="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0 scrollbar-none no-scrollbar">
+        <span class="text-[11px] uppercase font-bold text-charcoal/50 mr-1 flex-shrink-0">Format:</span>
+        <a href="{{ url_for('community.index', district=active_district, format='all') }}"
+           class="flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold transition-all {% if not active_format or active_format == 'all' %}bg-charcoal text-white shadow-xs{% else %}bg-stone/20 text-charcoal/80 hover:bg-stone/30{% endif %}">
+          All Explore
+        </a>
+        <a href="{{ url_for('community.index', district=active_district, format='videos') }}"
+           class="flex-shrink-0 inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold transition-all {% if active_format == 'videos' %}bg-red-600 text-white shadow-xs{% else %}bg-stone/20 text-charcoal/80 hover:bg-stone/30{% endif %}">
+          <i data-lucide="play" class="w-3 h-3 fill-current"></i>
+          <span>YouTube 16:9</span>
+        </a>
+        <a href="{{ url_for('community.index', district=active_district, format='shorts') }}"
+           class="flex-shrink-0 inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold transition-all {% if active_format == 'shorts' %}bg-rose-600 text-white shadow-xs{% else %}bg-stone/20 text-charcoal/80 hover:bg-stone/30{% endif %}">
+          <i data-lucide="zap" class="w-3 h-3 fill-current"></i>
+          <span>Shorts 9:16</span>
+        </a>
+        <a href="{{ url_for('community.index', district=active_district, format='reels') }}"
+           class="flex-shrink-0 inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold transition-all {% if active_format == 'reels' %}bg-pink-600 text-white shadow-xs{% else %}bg-stone/20 text-charcoal/80 hover:bg-stone/30{% endif %}">
+          <i data-lucide="instagram" class="w-3 h-3"></i>
+          <span>Reels</span>
+        </a>
+        <a href="{{ url_for('community.index', district=active_district, format='photos') }}"
+           class="flex-shrink-0 inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold transition-all {% if active_format == 'photos' %}bg-pine text-white shadow-xs{% else %}bg-stone/20 text-charcoal/80 hover:bg-stone/30{% endif %}">
+          <i data-lucide="camera" class="w-3 h-3"></i>
+          <span>Photos</span>
+        </a>
+      </div>
+
+      <!-- District Pills (Strictly Almora, Nainital, Pithoragarh, Uttarkashi) -->
+      <div class="flex items-center gap-1.5 overflow-x-auto pt-2 md:pt-0 border-t md:border-t-0 border-stone/30 scrollbar-none no-scrollbar">
+        <span class="text-[11px] uppercase font-bold text-terracotta mr-1 flex-shrink-0">District:</span>
+        <a href="{{ url_for('community.index', format=active_format) }}"
+           class="flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold transition-all {% if not active_district or active_district == 'all' %}bg-terracotta text-white shadow-xs{% else %}bg-stone/20 text-charcoal/80 hover:bg-stone/30{% endif %}">
+          All (4)
+        </a>
+        {% for dist in ['Almora', 'Nainital', 'Pithoragarh', 'Uttarkashi'] %}
+        {% set d_slug = dist|lower %}
+        <a href="{{ url_for('community.index', district=d_slug, format=active_format) }}"
+           class="flex-shrink-0 inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold transition-all {% if active_district == d_slug %}bg-terracotta text-white shadow-xs ring-2 ring-terracotta/30{% else %}bg-stone/20 text-charcoal/80 hover:bg-stone/30{% endif %}">
+          <i data-lucide="map-pin" class="w-2.5 h-2.5"></i>
+          <span>{{ dist }}</span>
+        </a>
+        {% endfor %}
+      </div>
+
+    </div>
+
+    <!-- Active Filter Status Badge -->
+    {% if active_district or (active_format and active_format != 'all') %}
+    <div class="mb-6 flex items-center justify-between bg-surface px-4 py-2 rounded-xl border border-stone/40 text-xs">
+      <div class="flex items-center gap-2">
+        <span class="text-charcoal/60">Filtering by:</span>
+        {% if active_format and active_format != 'all' %}
+        <span class="px-2 py-0.5 rounded-md bg-stone/30 font-semibold text-charcoal capitalize">{{ active_format }}</span>
+        {% endif %}
+        {% if active_district %}
+        <span class="px-2 py-0.5 rounded-md bg-terracotta/15 text-terracotta font-semibold capitalize">{{ active_district }}</span>
+        {% endif %}
+      </div>
+      <a href="{{ url_for('community.index') }}" class="text-terracotta hover:underline font-semibold flex items-center gap-1">
+        <span>Reset Filters</span>
+        <i data-lucide="x" class="w-3 h-3"></i>
+      </a>
+    </div>
+    {% endif %}
+
+    <!-- Instagram Explore / YouTube Grid -->
+    <div id="community-explore-grid">
+      {% include 'community/_posts.html' %}
+    </div>
+
+  </div>
+
+  <!-- Story Player Lightbox Modal -->
+  <div x-show="modalOpen" x-cloak
+       class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-md"
+       x-transition:enter="transition ease-out duration-300"
+       x-transition:enter-start="opacity-0"
+       x-transition:enter-end="opacity-100"
+       x-transition:leave="transition ease-in duration-200"
+       x-transition:leave-start="opacity-100"
+       x-transition:leave-end="opacity-0">
+
+    <!-- Modal Dialog Frame -->
+    <div @click.away="modalOpen = false"
+         class="w-full flex justify-center max-h-[95vh]"
+         id="modal-container">
+      <div class="p-8 text-white text-center flex items-center justify-center">
+        <i data-lucide="loader" class="w-8 h-8 animate-spin text-terracotta"></i>
+      </div>
+    </div>
+  </div>
+
+  <!-- + Share Your Trip Story Modal -->
+  <div x-show="shareModalOpen" x-cloak
+       class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/75 backdrop-blur-sm"
+       x-transition:enter="transition ease-out duration-300"
+       x-transition:enter-start="opacity-0"
+       x-transition:enter-end="opacity-100"
+       x-transition:leave="transition ease-in duration-200"
+       x-transition:leave-start="opacity-100"
+       x-transition:leave-end="opacity-0">
+
+    <div @click.away="shareModalOpen = false"
+         class="bg-surface rounded-3xl overflow-hidden shadow-2xl border border-stone/50 max-w-2xl w-full max-h-[92vh] flex flex-col p-6 sm:p-8"
+         x-data="communityUploadModal()">
+
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between pb-4 border-b border-stone/30 mb-4">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-full bg-terracotta/10 text-terracotta flex items-center justify-center">
+            <i data-lucide="share-2" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 class="font-serif text-lg font-bold text-charcoal">Share Your Trip Story</h3>
+            <p class="text-[11px] text-charcoal/50">Uttarakhand mountain experiences · Photos, Videos & Stories</p>
+          </div>
+        </div>
+        <button @click="shareModalOpen = false" class="text-charcoal/40 hover:text-charcoal p-1 transition-colors">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Format Tabs -->
+      <div class="flex p-1 bg-ivory rounded-xl border border-stone/50 text-xs gap-1 mb-4 overflow-x-auto">
+        <button type="button" @click="tab = 'photo'"
+                :class="tab === 'photo' ? 'bg-surface text-charcoal font-semibold shadow-xs' : 'text-charcoal/60 hover:text-charcoal'"
+                class="flex-1 min-w-[75px] py-1.5 rounded-lg transition-all flex items-center justify-center gap-1.5">
+          <i data-lucide="camera" class="w-3.5 h-3.5 text-terracotta"></i>
+          <span>Photo</span>
+        </button>
+        <button type="button" @click="tab = 'video'"
+                :class="tab === 'video' ? 'bg-surface text-charcoal font-semibold shadow-xs' : 'text-charcoal/60 hover:text-charcoal'"
+                class="flex-1 min-w-[85px] py-1.5 rounded-lg transition-all flex items-center justify-center gap-1.5">
+          <i data-lucide="film" class="w-3.5 h-3.5 text-amber-600"></i>
+          <span>Video File</span>
+        </button>
+        <button type="button" @click="tab = 'youtube'"
+                :class="tab === 'youtube' ? 'bg-surface text-charcoal font-semibold shadow-xs' : 'text-charcoal/60 hover:text-charcoal'"
+                class="flex-1 min-w-[85px] py-1.5 rounded-lg transition-all flex items-center justify-center gap-1.5">
+          <i data-lucide="play" class="w-3.5 h-3.5 text-red-600"></i>
+          <span>YouTube</span>
+        </button>
+        <button type="button" @click="tab = 'youtube_shorts'"
+                :class="tab === 'youtube_shorts' ? 'bg-surface text-charcoal font-semibold shadow-xs' : 'text-charcoal/60 hover:text-charcoal'"
+                class="flex-1 min-w-[75px] py-1.5 rounded-lg transition-all flex items-center justify-center gap-1.5">
+          <i data-lucide="zap" class="w-3.5 h-3.5 text-rose-500"></i>
+          <span>Shorts</span>
+        </button>
+        <button type="button" @click="tab = 'instagram'"
+                :class="tab === 'instagram' ? 'bg-surface text-charcoal font-semibold shadow-xs' : 'text-charcoal/60 hover:text-charcoal'"
+                class="flex-1 min-w-[75px] py-1.5 rounded-lg transition-all flex items-center justify-center gap-1.5">
+          <i data-lucide="instagram" class="w-3.5 h-3.5 text-pink-600"></i>
+          <span>Reel</span>
+        </button>
+      </div>
+
+      <!-- Form with Multipart / File Upload Support -->
+      <form method="POST" action="{{ url_for('community.create_post') }}" enctype="multipart/form-data" @submit="submitForm($event)" class="space-y-4 overflow-y-auto pr-1">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="media_type" :value="tab">
+        <input type="hidden" name="aspect_ratio" :value="tab === 'photo' ? photoRatio : (tab === 'youtube' ? '16:9' : (tab === 'youtube_shorts' ? '9:16' : (tab === 'video' ? videoFormat : '4:5')))">
+        <input type="hidden" name="video_format" :value="tab === 'youtube' ? '16:9' : (tab === 'youtube_shorts' ? '9:16' : (tab === 'video' ? videoFormat : '16:9'))">
+
+        <!-- Story Caption -->
+        <div>
+          <label class="text-xs font-semibold text-charcoal/80 block mb-1">Story Caption & Mountain Insights <span class="text-terracotta">*</span></label>
+          <textarea name="content" x-model="caption" required rows="3"
+                    placeholder="Describe this mountain encounter, route insight, or village stay in Uttarakhand..."
+                    class="w-full bg-ivory border border-stone/70 rounded-2xl p-3 text-xs text-charcoal placeholder-charcoal/40 focus:outline-none focus:border-terracotta resize-none leading-relaxed"></textarea>
+        </div>
+
+        <!-- Tab 1: Photo Upload & Drag-and-Drop -->
+        <div x-show="tab === 'photo'" class="space-y-3 p-3.5 bg-ivory/60 rounded-2xl border border-stone/40">
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-semibold text-charcoal/80">Aspect Ratio:</span>
+            <div class="flex items-center gap-2">
+              <label class="px-2.5 py-1 rounded-lg border cursor-pointer transition-colors"
+                     :class="photoRatio === '4:5' ? 'bg-surface font-semibold border-terracotta text-terracotta shadow-xs' : 'bg-ivory border-stone text-charcoal/70'">
+                <input type="radio" x-model="photoRatio" value="4:5" class="sr-only">
+                <span>4:5 Portrait</span>
+              </label>
+              <label class="px-2.5 py-1 rounded-lg border cursor-pointer transition-colors"
+                     :class="photoRatio === '1:1' ? 'bg-surface font-semibold border-terracotta text-terracotta shadow-xs' : 'bg-ivory border-stone text-charcoal/70'">
+                <input type="radio" x-model="photoRatio" value="1:1" class="sr-only">
+                <span>1:1 Square</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Drag and Drop Zone -->
+          <div @dragover.prevent="isDraggingPhoto = true"
+               @dragleave.prevent="isDraggingPhoto = false"
+               @drop.prevent="handlePhotoDrop($event)"
+               @click="$refs.photoInput.click()"
+               :class="isDraggingPhoto ? 'border-terracotta bg-terracotta/10 ring-2 ring-terracotta/30' : 'border-stone/70 bg-white/70 hover:bg-white hover:border-terracotta/70'"
+               class="border-2 border-dashed rounded-2xl p-5 text-center cursor-pointer transition-all">
+            <input type="file" x-ref="photoInput" name="photo_files" multiple accept="image/jpeg,image/png,image/webp,image/avif" class="hidden" @change="handlePhotoSelect($event)">
+            <div class="w-10 h-10 rounded-full bg-terracotta/10 text-terracotta flex items-center justify-center mx-auto mb-2">
+              <i data-lucide="upload-cloud" class="w-5 h-5"></i>
+            </div>
+            <p class="text-xs font-semibold text-charcoal">Drag & drop mountain photos here, or <span class="text-terracotta underline">browse</span></p>
+            <p class="text-[11px] text-charcoal/50 mt-0.5">Supports JPG, PNG, WEBP (multiple photos allowed)</p>
+          </div>
+
+          <!-- Live Photo Previews -->
+          <template x-if="photoPreviews.length > 0">
+            <div class="grid grid-cols-3 sm:grid-cols-4 gap-2.5 pt-1">
+              <template x-for="(photo, index) in photoPreviews" :key="index">
+                <div class="relative group rounded-xl overflow-hidden aspect-square border border-stone/60 bg-black/10">
+                  <img :src="photo.url" :alt="photo.name" class="w-full h-full object-cover">
+                  <button type="button" @click.stop="removePhoto(index)"
+                          class="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/70 hover:bg-red-600 text-white flex items-center justify-center shadow-xs transition-colors"
+                          title="Remove photo">
+                    <i data-lucide="x" class="w-3 h-3"></i>
+                  </button>
+                  <span class="absolute bottom-1 left-1 px-1.5 py-0.5 rounded bg-black/70 text-[9px] text-white font-medium truncate max-w-[85%]" x-text="photo.size"></span>
+                </div>
+              </template>
+            </div>
+          </template>
+
+          <!-- Or Paste URL fallback -->
+          <div class="pt-1">
+            <label class="text-[11px] text-charcoal/60 block mb-1">Or paste photo URL:</label>
+            <input type="url" name="photo_url" x-model="photoUrlInput" placeholder="https://images.unsplash.com/..."
+                   class="w-full bg-surface border border-stone/70 rounded-xl px-3 py-2 text-xs text-charcoal">
+          </div>
+        </div>
+
+        <!-- Tab 2: Video File Upload & Drag-and-Drop -->
+        <div x-show="tab === 'video'" class="space-y-3 p-3.5 bg-ivory/60 rounded-2xl border border-stone/40" style="display:none;">
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-semibold text-charcoal/80">Video Format:</span>
+            <div class="flex items-center gap-2">
+              <label class="px-2.5 py-1 rounded-lg border cursor-pointer transition-colors"
+                     :class="videoFormat === '16:9' ? 'bg-surface font-semibold border-amber-600 text-amber-700 shadow-xs' : 'bg-ivory border-stone text-charcoal/70'">
+                <input type="radio" x-model="videoFormat" value="16:9" class="sr-only">
+                <span>16:9 Landscape</span>
+              </label>
+              <label class="px-2.5 py-1 rounded-lg border cursor-pointer transition-colors"
+                     :class="videoFormat === '9:16' ? 'bg-surface font-semibold border-amber-600 text-amber-700 shadow-xs' : 'bg-ivory border-stone text-charcoal/70'">
+                <input type="radio" x-model="videoFormat" value="9:16" class="sr-only">
+                <span>9:16 Reel</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Drag and Drop Video Zone -->
+          <div @dragover.prevent="isDraggingVideo = true"
+               @dragleave.prevent="isDraggingVideo = false"
+               @drop.prevent="handleVideoDrop($event)"
+               @click="$refs.videoInput.click()"
+               :class="isDraggingVideo ? 'border-amber-600 bg-amber-500/10 ring-2 ring-amber-500/30' : 'border-stone/70 bg-white/70 hover:bg-white hover:border-amber-600/70'"
+               class="border-2 border-dashed rounded-2xl p-5 text-center cursor-pointer transition-all">
+            <input type="file" x-ref="videoInput" name="video_file" accept="video/mp4,video/webm,video/quicktime" class="hidden" @change="handleVideoSelect($event)">
+            <div class="w-10 h-10 rounded-full bg-amber-500/10 text-amber-600 flex items-center justify-center mx-auto mb-2">
+              <i data-lucide="video" class="w-5 h-5"></i>
+            </div>
+            <p class="text-xs font-semibold text-charcoal">Drag & drop video file here, or <span class="text-amber-700 underline">browse</span></p>
+            <p class="text-[11px] text-charcoal/50 mt-0.5">Supports MP4, WEBM, MOV (up to 100MB)</p>
+          </div>
+
+          <!-- Live Video Preview -->
+          <template x-if="videoPreviewUrl">
+            <div class="space-y-2 pt-1">
+              <div class="relative rounded-2xl overflow-hidden bg-black border border-stone/60">
+                <video :src="videoPreviewUrl" controls playsinline class="w-full max-h-[220px] object-contain"></video>
+                <button type="button" @click.stop="removeVideo()"
+                        class="absolute top-2 right-2 px-2.5 py-1 rounded-full bg-black/80 hover:bg-red-600 text-white text-[11px] font-semibold flex items-center gap-1 shadow-md transition-colors">
+                  <i data-lucide="trash-2" class="w-3 h-3"></i>
+                  <span>Remove</span>
+                </button>
+              </div>
+              <div class="flex items-center justify-between text-[11px] text-charcoal/60 px-1">
+                <span class="truncate max-w-[200px]" x-text="videoFileName"></span>
+                <span x-text="videoFileSize"></span>
+              </div>
+            </div>
+          </template>
+
+          <!-- Or Paste Video URL -->
+          <div class="pt-1">
+            <label class="text-[11px] text-charcoal/60 block mb-1">Or paste video link (MP4 URL):</label>
+            <input type="url" name="video_url" x-model="videoUrlInput" placeholder="https://example.com/mountain-clip.mp4"
+                   class="w-full bg-surface border border-stone/70 rounded-xl px-3 py-2 text-xs text-charcoal">
+          </div>
+        </div>
+
+        <!-- Tab 3: YouTube Video 16:9 -->
+        <div x-show="tab === 'youtube'" class="space-y-2.5 p-3.5 bg-ivory/60 rounded-2xl border border-stone/40" style="display:none;">
+          <div class="flex items-center justify-between">
+            <label class="text-xs font-semibold text-charcoal/80">YouTube Video Link</label>
+            <span class="text-[10px] text-charcoal/50">16:9 Widescreen</span>
+          </div>
+          <input type="url" name="youtube_url" x-model="ytUrl" @input="extractYt($el.value)"
+                 placeholder="https://www.youtube.com/watch?v=... or https://youtu.be/..."
+                 class="w-full bg-surface border border-stone/70 rounded-xl px-3 py-2 text-xs text-charcoal focus:border-red-500">
+          <p x-show="ytError" class="text-red-500 text-xs">Could not detect a valid YouTube video ID from this URL.</p>
+
+          <template x-if="ytId">
+            <div class="aspect-video w-full rounded-xl overflow-hidden mt-2 border border-stone/60 shadow-xs">
+              <iframe :src="'https://www.youtube-nocookie.com/embed/' + ytId" class="w-full h-full" frameborder="0" allowfullscreen></iframe>
+            </div>
+          </template>
+        </div>
+
+        <!-- Tab 4: YouTube Shorts 9:16 -->
+        <div x-show="tab === 'youtube_shorts'" class="space-y-2.5 p-3.5 bg-ivory/60 rounded-2xl border border-stone/40" style="display:none;">
+          <div class="flex items-center justify-between">
+            <label class="text-xs font-semibold text-charcoal/80">YouTube Shorts Link</label>
+            <span class="text-[10px] text-charcoal/50">9:16 Smartphone Vertical</span>
+          </div>
+          <input type="url" name="shorts_url" x-model="shortsUrl" @input="extractShorts($el.value)"
+                 placeholder="https://www.youtube.com/shorts/... or https://youtu.be/..."
+                 class="w-full bg-surface border border-stone/70 rounded-xl px-3 py-2 text-xs text-charcoal focus:border-rose-500">
+          <p x-show="shortsError" class="text-rose-500 text-xs">Could not detect a valid YouTube Shorts ID from this URL.</p>
+
+          <template x-if="shortsId">
+            <div class="flex justify-center mt-2">
+              <div class="w-[180px] aspect-[9/16] rounded-xl overflow-hidden border border-stone/60 shadow-md">
+                <iframe :src="'https://www.youtube-nocookie.com/embed/' + shortsId" class="w-full h-full" frameborder="0" allowfullscreen></iframe>
+              </div>
+            </div>
+          </template>
+        </div>
+
+        <!-- Tab 5: Instagram Post or Reel -->
+        <div x-show="tab === 'instagram'" class="space-y-2.5 p-3.5 bg-ivory/60 rounded-2xl border border-stone/40" style="display:none;">
+          <div class="flex items-center justify-between">
+            <label class="text-xs font-semibold text-charcoal/80">Instagram Post or Reel URL</label>
+            <span class="text-[10px] text-charcoal/50">Public posts & reels</span>
+          </div>
+          <input type="url" name="instagram_url" x-model="igUrl" @input="checkIg($el.value)"
+                 placeholder="https://www.instagram.com/p/... or /reel/..."
+                 class="w-full bg-surface border border-stone/70 rounded-xl px-3 py-2 text-xs text-charcoal focus:border-pink-500">
+          <p x-show="igValid" class="text-emerald-600 text-xs font-medium flex items-center gap-1">
+            <i data-lucide="check-circle" class="w-3.5 h-3.5"></i>
+            <span>Valid Instagram link format detected.</span>
+          </p>
+        </div>
+
+        <!-- District Tag (Strictly 4 Districts) -->
+        <div>
+          <label class="text-xs font-semibold text-charcoal/80 block mb-1">Tagged District</label>
+          <select name="district_tag" class="w-full bg-ivory border border-stone/70 rounded-xl px-3 py-2 text-xs font-semibold text-charcoal focus:outline-none focus:border-terracotta">
+            <option value="Almora">Almora District (Jageshwar, Kasar Devi, Binsar)</option>
+            <option value="Nainital">Nainital District (Naini Lake, Pangot, Mukteshwar)</option>
+            <option value="Pithoragarh">Pithoragarh District (Munsiyari, Soar Valley, Johar)</option>
+            <option value="Uttarkashi">Uttarkashi District (Gangotri, Dayara Bugyal, Harsil)</option>
+          </select>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="pt-3 border-t border-stone/30 flex items-center justify-between">
+          <span class="text-[11px] text-charcoal/50">Curated & verified community</span>
+          <button type="submit" :disabled="isSubmitting"
+                  class="px-6 py-2.5 rounded-full bg-terracotta hover:bg-terracotta-hover disabled:opacity-60 text-white text-xs font-semibold transition-all shadow-md flex items-center gap-1.5">
+            <template x-if="!isSubmitting">
+              <span>Publish Story</span>
+            </template>
+            <template x-if="isSubmitting">
+              <span class="flex items-center gap-1.5">
+                <i data-lucide="loader" class="w-3.5 h-3.5 animate-spin"></i>
+                <span>Publishing Story...</span>
+              </span>
+            </template>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+</div>
+<script src="{{ url_for('static', filename='js/community-upload.js') }}"></script>
+{% endblock %}

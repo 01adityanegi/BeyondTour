@@ -1,0 +1,394 @@
+{% extends '_base.html' %}
+{% block title %}{{ 'संपादित करें' if lang == 'hi' else 'Edit' }} {{ hotel.name }} — Beyond Tour{% endblock %}
+
+{% block content %}
+<div class="pt-6 sm:pt-10 pb-20 bg-ivory min-h-screen"
+     x-data="vendorHotelEditor({{ hotel.id }}, '{{ csrf_token() }}')"
+     x-cloak>
+  <div class="max-w-2xl mx-auto px-4 sm:px-6">
+
+    <!-- Top Navigation & Language Switcher -->
+    <div class="flex items-center justify-between gap-4 mb-6">
+      <a href="{{ url_for('business_dashboard.index') }}"
+         class="inline-flex items-center gap-1.5 text-xs font-semibold text-charcoal/70 hover:text-charcoal transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="m15 18-6-6 6-6"/>
+        </svg>
+        <span>{{ 'डैशबोर्ड पर वापस जाएं' if lang == 'hi' else 'Back to Dashboard' }}</span>
+      </a>
+
+      <!-- Language Toggle -->
+      <div class="inline-flex items-center bg-surface rounded-xl p-1 gap-1 border border-stone/60 shadow-2xs text-xs">
+        <a href="{{ url_for('business_dashboard.hotel_edit', hotel_id=hotel.id) }}?lang=en"
+           class="px-2.5 py-1 rounded-lg font-bold transition-all {% if lang != 'hi' %}bg-pine text-ivory{% else %}text-charcoal/60 hover:text-charcoal{% endif %}">
+          English
+        </a>
+        <a href="{{ url_for('business_dashboard.hotel_edit', hotel_id=hotel.id) }}?lang=hi"
+           class="px-2.5 py-1 rounded-lg font-bold transition-all {% if lang == 'hi' %}bg-pine text-ivory{% else %}text-charcoal/60 hover:text-charcoal{% endif %}">
+          हिंदी
+        </a>
+      </div>
+    </div>
+
+    <!-- Status & Header Card -->
+    <div class="bg-surface rounded-3xl border border-stone/60 p-6 shadow-card mb-6">
+      <div class="flex items-center justify-between gap-4 pb-4 border-b border-stone/30 mb-4">
+        <div>
+          <span class="text-[10px] font-bold uppercase tracking-widest text-charcoal/50 block mb-1">
+            {{ 'होमस्टे प्रोफ़ाइल प्रबंधन' if lang == 'hi' else 'Homestay Self-Service Management' }}
+          </span>
+          <h1 class="font-serif text-2xl sm:text-3xl font-bold text-charcoal">{{ hotel.name }}</h1>
+        </div>
+
+        <!-- Status Chip -->
+        <div>
+          {% if hotel.status == 'live' %}
+          <span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            <span>{{ 'लाइव' if lang == 'hi' else 'Live on Site' }}</span>
+          </span>
+          {% elif hotel.status == 'changes_requested' %}
+          <span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold bg-rose-100 text-rose-800 border border-rose-300">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/>
+            </svg>
+            <span>{{ 'संशोधन आवश्यक' if lang == 'hi' else 'Changes Requested' }}</span>
+          </span>
+          {% else %}
+          <span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-300">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+            </svg>
+            <span>{{ 'समीक्षा लंबित' if lang == 'hi' else 'Pending Review' }}</span>
+          </span>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Admin Note Alert if changes requested -->
+      {% if hotel.status == 'changes_requested' and hotel.admin_note %}
+      <div class="p-4 rounded-2xl bg-rose-50 border border-rose-200 mb-4 text-xs">
+        <strong class="font-bold text-rose-900 block mb-1">
+          {{ 'पर्यटन बोर्ड द्वारा आवश्यक निर्देश:' if lang == 'hi' else 'Tourism Board Reviewer Notes:' }}
+        </strong>
+        <p class="text-rose-800 leading-relaxed">{{ hotel.admin_note }}</p>
+      </div>
+      {% endif %}
+
+      <!-- Autosave State Bar -->
+      <div class="flex items-center justify-between text-xs text-charcoal/60 bg-ivory/60 rounded-xl p-3 border border-stone/40">
+        <div class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full"
+                :class="saveStatus === 'saving' ? 'bg-amber-500 animate-ping' : (saveStatus === 'saved' ? 'bg-emerald-500' : 'bg-stone/60')"></span>
+          <span x-text="statusText"></span>
+        </div>
+        <span class="text-[11px] text-charcoal/50">
+          {{ 'परिवर्तन स्वतः सुरक्षित होते हैं' if lang == 'hi' else 'Autosaves on blur' }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Mobile-First Single Column Accordion Form -->
+    <div class="space-y-4">
+
+      <!-- STEP 1: BASIC INFORMATION -->
+      <div class="bg-surface rounded-2xl border border-stone/60 overflow-hidden shadow-2xs">
+        <button type="button"
+                @click="openSection = (openSection === 1 ? null : 1)"
+                class="w-full p-4 sm:p-5 flex items-center justify-between text-left hover:bg-ivory/40 transition-colors">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-xl bg-pine/10 text-pine flex items-center justify-center font-bold text-xs">1</div>
+            <div>
+              <h3 class="font-bold text-sm text-charcoal">{{ 'मूल जानकारी' if lang == 'hi' else 'Basic Information' }}</h3>
+              <p class="text-[11px] text-charcoal/50">{{ 'नाम, स्थान और श्रेणी' if lang == 'hi' else 'Property name, district, and category' }}</p>
+            </div>
+          </div>
+          <svg class="w-4 h-4 text-charcoal/60 transition-transform duration-200" :class="openSection === 1 ? 'rotate-180' : ''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="m6 9 6 6 6-6"/>
+          </svg>
+        </button>
+
+        <div x-show="openSection === 1" x-collapse class="p-4 sm:p-5 pt-0 border-t border-stone/20 space-y-4 text-xs">
+          <div>
+            <label class="block font-bold text-charcoal mb-1">{{ 'संपत्ति का नाम' if lang == 'hi' else 'Property / Homestay Name' }} *</label>
+            <input type="text"
+                   name="name"
+                   value="{{ hotel.name }}"
+                   @blur="saveField('name', $el.value)"
+                   class="w-full rounded-xl border border-stone/70 p-3 bg-ivory/20 focus:bg-white focus:outline-hidden focus:border-terracotta">
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block font-bold text-charcoal mb-1">{{ 'ज़िला' if lang == 'hi' else 'District' }} *</label>
+              <select name="district"
+                      @change="saveField('district', $el.value)"
+                      class="w-full rounded-xl border border-stone/70 p-3 bg-ivory/20 focus:bg-white focus:outline-hidden focus:border-terracotta">
+                {% for dist in ['Almora', 'Nainital', 'Bageshwar', 'Pithoragarh', 'Champawat', 'Chamoli', 'Uttarkashi', 'Rudraprayag', 'Dehradun', 'Haridwar', 'Tehri Garhwal'] %}
+                <option value="{{ dist }}" {% if hotel.district == dist %}selected{% endif %}>{{ dist }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div>
+              <label class="block font-bold text-charcoal mb-1">{{ 'आवास का प्रकार' if lang == 'hi' else 'Stay Category' }} *</label>
+              <select name="hotel_type"
+                      @change="saveField('hotel_type', $el.value)"
+                      class="w-full rounded-xl border border-stone/70 p-3 bg-ivory/20 focus:bg-white focus:outline-hidden focus:border-terracotta">
+                <option value="homestay" {% if hotel.hotel_type == 'homestay' %}selected{% endif %}>{{ 'पारंपरिक ग्राम होमस्टे' if lang == 'hi' else 'Village Homestay' }}</option>
+                <option value="hotel" {% if hotel.hotel_type == 'hotel' %}selected{% endif %}>{{ 'माउंटेन लॉज / होटल' if lang == 'hi' else 'Mountain Lodge / Hotel' }}</option>
+                <option value="restaurant" {% if hotel.hotel_type == 'restaurant' %}selected{% endif %}>{{ 'स्थानीय भोजनालय' if lang == 'hi' else 'Local Dining / Dhaba' }}</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="block font-bold text-charcoal mb-1">{{ 'मेज़बान / संचालक का नाम' if lang == 'hi' else 'Host / Manager Name' }} *</label>
+            <input type="text"
+                   name="host_name"
+                   value="{{ hotel.host_name or '' }}"
+                   @blur="saveField('host_name', $el.value)"
+                   class="w-full rounded-xl border border-stone/70 p-3 bg-ivory/20 focus:bg-white focus:outline-hidden focus:border-terracotta">
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 2: PHOTOGRAPHS & CLIENT CANVAS COMPRESSOR -->
+      <div class="bg-surface rounded-2xl border border-stone/60 overflow-hidden shadow-2xs">
+        <button type="button"
+                @click="openSection = (openSection === 2 ? null : 2)"
+                class="w-full p-4 sm:p-5 flex items-center justify-between text-left hover:bg-ivory/40 transition-colors">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-xl bg-pine/10 text-pine flex items-center justify-center font-bold text-xs">2</div>
+            <div>
+              <h3 class="font-bold text-sm text-charcoal">{{ 'तस्वीरें (2G कंप्रेसर)' if lang == 'hi' else 'Photos & 2G Canvas Compressor' }}</h3>
+              <p class="text-[11px] text-charcoal/50">{{ 'कमजोर सिग्नल में तेज़ अपलोड' if lang == 'hi' else 'Fast upload optimized for mountain network' }}</p>
+            </div>
+          </div>
+          <svg class="w-4 h-4 text-charcoal/60 transition-transform duration-200" :class="openSection === 2 ? 'rotate-180' : ''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="m6 9 6 6 6-6"/>
+          </svg>
+        </button>
+
+        <div x-show="openSection === 2" x-collapse class="p-4 sm:p-5 pt-0 border-t border-stone/20 space-y-4 text-xs">
+          <!-- Current Preview -->
+          <div>
+            <label class="block font-bold text-charcoal mb-2">{{ 'वर्तमान कवर फ़ोटो' if lang == 'hi' else 'Current Cover Photo' }}</label>
+            <div class="relative aspect-video rounded-2xl overflow-hidden border border-stone/40 bg-charcoal">
+              <img :src="coverUrl"
+                   alt="Homestay Cover"
+                   class="w-full h-full object-cover">
+            </div>
+          </div>
+
+          <!-- File Upload with Canvas Compression -->
+          <div class="p-4 rounded-2xl bg-ivory/60 border border-dashed border-stone/70 text-center space-y-3">
+            <svg class="w-8 h-8 mx-auto text-terracotta" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <rect width="18" height="18" x="3" y="3" rx="2"/>
+              <circle cx="9" cy="9" r="2"/>
+              <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+            </svg>
+            <div>
+              <label for="hotel-photo-input"
+                     class="cursor-pointer inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-terracotta text-white font-bold text-xs hover:bg-terracotta-hover transition-colors shadow-2xs">
+                <span>{{ 'फ़ोन से फ़ोटो चुनें' if lang == 'hi' else 'Choose Photo from Phone' }}</span>
+              </label>
+              <input id="hotel-photo-input"
+                     type="file"
+                     accept="image/*"
+                     @change="handlePhotoUpload($event)"
+                     class="hidden">
+              <p class="text-[11px] text-charcoal/60 mt-1.5">
+                {{ 'स्वचालित कैनवास कंप्रेसर: बड़ी फ़ोटो को 200KB में संपीड़ित करता है।' if lang == 'hi' else 'Automatic client-side canvas compressor: drops 10MB phone pics to ~200KB before upload.' }}
+              </p>
+            </div>
+
+            <!-- Upload Progress & Stats -->
+            <div x-show="uploadProgress > 0" class="pt-2">
+              <div class="w-full bg-stone/40 rounded-full h-2 overflow-hidden mb-1">
+                <div class="bg-pine h-full transition-all duration-300" :style="'width: ' + uploadProgress + '%'"></div>
+              </div>
+              <p class="text-[11px] text-charcoal/70" x-text="compressionStats"></p>
+            </div>
+          </div>
+
+          <!-- Direct URL Option -->
+          <div>
+            <label class="block font-semibold text-charcoal/70 mb-1">{{ 'या फ़ोटो लिंक (URL) दर्ज करें' if lang == 'hi' else 'Or Enter Image URL' }}</label>
+            <input type="text"
+                   name="cover_image_url"
+                   x-model="coverUrl"
+                   @blur="saveField('cover_image_url', coverUrl)"
+                   class="w-full rounded-xl border border-stone/70 p-2.5 bg-ivory/20 focus:bg-white focus:outline-hidden focus:border-terracotta font-mono text-[11px]">
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 3: AMENITIES & VILLAGE EXPERIENCES -->
+      <div class="bg-surface rounded-2xl border border-stone/60 overflow-hidden shadow-2xs">
+        <button type="button"
+                @click="openSection = (openSection === 3 ? null : 3)"
+                class="w-full p-4 sm:p-5 flex items-center justify-between text-left hover:bg-ivory/40 transition-colors">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-xl bg-pine/10 text-pine flex items-center justify-center font-bold text-xs">3</div>
+            <div>
+              <h3 class="font-bold text-sm text-charcoal">{{ 'सुविधाएं व ग्रामीण अनुभव' if lang == 'hi' else 'Amenities & Village Experiences' }}</h3>
+              <p class="text-[11px] text-charcoal/50">{{ 'चूल्हे का भोजन, सोलर गीज़र, बोनफ़ायर' if lang == 'hi' else 'Organic food, bonfire, mountain water' }}</p>
+            </div>
+          </div>
+          <svg class="w-4 h-4 text-charcoal/60 transition-transform duration-200" :class="openSection === 3 ? 'rotate-180' : ''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="m6 9 6 6 6-6"/>
+          </svg>
+        </button>
+
+        <div x-show="openSection === 3" x-collapse class="p-4 sm:p-5 pt-0 border-t border-stone/20 space-y-4 text-xs">
+          <p class="text-[11px] text-charcoal/60">
+            {{ 'उपलब्ध सुविधाओं पर क्लिक करें:' if lang == 'hi' else 'Toggle available amenities:' }}
+          </p>
+
+          <div class="flex flex-wrap gap-2">
+            {% set preset_amenities = [
+              ('Organic Farm Meals', 'जैविक पहाड़ी भोजन'),
+              ('Himalayan View', 'हिमालय दर्शन'),
+              ('Bonfire & Folk Lore', 'अलाव व लोकगाथा'),
+              ('Hot Water Geyser', 'गर्म पानी सुविधा'),
+              ('Solar Power Backup', 'सोलर बिजली बैकअप'),
+              ('Guided Village Walk', 'मार्गदर्शित ग्राम भ्रमण'),
+              ('Traditional Hearth / Chulha', 'पारंपरिक चूल्हा'),
+              ('Pet Friendly', 'पालतू अनुकूल')
+            ] %}
+            {% for item_en, item_hi in preset_amenities %}
+            <button type="button"
+                    @click="toggleAmenity('{{ item_en }}')"
+                    class="px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all"
+                    :class="amenitiesList.includes('{{ item_en }}') ? 'bg-pine text-ivory border-pine shadow-2xs' : 'bg-ivory/40 border-stone/60 text-charcoal/70 hover:border-terracotta'">
+              {{ item_hi if lang == 'hi' else item_en }}
+            </button>
+            {% endfor %}
+          </div>
+
+          <div>
+            <label class="block font-bold text-charcoal mb-1">{{ 'अतिरिक्त सुविधाएं (अल्पविराम द्वारा अलग करें)' if lang == 'hi' else 'Custom Amenities (comma-separated)' }}</label>
+            <input type="text"
+                   x-model="amenitiesRaw"
+                   @blur="saveField('amenities', amenitiesRaw)"
+                   placeholder="Wi-Fi, Balcony, Trekking Gear"
+                   class="w-full rounded-xl border border-stone/70 p-3 bg-ivory/20 focus:bg-white focus:outline-hidden focus:border-terracotta">
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 4: PRICING & TARIFFS -->
+      <div class="bg-surface rounded-2xl border border-stone/60 overflow-hidden shadow-2xs">
+        <button type="button"
+                @click="openSection = (openSection === 4 ? null : 4)"
+                class="w-full p-4 sm:p-5 flex items-center justify-between text-left hover:bg-ivory/40 transition-colors">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-xl bg-pine/10 text-pine flex items-center justify-center font-bold text-xs">4</div>
+            <div>
+              <h3 class="font-bold text-sm text-charcoal">{{ 'मूल्य निर्धारण (INR)' if lang == 'hi' else 'Pricing & Tariffs (INR)' }}</h3>
+              <p class="text-[11px] text-charcoal/50">{{ 'न्यूनतम व पीक सीज़न दर' if lang == 'hi' else 'Base rate and high-season tariffs' }}</p>
+            </div>
+          </div>
+          <svg class="w-4 h-4 text-charcoal/60 transition-transform duration-200" :class="openSection === 4 ? 'rotate-180' : ''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="m6 9 6 6 6-6"/>
+          </svg>
+        </button>
+
+        <div x-show="openSection === 4" x-collapse class="p-4 sm:p-5 pt-0 border-t border-stone/20 space-y-4 text-xs">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block font-bold text-charcoal mb-1">{{ 'न्यूनतम दर (प्रति रात्रि ₹)' if lang == 'hi' else 'Starting Rate Per Night (INR)' }} *</label>
+              <input type="number"
+                     name="price_min"
+                     value="{{ hotel.price_min }}"
+                     min="500"
+                     max="15000"
+                     @blur="saveField('price_min', $el.value)"
+                     class="w-full rounded-xl border border-stone/70 p-3 bg-ivory/20 focus:bg-white focus:outline-hidden focus:border-terracotta font-semibold">
+              <span class="text-[10px] text-charcoal/50 mt-1 block">{{ 'ग्रामीण होमस्टे के लिए ₹700 - ₹2,000 अनुशंसित' if lang == 'hi' else 'Recommended INR 700 - 2,000 for village homestays' }}</span>
+            </div>
+
+            <div>
+              <label class="block font-bold text-charcoal mb-1">{{ 'पीक सीज़न दर (प्रति रात्रि ₹)' if lang == 'hi' else 'Peak Season Rate Per Night (INR)' }} *</label>
+              <input type="number"
+                     name="price_max"
+                     value="{{ hotel.price_max }}"
+                     min="500"
+                     max="25000"
+                     @blur="saveField('price_max', $el.value)"
+                     class="w-full rounded-xl border border-stone/70 p-3 bg-ivory/20 focus:bg-white focus:outline-hidden focus:border-terracotta font-semibold">
+              <span class="text-[10px] text-charcoal/50 mt-1 block">{{ 'मई-जून और शीतकालीन स्नोफॉल अवधि' if lang == 'hi' else 'May-June and winter snowfall periods' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 5: HOST STORY & LORE -->
+      <div class="bg-surface rounded-2xl border border-stone/60 overflow-hidden shadow-2xs">
+        <button type="button"
+                @click="openSection = (openSection === 5 ? null : 5)"
+                class="w-full p-4 sm:p-5 flex items-center justify-between text-left hover:bg-ivory/40 transition-colors">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-xl bg-pine/10 text-pine flex items-center justify-center font-bold text-xs">5</div>
+            <div>
+              <h3 class="font-bold text-sm text-charcoal">{{ 'मेज़बान कथा व पारिवारिक विरासत' if lang == 'hi' else 'Host Story & Heritage Lore' }}</h3>
+              <p class="text-[11px] text-charcoal/50">{{ 'ग्राम इतिहास, भोजन परंपरा और स्थानीय संस्कृति' if lang == 'hi' else 'Family lineage, ancient recipes, and village history' }}</p>
+            </div>
+          </div>
+          <svg class="w-4 h-4 text-charcoal/60 transition-transform duration-200" :class="openSection === 5 ? 'rotate-180' : ''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="m6 9 6 6 6-6"/>
+          </svg>
+        </button>
+
+        <div x-show="openSection === 5" x-collapse class="p-4 sm:p-5 pt-0 border-t border-stone/20 space-y-4 text-xs">
+          <div>
+            <label class="block font-bold text-charcoal mb-1">{{ 'अपनी और अपने होमस्टे की कहानी बताएं' if lang == 'hi' else 'Tell travelers about your family and village heritage' }}</label>
+            <textarea name="host_story"
+                      rows="5"
+                      @blur="saveField('host_story', $el.value)"
+                      placeholder="{{ 'हमारे परिवार की यह पुश्तैनी हवेली 90 वर्ष पुरानी है...' if lang == 'hi' else 'Our traditional kath-khuni stone house has welcomed wanderers for generations...' }}"
+                      class="w-full rounded-xl border border-stone/70 p-3 bg-ivory/20 focus:bg-white focus:outline-hidden focus:border-terracotta leading-relaxed">{{ hotel.host_story or '' }}</textarea>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Bottom Actions -->
+    <div class="mt-8 flex items-center justify-between">
+      <a href="{{ url_for('business_dashboard.index') }}"
+         class="px-5 py-2.5 rounded-xl bg-surface border border-stone/60 text-charcoal text-xs font-semibold hover:bg-stone/20 transition-colors">
+        {{ 'डैशबोर्ड पर लौटें' if lang == 'hi' else 'Return to Dashboard' }}
+      </a>
+
+      <a href="{{ url_for('hotels.detail', hotel_id=hotel.id) }}"
+         target="_blank"
+         class="px-6 py-2.5 rounded-xl bg-terracotta hover:bg-terracotta-hover text-white text-xs font-bold transition-colors shadow-sm inline-flex items-center gap-1.5">
+        <span>{{ 'लाइव पूर्वावलोकन देखें' if lang == 'hi' else 'View Live Preview' }}</span>
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+          <polyline points="15 3 21 3 21 9"/>
+          <line x1="10" x2="21" y1="14" y2="3"/>
+        </svg>
+      </a>
+    </div>
+
+  </div>
+</div>
+
+<script id="hotel-editor-data" type="application/json">
+{{ {
+  'coverUrl': hotel.cover_image_url or '',
+  'amenitiesList': (hotel.amenities|from_json if hotel.amenities else []),
+  'isHindi': (lang == 'hi')
+} | tojson }}
+</script>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/vendor-hotel-editor.js') }}"></script>
+{% endblock %}

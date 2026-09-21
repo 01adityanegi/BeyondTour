@@ -1,0 +1,48 @@
+/* BeyondTour — Culture Hub & Interactive Map Stylesheet */
+
+#uttarakhand-google-map {
+  z-index: 10;
+}
+
+.leaflet-popup-content-wrapper {
+  background: #16302b;
+  color: #f7f3ec;
+  border-radius: 16px;
+  padding: 0;
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.leaflet-popup-content {
+  margin: 0;
+  line-height: 1.4;
+}
+
+.leaflet-popup-tip {
+  background: #16302b;
+}
+
+.leaflet-container a.leaflet-popup-close-button {
+  color: #f7f3ec;
+  padding: 8px 8px 0 0;
+}
+
+.leaflet-container a.leaflet-popup-close-button:hover {
+  color: #c1622d;
+}
+
+.peak-marker-label {
+  background: rgba(15, 23, 42, 0.88);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 9999px;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  letter-spacing: 0.02em;
+}

@@ -1,0 +1,238 @@
+{% extends '_base.html' %}
+{% block title %}Business Dashboard — Beyond Tour{% endblock %}
+{% block content %}
+<div class="pt-4 sm:pt-6 pb-16 min-h-screen bg-ivory">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-2 pb-12">
+    <div class="mb-8 text-center">
+      <h1 class="font-serif text-4xl font-bold text-charcoal">Business Dashboard</h1>
+      <p class="text-charcoal/60 mt-1">Welcome back, {{ current_user.name }}</p>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
+      <div class="bg-white rounded-card shadow-card p-5 border border-stone/40">
+        <p class="text-3xl font-serif font-bold text-charcoal">{{ hotels|length }}</p>
+        <p class="text-charcoal/60 text-sm mt-1">Active Listings</p>
+      </div>
+      <div class="bg-white rounded-card shadow-card p-5 border border-stone/40">
+        <p class="text-3xl font-serif font-bold text-charcoal">{{ bookings|length }}</p>
+        <p class="text-charcoal/60 text-sm mt-1">Total Bookings</p>
+      </div>
+      <div class="bg-white rounded-card shadow-card p-5 border border-stone/40">
+        <p class="text-3xl font-serif font-bold text-terracotta">₹{{ "{:,.0f}".format(total_revenue) }}</p>
+        <p class="text-charcoal/60 text-sm mt-1">Total Revenue</p>
+      </div>
+      <div class="bg-pine rounded-card shadow-card p-5 text-ivory flex items-center justify-between border border-stone/20">
+        <div>
+          <p class="text-xs text-ivory/60 mb-1">Actions</p>
+          <div class="flex items-center gap-2 flex-wrap">
+            <form action="{{ url_for('business_dashboard.hotel_new') }}" method="POST" class="inline">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button type="submit" class="text-xs font-bold text-terracotta hover:underline flex items-center gap-1">
+                + Add Homestay
+              </button>
+            </form>
+            <span class="text-ivory/30">|</span>
+            <a href="{{ url_for('business_dashboard.guide_edit') }}" class="text-xs font-semibold text-ivory hover:text-terracotta transition-colors">
+              Guide Profile
+            </a>
+            <span class="text-ivory/30">|</span>
+            <a href="{{ url_for('business_dashboard.festival_new') }}" class="text-xs font-bold text-amber-300 hover:underline inline-flex items-center gap-1">
+              <i data-lucide="calendar-plus" class="w-3 h-3"></i>
+              <span>+ Add Festival</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Homestay Listings -->
+    <div class="bg-white rounded-card shadow-card p-6 mb-8 border border-stone/40">
+      <div class="flex items-center justify-between mb-5">
+        <div>
+          <h2 class="font-serif text-2xl font-semibold text-charcoal">Your Homestay & Lodging Listings</h2>
+          <p class="text-xs text-charcoal/60 mt-0.5">Self-manage room rates, photos, and guest policies with automatic background saving</p>
+        </div>
+        <form action="{{ url_for('business_dashboard.hotel_new') }}" method="POST">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit"
+                  class="px-4 py-2 bg-terracotta text-white font-bold text-xs rounded-xl hover:bg-terracotta-hover transition-colors shadow-2xs">
+            + New Homestay
+          </button>
+        </form>
+      </div>
+
+      {% if hotels %}
+      <div class="space-y-4">
+        {% for hotel in hotels %}
+        <div class="p-4 bg-ivory/60 rounded-2xl border border-stone/40 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div class="space-y-1">
+            <div class="flex items-center gap-2">
+              <h3 class="font-bold text-base text-charcoal">{{ hotel.name }}</h3>
+              {% if hotel.status == 'live' %}
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">Live</span>
+              {% elif hotel.status == 'changes_requested' %}
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800 border border-rose-300">Changes Requested</span>
+              {% else %}
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300">Pending Review</span>
+              {% endif %}
+            </div>
+
+            <p class="text-xs text-charcoal/60">
+              {{ hotel.district }} · {{ hotel.hotel_type|capitalize }} · Starting ₹{{ hotel.price_min }}/night
+            </p>
+
+            {% if hotel.status == 'changes_requested' and hotel.admin_note %}
+            <p class="text-xs text-rose-700 bg-rose-50 p-2.5 rounded-xl border border-rose-200 mt-2">
+              <strong>Reviewer Note:</strong> {{ hotel.admin_note }}
+            </p>
+            {% endif %}
+          </div>
+
+          <div class="flex items-center gap-2 self-start sm:self-center flex-shrink-0">
+            <a href="{{ url_for('business_dashboard.hotel_edit', hotel_id=hotel.id) }}"
+               class="px-4 py-2 bg-pine text-ivory text-xs font-bold rounded-xl hover:bg-pine-dark transition-colors shadow-2xs">
+              Edit (Autosave)
+            </a>
+            <a href="{{ url_for('hotels.detail', hotel_id=hotel.id) }}"
+               target="_blank"
+               class="px-3 py-2 bg-surface border border-stone/60 text-charcoal text-xs font-semibold rounded-xl hover:bg-stone/20 transition-colors">
+              View
+            </a>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="py-8 text-center text-xs text-charcoal/50">
+        You have no registered homestays yet. Click "+ New Homestay" above to create your first listing.
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Guide Contributed Cultural Festivals & Events -->
+    <div class="bg-white rounded-card shadow-card p-6 mb-8 border border-stone/40">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
+        <div>
+          <div class="flex items-center gap-2">
+            <h2 class="font-serif text-2xl font-semibold text-charcoal">Regional Festivals & Cultural Events</h2>
+            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-terracotta/10 text-terracotta border border-terracotta/20">Guide Showcase</span>
+          </div>
+          <p class="text-xs text-charcoal/60 mt-0.5">Living traditions, sacred melas, and temple ceremonies curated by local mountain guides</p>
+        </div>
+        <a href="{{ url_for('business_dashboard.festival_new') }}"
+           class="px-4 py-2 bg-terracotta hover:bg-terracotta-hover text-white font-bold text-xs rounded-xl transition-colors shadow-2xs inline-flex items-center gap-1.5 self-start sm:self-auto">
+          <i data-lucide="calendar-plus" class="w-3.5 h-3.5"></i>
+          <span>+ Add Local Festival / Event</span>
+        </a>
+      </div>
+
+      {% if festivals %}
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {% for fest in festivals %}
+        <div class="p-4 bg-ivory/60 rounded-2xl border border-stone/40 flex flex-col justify-between gap-3">
+          <div class="flex items-start gap-3">
+            <img src="{{ fest.cover_image_url or 'https://images.unsplash.com/photo-1609137144822-473180424578?w=300&q=80' }}"
+                 alt="{{ fest.title }}"
+                 class="w-16 h-16 rounded-xl object-cover border border-stone/40 flex-shrink-0">
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center gap-2 flex-wrap mb-1">
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-pine/10 text-pine border border-pine/20">
+                  {{ fest.district }}
+                </span>
+                <span class="text-[11px] font-semibold text-charcoal/60">
+                  {{ fest.month_name }}
+                  {% if fest.event_date %}· {{ fest.event_date }}{% endif %}
+                </span>
+                {% if fest.video_url %}
+                <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-terracotta/10 text-terracotta border border-terracotta/20 inline-flex items-center gap-0.5">
+                  <i data-lucide="video" class="w-2.5 h-2.5"></i>
+                  <span>Video</span>
+                </span>
+                {% endif %}
+              </div>
+              <h3 class="font-bold text-sm text-charcoal truncate">{{ fest.title }}</h3>
+              <p class="text-xs text-charcoal/70 line-clamp-2 mt-0.5 leading-relaxed">{{ fest.story_text }}</p>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between pt-2 border-t border-stone/30">
+            <p class="text-[11px] text-charcoal/50">
+              Curated by: <span class="font-semibold text-charcoal">{{ fest.guide_name or current_user.name }}</span>
+            </p>
+            <div class="flex items-center gap-2">
+              <a href="{{ url_for('culture.festival_by_slug', slug=fest.slug) }}"
+                 target="_blank"
+                 class="px-3 py-1.5 rounded-xl border border-stone/60 text-charcoal text-xs font-semibold hover:bg-stone/20 transition-colors inline-flex items-center gap-1">
+                <span>View</span>
+                <i data-lucide="external-link" class="w-3 h-3"></i>
+              </a>
+
+              <form action="{{ url_for('business_dashboard.festival_delete', festival_id=fest.id) }}"
+                    method="POST"
+                    onsubmit="return confirm('Delete this festival from the site?');">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit"
+                        class="px-2.5 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-semibold transition-colors inline-flex items-center gap-1">
+                  <i data-lucide="trash-2" class="w-3 h-3"></i>
+                  <span>Delete</span>
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="py-10 text-center rounded-2xl border border-dashed border-stone/60 bg-ivory/30 p-6">
+        <div class="w-12 h-12 rounded-2xl bg-terracotta/10 text-terracotta flex items-center justify-center mx-auto mb-3">
+          <i data-lucide="calendar-plus" class="w-6 h-6"></i>
+        </div>
+        <h3 class="font-serif font-bold text-base text-charcoal">No Local Festivals Added Yet</h3>
+        <p class="text-xs text-charcoal/60 mt-1 max-w-sm mx-auto">
+          As a certified mountain guide, you can document sacred temple melas, harvest festivals, and folk traditions of your district with photos, video clips, and dates.
+        </p>
+        <a href="{{ url_for('business_dashboard.festival_new') }}"
+           class="mt-4 inline-flex items-center gap-1.5 px-4 py-2 bg-terracotta hover:bg-terracotta-hover text-white text-xs font-bold rounded-xl transition-colors shadow-2xs">
+          <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+          <span>Add First Festival / Event</span>
+        </a>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Bookings -->
+    {% if bookings %}
+    <div class="bg-white rounded-card shadow-card p-6 border border-stone/40">
+      <h2 class="font-serif text-2xl font-semibold text-charcoal mb-5">Recent Traveler Bookings</h2>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="text-charcoal/50 text-xs uppercase tracking-wide border-b border-stone/30">
+              <th class="pb-3 text-left whitespace-nowrap">Booking ID</th>
+              <th class="pb-3 text-left whitespace-nowrap">Service Type</th>
+              <th class="pb-3 text-left whitespace-nowrap">Check-in Date</th>
+              <th class="pb-3 text-left whitespace-nowrap">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for booking in bookings %}
+            <tr class="border-b border-stone/20">
+              <td class="py-3.5 font-medium text-charcoal">#{{ booking.id }}</td>
+              <td class="py-3.5 text-charcoal/70">{{ booking.target_type | capitalize }}</td>
+              <td class="py-3.5 text-charcoal/70">{{ booking.check_in }}</td>
+              <td class="py-3.5">
+                <span class="px-2.5 py-0.5 rounded text-xs font-medium {% if booking.status == 'confirmed' %}tag-sage{% else %}tag-terracotta{% endif %}">
+                  {{ booking.status | capitalize }}
+                </span>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

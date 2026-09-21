@@ -1,0 +1,118 @@
+{% extends 'admin/base.html' %}
+{% block title %}Destinations Directory — Beyond Tour Admin{% endblock %}
+
+{% block admin_content %}
+<div>
+
+  <!-- Header & Actions -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+    <div>
+      <h2 class="font-serif text-2xl font-bold text-charcoal">Destinations Directory</h2>
+      <p class="text-xs text-charcoal/60 mt-0.5">Manage Himalayan towns, sacred temple shrines, and trek trailheads</p>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <!-- Search Form -->
+      <form action="{{ url_for('admin.destinations') }}" method="GET" class="relative">
+        <input type="text"
+               name="q"
+               value="{{ query }}"
+               placeholder="Search destinations..."
+               class="text-xs rounded-xl border border-stone/60 bg-surface pl-9 pr-3 py-2 focus:outline-hidden focus:border-terracotta w-48 sm:w-64">
+        <svg class="w-3.5 h-3.5 text-charcoal/40 absolute left-3 top-2.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+        </svg>
+      </form>
+
+      <a href="{{ url_for('admin.destination_new') }}"
+         class="px-4 py-2 rounded-xl bg-terracotta hover:bg-terracotta-hover text-white text-xs font-bold transition-colors flex items-center gap-1.5 shadow-sm">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <path d="M5 12h14"/><path d="M12 5v14"/>
+        </svg>
+        <span>Add Destination</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Destinations Table -->
+  <div class="bg-surface rounded-3xl border border-stone/60 shadow-card overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-xs">
+        <thead class="bg-ivory/60 text-[11px] uppercase tracking-wider text-charcoal/70 border-b border-stone/30">
+          <tr>
+            <th class="py-3.5 px-5">Destination Name</th>
+            <th class="py-3.5 px-4">Region</th>
+            <th class="py-3.5 px-4">District</th>
+            <th class="py-3.5 px-4">Category</th>
+            <th class="py-3.5 px-4">Featured</th>
+            <th class="py-3.5 px-5 text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-stone/20">
+          {% for dest in destinations %}
+          <tr class="hover:bg-ivory/30 transition-colors">
+            <td class="py-4 px-5 font-bold text-sm text-charcoal">
+              <a href="{{ url_for('destinations.detail', dest_id=dest.id) }}" target="_blank" class="hover:text-terracotta transition-colors">
+                {{ dest.name }}
+              </a>
+              <span class="block text-[11px] text-charcoal/50 font-normal font-mono">{{ dest.slug }}</span>
+            </td>
+
+            <td class="py-4 px-4">
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase
+                {% if dest.region == 'kumaon' %}bg-terracotta/10 text-terracotta border border-terracotta/20{% else %}bg-pine/10 text-pine border border-pine/20{% endif %}">
+                {{ dest.region|capitalize }}
+              </span>
+            </td>
+
+            <td class="py-4 px-4 text-charcoal font-medium">
+              {{ dest.district }}
+            </td>
+
+            <td class="py-4 px-4 text-charcoal">
+              {{ dest.category|capitalize }}
+            </td>
+
+            <td class="py-4 px-4">
+              {% if dest.featured %}
+              <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-full">
+                Featured
+              </span>
+              {% else %}
+              <span class="text-charcoal/40 text-[11px]">Standard</span>
+              {% endif %}
+            </td>
+
+            <td class="py-4 px-5 text-right whitespace-nowrap">
+              <div class="inline-flex items-center gap-2">
+                <a href="{{ url_for('admin.destination_edit', dest_id=dest.id) }}"
+                   class="px-2.5 py-1.5 rounded-lg bg-stone/20 hover:bg-stone/40 text-charcoal text-xs font-semibold transition-colors">
+                  Edit
+                </a>
+
+                <form action="{{ url_for('admin.destination_delete', dest_id=dest.id) }}"
+                      method="POST"
+                      onsubmit="return confirm('Are you sure you want to delete {{ dest.name }}?');">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <button type="submit"
+                          class="px-2.5 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-semibold transition-colors">
+                    Delete
+                  </button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="6" class="py-12 text-center text-charcoal/50">
+              No destinations match your search.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

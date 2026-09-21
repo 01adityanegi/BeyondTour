@@ -1,0 +1,161 @@
+{% extends '_base.html' %}
+
+{% block content %}
+<div class="min-h-screen bg-ivory/50">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- Top Admin Bar -->
+    <div class="bg-pine text-ivory rounded-2xl p-4 sm:p-6 mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-card">
+      <div class="flex items-center gap-3">
+        <div class="w-12 h-12 rounded-xl bg-ivory/10 border border-ivory/20 flex items-center justify-center text-ivory">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/>
+            <path d="m9 12 2 2 4-4"/>
+          </svg>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="font-serif text-xl sm:text-2xl font-bold tracking-tight text-ivory">BeyondTour Admin & Governance</h1>
+            <span class="text-[10px] uppercase font-bold tracking-widest px-2.5 py-0.5 rounded-full bg-terracotta text-white">
+              {{ current_user.role|capitalize }}
+            </span>
+          </div>
+          <p class="text-xs text-ivory/70 font-light mt-0.5">
+            Logged in as <strong>{{ current_user.name }}</strong> ({{ current_user.email }})
+          </p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <a href="{{ url_for('tourism_dashboard.index') }}"
+           class="px-4 py-2 rounded-xl bg-ivory/10 hover:bg-ivory/20 text-ivory text-xs font-semibold transition-colors flex items-center gap-1.5 border border-ivory/20">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M3 3v18h18"/>
+            <path d="m19 9-5 5-4-4-3 3"/>
+          </svg>
+          <span>Tourism Analytics</span>
+        </a>
+        <a href="{{ url_for('main.index') }}"
+           class="px-4 py-2 rounded-xl bg-terracotta hover:bg-terracotta-hover text-white text-xs font-bold transition-colors flex items-center gap-1.5 shadow-sm">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+          </svg>
+          <span>Public Site</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Admin Navigation Tabs -->
+    <div class="mb-8 overflow-x-auto pb-2">
+      <div class="inline-flex items-center bg-surface rounded-2xl p-1.5 gap-1 border border-stone/60 shadow-2xs min-w-max">
+        <a href="{{ url_for('admin.index') }}"
+           class="px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2
+           {% if request.endpoint == 'admin.index' %}bg-pine text-ivory shadow-sm{% else %}text-charcoal/70 hover:text-charcoal{% endif %}">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+            <rect width="7" height="9" x="3" y="3" rx="1"/>
+            <rect width="7" height="5" x="14" y="3" rx="1"/>
+            <rect width="7" height="9" x="14" y="12" rx="1"/>
+            <rect width="7" height="5" x="3" y="16" rx="1"/>
+          </svg>
+          <span>Overview</span>
+        </a>
+
+        <a href="{{ url_for('admin.hotels') }}"
+           class="px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2
+           {% if request.endpoint == 'admin.hotels' %}bg-pine text-ivory shadow-sm{% else %}text-charcoal/70 hover:text-charcoal{% endif %}">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+            <path d="M3 21h18"/>
+            <path d="M19 21v-4"/>
+            <path d="M19 11V5a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v16"/>
+          </svg>
+          <span>Hotels & Stays</span>
+        </a>
+
+        <a href="{{ url_for('admin.guides') }}"
+           class="px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2
+           {% if request.endpoint == 'admin.guides' %}bg-pine text-ivory shadow-sm{% else %}text-charcoal/70 hover:text-charcoal{% endif %}">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+          </svg>
+          <span>Local Guides</span>
+        </a>
+
+        <a href="{{ url_for('admin.community') }}"
+           class="px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2
+           {% if request.endpoint == 'admin.community' %}bg-pine text-ivory shadow-sm{% else %}text-charcoal/70 hover:text-charcoal{% endif %}">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+          <span>Community</span>
+        </a>
+
+        <a href="{{ url_for('admin.destinations') }}"
+           class="px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2
+           {% if 'admin.destination' in request.endpoint %}bg-pine text-ivory shadow-sm{% else %}text-charcoal/70 hover:text-charcoal{% endif %}">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+            <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
+            <circle cx="12" cy="10" r="3"/>
+          </svg>
+          <span>Destinations</span>
+        </a>
+
+        <a href="{{ url_for('admin.culture') }}"
+           class="px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2
+           {% if 'admin.culture' in request.endpoint %}bg-pine text-ivory shadow-sm{% else %}text-charcoal/70 hover:text-charcoal{% endif %}">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+            <path d="m8 3 4 8 5-5 5 15H2L8 3z"/>
+          </svg>
+          <span>Culture & Fairs</span>
+        </a>
+
+        <a href="{{ url_for('admin.food') }}"
+           class="px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2
+           {% if 'admin.food' in request.endpoint %}bg-pine text-ivory shadow-sm{% else %}text-charcoal/70 hover:text-charcoal{% endif %}">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="m4.93 4.93 4.24 4.24"/>
+          </svg>
+          <span>Local Food</span>
+        </a>
+
+        <a href="{{ url_for('admin.calendar') }}"
+           class="px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2
+           {% if request.endpoint == 'admin.calendar' %}bg-pine text-ivory shadow-sm{% else %}text-charcoal/70 hover:text-charcoal{% endif %}">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+            <rect width="18" height="18" x="3" y="4" rx="2"/>
+            <line x1="16" x2="16" y1="2" y2="6"/>
+            <line x1="8" x2="8" y1="2" y2="6"/>
+            <line x1="3" x2="21" y1="10" y2="10"/>
+          </svg>
+          <span>Calendar</span>
+        </a>
+
+        <a href="{{ url_for('admin.site_content') }}"
+           class="px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2
+           {% if request.endpoint == 'admin.site_content' %}bg-pine text-ivory shadow-sm{% else %}text-charcoal/70 hover:text-charcoal{% endif %}">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+          </svg>
+          <span>Copy Strings</span>
+        </a>
+
+        <a href="{{ url_for('admin.audit_log') }}"
+           class="px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2
+           {% if request.endpoint == 'admin.audit_log' %}bg-pine text-ivory shadow-sm{% else %}text-charcoal/70 hover:text-charcoal{% endif %}">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+            <path d="M12 20h9"/>
+            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+          </svg>
+          <span>Audit Trail</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Admin Body Content -->
+    {% block admin_content %}{% endblock %}
+
+  </div>
+</div>
+{% endblock %}

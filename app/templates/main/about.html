@@ -1,0 +1,172 @@
+{% extends '_base.html' %}
+{% block title %}About Us — Beyond Tour Uttarakhand{% endblock %}
+{% block meta_description %}Learn about Beyond Tour's mission to champion community-driven, culturally authentic, and sustainable travel across Kumaon and Garhwal, Uttarakhand.{% endblock %}
+
+{% block content %}
+<div class="pt-4 sm:pt-8 pb-20 bg-ivory min-h-screen">
+  <!-- Hero Section -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="relative rounded-3xl overflow-hidden shadow-2xl bg-pine text-white mb-12 sm:mb-16">
+      <div class="absolute inset-0 z-0">
+        <img src="/static/images/Almora/jageshwar.png" alt="Uttarakhand Heritage" class="w-full h-full object-cover opacity-25 mix-blend-overlay">
+        <div class="absolute inset-0 bg-gradient-to-r from-pine via-pine/95 to-pine/80"></div>
+      </div>
+      
+      <div class="relative z-10 px-6 py-12 sm:px-12 sm:py-20 max-w-3xl">
+        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-terracotta/20 border border-terracotta/40 text-terracotta text-xs font-semibold uppercase tracking-wider mb-6">
+          <i data-lucide="compass" class="w-4 h-4"></i>
+          Our Story & Vision
+        </div>
+        <h1 class="font-serif text-3xl sm:text-5xl font-bold leading-tight mb-6">
+          Rediscovering the Soul of <span class="text-terracotta italic">Devbhoomi</span>
+        </h1>
+        <p class="text-white/80 text-base sm:text-lg leading-relaxed mb-8">
+          Beyond Tour was born out of a profound love for the Himalayas and a commitment to preserving the living heritage of Uttarakhand. We connect conscious travellers directly with village homestays, verified local mountain guides, indigenous recipes, and age-old artisan guilds.
+        </p>
+        <div class="flex flex-wrap gap-4">
+          <a href="{{ url_for('destinations.index') }}" class="px-6 py-3.5 rounded-xl bg-terracotta hover:bg-terracotta/90 text-white font-medium shadow-md transition-all flex items-center gap-2 text-sm sm:text-base">
+            Explore Destinations
+            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          </a>
+          <a href="{{ url_for('culture.food') }}" class="px-6 py-3.5 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/20 font-medium backdrop-blur transition-all flex items-center gap-2 text-sm sm:text-base">
+            Taste Authentic Food
+            <i data-lucide="utensils" class="w-4 h-4"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Core Pillars -->
+    <div class="mb-16">
+      <div class="text-center max-w-2xl mx-auto mb-10">
+        <h2 class="font-serif text-2xl sm:text-3xl font-bold text-charcoal mb-3">Our Guiding Pillars</h2>
+        <p class="text-charcoal/70 text-sm sm:text-base">Empowering Himalayan communities while delivering transformative journeys for travellers.</p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+        <!-- Pillar 1 -->
+        <div class="bg-white rounded-2xl p-6 sm:p-8 shadow-card border border-stone/30 hover:shadow-lg transition-shadow">
+          <div class="w-12 h-12 rounded-xl bg-terracotta/10 text-terracotta flex items-center justify-center mb-5">
+            <i data-lucide="home" class="w-6 h-6"></i>
+          </div>
+          <h3 class="font-serif text-xl font-bold text-charcoal mb-3">Direct-to-Community Homestays</h3>
+          <p class="text-charcoal/70 text-sm leading-relaxed">
+            Eliminating extractive middlemen so that 100% of your stay fees support local Pahadi families, renovate traditional mud-and-slate homes, and stem rural distress migration.
+          </p>
+        </div>
+
+        <!-- Pillar 2 -->
+        <div class="bg-white rounded-2xl p-6 sm:p-8 shadow-card border border-stone/30 hover:shadow-lg transition-shadow">
+          <div class="w-12 h-12 rounded-xl bg-sage/20 text-sage-dark flex items-center justify-center mb-5">
+            <i data-lucide="shield-check" class="w-6 h-6"></i>
+          </div>
+          <h3 class="font-serif text-xl font-bold text-charcoal mb-3">Certified Mountain Guides</h3>
+          <p class="text-charcoal/70 text-sm leading-relaxed">
+            Every guide registered on Beyond Tour is a native mountaineer certified in wilderness first aid and local folklore, ensuring both high-altitude safety and rich storytelling.
+          </p>
+        </div>
+
+        <!-- Pillar 3 -->
+        <div class="bg-white rounded-2xl p-6 sm:p-8 shadow-card border border-stone/30 hover:shadow-lg transition-shadow">
+          <div class="w-12 h-12 rounded-xl bg-pine/10 text-pine flex items-center justify-center mb-5">
+            <i data-lucide="palette" class="w-6 h-6"></i>
+          </div>
+          <h3 class="font-serif text-xl font-bold text-charcoal mb-3">Preserving Cultural Heritage</h3>
+          <p class="text-charcoal/70 text-sm leading-relaxed">
+            From Kumaoni Aipan sacred art to centuries-old culinary secrets like Gahat ki Dal and Bal Mithai, we document and celebrate living rituals before they fade.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Impact in Numbers -->
+    <div class="bg-white rounded-3xl p-8 sm:p-12 shadow-card border border-stone/30 mb-16">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 text-center divide-y md:divide-y-0 md:divide-x divide-stone/30">
+        <div class="pt-4 md:pt-0">
+          <p class="font-serif text-3xl sm:text-4xl font-bold text-terracotta mb-1">13</p>
+          <p class="text-xs sm:text-sm font-medium text-charcoal/70 uppercase tracking-wider">Districts Covered</p>
+        </div>
+        <div class="pt-4 md:pt-0">
+          <p class="font-serif text-3xl sm:text-4xl font-bold text-pine mb-1">100+</p>
+          <p class="text-xs sm:text-sm font-medium text-charcoal/70 uppercase tracking-wider">Heritage Sites & Homestays</p>
+        </div>
+        <div class="pt-4 md:pt-0">
+          <p class="font-serif text-3xl sm:text-4xl font-bold text-terracotta mb-1">85%</p>
+          <p class="text-xs sm:text-sm font-medium text-charcoal/70 uppercase tracking-wider">Local Economic Retention</p>
+        </div>
+        <div class="pt-4 md:pt-0">
+          <p class="font-serif text-3xl sm:text-4xl font-bold text-pine mb-1">24/7</p>
+          <p class="text-xs sm:text-sm font-medium text-charcoal/70 uppercase tracking-wider">Emergency SOS & Offline Sync</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- The Regions: Kumaon & Garhwal -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16">
+      <div class="bg-white rounded-2xl overflow-hidden shadow-card border border-stone/30 flex flex-col">
+        <div class="h-48 sm:h-56 relative overflow-hidden">
+          <img src="/static/images/Almora/almora.png" alt="Kumaon Region" class="w-full h-full object-cover">
+          <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end p-6">
+            <div>
+              <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-terracotta text-white mb-2 inline-block">Eastern Uttarakhand</span>
+              <h3 class="font-serif text-2xl font-bold text-white">Kumaon Region</h3>
+            </div>
+          </div>
+        </div>
+        <div class="p-6 sm:p-8 flex-1 flex flex-col justify-between">
+          <p class="text-charcoal/80 text-sm leading-relaxed mb-6">
+            Characterized by dense oak and rhododendron forests, fruit orchards in Mukteshwar, the spiritual geomagnetic vortex of Kasar Devi, the stone temples of Jageshwar, and the timeless artistry of Aipan geometric patterns.
+          </p>
+          <a href="{{ url_for('destinations.index') }}?region=kumaon" class="inline-flex items-center gap-2 text-sm font-semibold text-terracotta hover:underline">
+            Explore Kumaon Destinations <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          </a>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-2xl overflow-hidden shadow-card border border-stone/30 flex flex-col">
+        <div class="h-48 sm:h-56 relative overflow-hidden">
+          <img src="/static/images/Chamoli/badrinath.png" alt="Garhwal Region" class="w-full h-full object-cover">
+          <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end p-6">
+            <div>
+              <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-pine text-white mb-2 inline-block">Western Uttarakhand</span>
+              <h3 class="font-serif text-2xl font-bold text-white">Garhwal Region</h3>
+            </div>
+          </div>
+        </div>
+        <div class="p-6 sm:p-8 flex-1 flex flex-col justify-between">
+          <p class="text-charcoal/80 text-sm leading-relaxed mb-6">
+            Home to towering glacial peaks, sacred river confluences (Panch Prayag), revered pilgrimage circuits, the Valley of Flowers biosphere, high alpine bugyals (meadows), and legendary shepherd pathways.
+          </p>
+          <a href="{{ url_for('destinations.index') }}?region=garhwal" class="inline-flex items-center gap-2 text-sm font-semibold text-terracotta hover:underline">
+            Explore Garhwal Destinations <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Safety & Responsible Travel Pledge -->
+    <div class="bg-gradient-to-br from-pine to-pine-dark text-white rounded-3xl p-8 sm:p-12 shadow-2xl relative overflow-hidden mb-12">
+      <div class="relative z-10 max-w-2xl">
+        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 text-white text-xs font-semibold mb-4 border border-white/20">
+          <i data-lucide="heart-handshake" class="w-4 h-4 text-terracotta"></i>
+          Responsible Mountain Ethics
+        </div>
+        <h2 class="font-serif text-2xl sm:text-3xl font-bold mb-4">Travel Light, Leave Only Footprints</h2>
+        <p class="text-white/80 text-sm sm:text-base leading-relaxed mb-6">
+          We ask every visitor to uphold the sanctity of Himalayan ecology: carry your non-biodegradable waste back to base towns, respect local dress codes at devsthans, support local organic produce, and honor water conservation.
+        </p>
+        <div class="flex flex-wrap gap-4">
+          <a href="{{ url_for('safety.emergency_info') }}" class="px-6 py-3 rounded-xl bg-terracotta hover:bg-terracotta/90 text-white font-medium text-sm transition-all flex items-center gap-2">
+            <i data-lucide="phone-call" class="w-4 h-4"></i>
+            Safety & Emergency Contacts
+          </a>
+          <a href="{{ url_for('trip_planner.index') }}" class="px-6 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/20 font-medium text-sm transition-all flex items-center gap-2">
+            <i data-lucide="map-pin" class="w-4 h-4"></i>
+            Plan a Sustainable Itinerary
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,148 @@
+{% extends 'admin/base.html' %}
+{% block title %}Culture & Festivals Directory — Beyond Tour Admin{% endblock %}
+
+{% block admin_content %}
+<div>
+
+  <!-- Header & Filters -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+    <div>
+      <h2 class="font-serif text-2xl font-bold text-charcoal">Living Culture & Festivals Directory</h2>
+      <p class="text-xs text-charcoal/60 mt-0.5">Manage Himalayan festivals, melas, folk rituals, and traditional crafts</p>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <!-- Search Form -->
+      <form action="{{ url_for('admin.culture') }}" method="GET" class="relative">
+        <input type="text"
+               name="q"
+               value="{{ query }}"
+               placeholder="Search traditions..."
+               class="text-xs rounded-xl border border-stone/60 bg-surface pl-9 pr-3 py-2 focus:outline-hidden focus:border-terracotta w-44 sm:w-56">
+        <svg class="w-3.5 h-3.5 text-charcoal/40 absolute left-3 top-2.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+        </svg>
+      </form>
+
+      <a href="{{ url_for('admin.culture_new') }}"
+         class="px-4 py-2 rounded-xl bg-terracotta hover:bg-terracotta-hover text-white text-xs font-bold transition-colors flex items-center gap-1.5 shadow-sm">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <path d="M5 12h14"/><path d="M12 5v14"/>
+        </svg>
+        <span>Add Culture Entry</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Entry Type Filters -->
+  <div class="flex items-center gap-2 mb-6">
+    <a href="{{ url_for('admin.culture') }}?type=all"
+       class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all
+       {% if entry_type == 'all' or not entry_type %}bg-pine text-ivory shadow-xs{% else %}bg-surface border border-stone/60 text-charcoal/70 hover:text-charcoal{% endif %}">
+      All Culture Entries
+    </a>
+    <a href="{{ url_for('admin.culture') }}?type=festival"
+       class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all
+       {% if entry_type == 'festival' %}bg-pine text-ivory shadow-xs{% else %}bg-surface border border-stone/60 text-charcoal/70 hover:text-charcoal{% endif %}">
+      Festivals & Melas
+    </a>
+    <a href="{{ url_for('admin.culture') }}?type=art"
+       class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all
+       {% if entry_type == 'art' %}bg-pine text-ivory shadow-xs{% else %}bg-surface border border-stone/60 text-charcoal/70 hover:text-charcoal{% endif %}">
+      Traditional Arts & Crafts
+    </a>
+  </div>
+
+  <!-- Culture Table -->
+  <div class="bg-surface rounded-3xl border border-stone/60 shadow-card overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-xs">
+        <thead class="bg-ivory/60 text-[11px] uppercase tracking-wider text-charcoal/70 border-b border-stone/30">
+          <tr>
+            <th class="py-3.5 px-5">Title & Subtitle</th>
+            <th class="py-3.5 px-4">Type</th>
+            <th class="py-3.5 px-4">Region & District</th>
+            <th class="py-3.5 px-4">Month / Timing</th>
+            <th class="py-3.5 px-4">Badges</th>
+            <th class="py-3.5 px-5 text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-stone/20">
+          {% for entry in culture_entries %}
+          <tr class="hover:bg-ivory/30 transition-colors">
+            <!-- Title -->
+            <td class="py-4 px-5 font-bold text-sm text-charcoal">
+              <a href="{{ url_for('culture.festival_by_slug', slug=entry.slug) if entry.slug else '#' }}" target="_blank" class="hover:text-terracotta transition-colors">
+                {{ entry.title }}
+              </a>
+              <span class="block text-[11px] text-charcoal/60 font-normal truncate max-w-xs">{{ entry.subtitle or entry.story_text[:60] ~ '...' }}</span>
+            </td>
+
+            <!-- Type -->
+            <td class="py-4 px-4">
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase
+                {% if entry.entry_type == 'festival' %}bg-amber-100 text-amber-800 border border-amber-200{% else %}bg-pine/10 text-pine border border-pine/20{% endif %}">
+                {{ entry.entry_type|capitalize }}
+              </span>
+            </td>
+
+            <!-- Region & District -->
+            <td class="py-4 px-4 text-charcoal">
+              <span class="font-semibold block">{{ entry.district or 'Uttarakhand' }}</span>
+              <span class="text-[10px] uppercase font-bold text-charcoal/50">{{ entry.region|capitalize }}</span>
+            </td>
+
+            <!-- Month / Timing -->
+            <td class="py-4 px-4 text-charcoal font-medium">
+              {{ entry.month_name or entry.when_celebrated or 'Year-round' }}
+            </td>
+
+            <!-- Badges -->
+            <td class="py-4 px-4">
+              <div class="flex flex-wrap items-center gap-1.5">
+                {% if entry.is_happening_soon %}
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-terracotta text-white">Soon</span>
+                {% endif %}
+                {% if entry.gi_tag %}
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-pine text-ivory">GI Tag</span>
+                {% endif %}
+                {% if entry.unesco %}
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-700 text-white">UNESCO</span>
+                {% endif %}
+              </div>
+            </td>
+
+            <!-- Actions -->
+            <td class="py-4 px-5 text-right whitespace-nowrap">
+              <div class="inline-flex items-center gap-2">
+                <a href="{{ url_for('admin.culture_edit', entry_id=entry.id) }}"
+                   class="px-2.5 py-1.5 rounded-lg bg-stone/20 hover:bg-stone/40 text-charcoal text-xs font-semibold transition-colors">
+                  Edit
+                </a>
+
+                <form action="{{ url_for('admin.culture_delete', entry_id=entry.id) }}"
+                      method="POST"
+                      onsubmit="return confirm('Delete {{ entry.title }}?');">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <button type="submit"
+                          class="px-2.5 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-semibold transition-colors">
+                    Delete
+                  </button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="6" class="py-12 text-center text-charcoal/50">
+              No culture entries match your filter.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

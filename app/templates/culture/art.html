@@ -1,0 +1,519 @@
+{% extends '_base.html' %}
+{% block title %}{{ title or 'Arts, Crafts & Master Artisans of Uttarakhand — Beyond Tour' }}{% endblock %}
+{% block meta_description %}Explore GI-tagged Ringal bamboo weaving, sacred Kath-Khuni temple woodcarvings, Shauka woolen pit-loom carpets, and Aipan geometric ritual art. Connect directly with verified master artisans across Uttarakhand.{% endblock %}
+
+{% block content %}
+<!-- Embedded Dataset for Alpine.js Dynamic Modal & Gallery -->
+<script id="traditional-arts-data" type="application/json">
+{{ traditional_arts_json|safe }}
+</script>
+
+<div class="pt-6 sm:pt-10 pb-24 bg-ivory min-h-screen"
+     x-data="artHub()"
+     x-cloak>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+    <!-- Breadcrumb -->
+    <nav class="flex items-center gap-2 text-xs text-charcoal/50 mb-6 overflow-x-auto py-1">
+      <a href="{{ url_for('main.index') }}" class="hover:text-terracotta transition-colors">Home</a>
+      <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+      <a href="{{ url_for('culture.index') }}" class="hover:text-terracotta transition-colors">Festivals & Culture</a>
+      <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+      <span class="text-charcoal font-medium">Arts, Crafts & Artisans</span>
+    </nav>
+
+    <!-- Page Header -->
+    <div class="text-center max-w-3xl mx-auto mb-8">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-pine/10 border border-pine/25 text-pine text-[11px] font-bold uppercase tracking-wider mb-2.5">
+        <i data-lucide="award" class="w-3.5 h-3.5 text-terracotta"></i>
+        <span>GI-Tagged Living Himalayan Crafts</span>
+      </div>
+      <h1 class="font-serif text-2xl sm:text-3xl lg:text-4xl font-bold text-charcoal tracking-tight mb-2">
+        Traditional Arts & Master Artisans
+      </h1>
+      <p class="text-charcoal/75 text-xs sm:text-sm leading-relaxed font-light max-w-2xl mx-auto">
+        Centuries of Himalayan cultural isolation nurtured master crafts—from wild sub-alpine bamboo weaving in Garhwal to sacred deodar lintels and highland sheep-wool pit looms in Kumaon.
+      </p>
+      <p class="text-[11px] text-terracotta font-medium mt-1.5 flex items-center justify-center gap-1.5">
+        <i data-lucide="mouse-pointer-click" class="w-3.5 h-3.5"></i>
+        <span>Click any photograph to view the full cultural story, workshop transit route & direct cooperative contact.</span>
+      </p>
+    </div>
+
+    <!-- Region Toggle: All | Garhwal | Kumaon -->
+    <div class="flex justify-center mb-8 px-2">
+      <div class="inline-flex items-center bg-surface rounded-2xl shadow-card p-1 gap-1 border border-stone/50 max-w-full">
+        <a href="{{ url_for('culture.art') }}?region=all"
+           @click="setRegion('all')"
+           class="px-3 sm:px-5 py-2 rounded-xl text-xs font-bold transition-all
+           {% if active_region == 'all' or not active_region %}bg-terracotta text-white shadow-sm{% else %}text-charcoal/70 hover:text-charcoal{% endif %}">
+          All Crafts (4)
+        </a>
+        <a href="{{ url_for('culture.art') }}?region=garhwal"
+           @click="setRegion('garhwal')"
+           class="flex items-center gap-1.5 px-3 sm:px-5 py-2 rounded-xl text-xs font-bold transition-all
+           {% if active_region == 'garhwal' %}bg-terracotta text-white shadow-sm{% else %}text-charcoal/70 hover:text-charcoal{% endif %}">
+          <i data-lucide="mountain" class="w-3.5 h-3.5"></i> Garhwal
+        </a>
+        <a href="{{ url_for('culture.art') }}?region=kumaon"
+           @click="setRegion('kumaon')"
+           class="flex items-center gap-1.5 px-3 sm:px-5 py-2 rounded-xl text-xs font-bold transition-all
+           {% if active_region == 'kumaon' %}bg-terracotta text-white shadow-sm{% else %}text-charcoal/70 hover:text-charcoal{% endif %}">
+          <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Kumaon
+        </a>
+      </div>
+    </div>
+
+    <!-- HOW TOURISM REACHES THE VENDOR ECOSYSTEM BANNER -->
+    <div class="bg-surface rounded-2xl border border-stone/60 shadow-card p-4 sm:p-6 mb-8">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-4 border-b border-stone/30 mb-4">
+        <div>
+          <span class="text-[10px] uppercase font-bold text-terracotta tracking-widest block mb-0.5">Ecosystem Integration</span>
+          <h3 class="font-serif text-lg sm:text-xl lg:text-2xl font-bold text-charcoal">
+            How BeyondTour Connects You Directly to Rural Artisans
+          </h3>
+        </div>
+        <span class="text-[11px] text-pine font-semibold px-3 py-1 rounded-xl bg-pine/10 border border-pine/20 self-start md:self-center">
+          100% Direct Cooperative Support · 0% Commission
+        </span>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
+        <div class="p-3 rounded-xl bg-ivory/80 border border-stone/50 space-y-1">
+          <div class="w-7 h-7 rounded-lg bg-terracotta/10 text-terracotta flex items-center justify-center font-bold font-serif text-xs">1</div>
+          <h4 class="font-bold text-charcoal text-xs">Documented Heritage</h4>
+          <p class="text-charcoal/70 leading-relaxed font-light text-[11px]">Verified folklore, sacred Vedic geometry, and authentic GI-tag certifications.</p>
+        </div>
+        <div class="p-3 rounded-xl bg-ivory/80 border border-stone/50 space-y-1">
+          <div class="w-7 h-7 rounded-lg bg-pine/10 text-pine flex items-center justify-center font-bold font-serif text-xs">2</div>
+          <h4 class="font-bold text-charcoal text-xs">Exact Workshop Route</h4>
+          <p class="text-charcoal/70 leading-relaxed font-light text-[11px]">Detailed road transit, shared jeep routes, and mountain valley landmarks.</p>
+        </div>
+        <div class="p-3 rounded-xl bg-ivory/80 border border-stone/50 space-y-1">
+          <div class="w-7 h-7 rounded-lg bg-amber-600/10 text-amber-600 flex items-center justify-center font-bold font-serif text-xs">3</div>
+          <h4 class="font-bold text-charcoal text-xs">Direct Artisan Access</h4>
+          <p class="text-charcoal/70 leading-relaxed font-light text-[11px]">Direct phone/WhatsApp, visiting hours, hands-on masterclasses, and fair pricing.</p>
+        </div>
+        <div class="p-3 rounded-xl bg-ivory/80 border border-stone/50 space-y-1">
+          <div class="w-7 h-7 rounded-lg bg-terracotta/15 text-terracotta flex items-center justify-center font-bold font-serif text-xs">4</div>
+          <h4 class="font-bold text-charcoal text-xs">BeyondTour Connect</h4>
+          <p class="text-charcoal/70 leading-relaxed font-light text-[11px]">Book certified local guides, reserve village homestays next to workshops.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- CRAFT LISTINGS: SCREEN-FRIENDLY COMPACT CARDS -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {% for art in traditional_arts %}
+      <article class="group bg-surface rounded-2xl border border-stone/60 shadow-card overflow-hidden transition-all duration-300 hover:shadow-card-hover hover:border-terracotta/40 flex flex-col justify-between"
+               x-data="{ cardImg: '{{ art.cover_image }}' }">
+        
+        <div>
+          <!-- 1. PICTURE IN FIRST: Interactive Photo Showcase with Controlled Screen Height -->
+          <div class="relative h-44 sm:h-48 md:h-52 w-full overflow-hidden bg-charcoal cursor-pointer"
+               @click="openModal('{{ art.id }}', cardImg)">
+            <img :src="cardImg"
+                 alt="{{ art.title }}"
+                 class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/25"></div>
+
+            <!-- Top Floating Badges -->
+            <div class="absolute top-3 left-3 flex items-center gap-1.5">
+              <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-pine text-ivory text-[9px] font-bold uppercase tracking-wider shadow-md backdrop-blur-md">
+                <i data-lucide="award" class="w-3 h-3 text-emerald-300"></i>
+                <span>{{ art.gi_tag_badge }}</span>
+              </span>
+            </div>
+
+            <div class="absolute top-3 right-3">
+              <span class="px-2 py-0.5 rounded-md bg-black/60 text-white text-[9px] font-bold uppercase tracking-wider backdrop-blur-md border border-white/20">
+                {{ art.region }}
+              </span>
+            </div>
+
+            <!-- Interactive Hover Prompt Pill -->
+            <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/40 backdrop-blur-[2px]">
+              <span class="px-3.5 py-1.5 rounded-full bg-white/95 text-charcoal text-[11px] font-bold shadow-xl flex items-center gap-1.5 transform translate-y-2 group-hover:translate-y-0 transition-transform">
+                <i data-lucide="maximize-2" class="w-3 h-3 text-terracotta"></i>
+                <span>Click to view full story & details</span>
+              </span>
+            </div>
+
+            <!-- Bottom Photo Captions -->
+            <div class="absolute bottom-2.5 left-3 right-3 flex items-end justify-between text-white pointer-events-none">
+              <div>
+                <span class="text-[9px] font-bold uppercase tracking-widest text-terracotta block">{{ art.district }}</span>
+                <span class="text-[11px] text-white/85 font-light flex items-center gap-1">
+                  <i data-lucide="camera" class="w-2.5 h-2.5 text-terracotta"></i>
+                  <span>Authentic documentary photography</span>
+                </span>
+              </div>
+              <span class="text-[9px] bg-black/60 backdrop-blur-md px-2 py-0.5 rounded-md text-white/90 border border-white/15">
+                {{ art.gallery|length }} Photos
+              </span>
+            </div>
+          </div>
+
+          <!-- Thumbnail Gallery Selector (Compact) -->
+          <div class="p-1.5 px-3 bg-charcoal/95 border-b border-stone/30 flex items-center gap-1.5 overflow-x-auto">
+            {% for img in art.gallery %}
+            <button type="button"
+                    @click.stop="cardImg = '{{ img }}'"
+                    :class="cardImg === '{{ img }}' ? 'ring-2 ring-terracotta scale-105 opacity-100' : 'opacity-65 hover:opacity-100'"
+                    class="w-11 h-7 rounded-md overflow-hidden bg-stone/30 flex-shrink-0 transition-all">
+              <img src="{{ img }}" alt="{{ art.title }} angle {{ loop.index }}" class="w-full h-full object-cover">
+            </button>
+            {% endfor %}
+            <span class="text-[9px] text-white/50 ml-auto pr-1 flex-shrink-0 hidden sm:inline">
+              Click photo to enlarge
+            </span>
+          </div>
+
+          <!-- 2. SHORT STORY & CRAFT INTRO -->
+          <div class="p-4 sm:p-5">
+            <div class="flex items-center gap-2 mb-1">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-terracotta">{{ art.district }}</span>
+              <span class="text-charcoal/30">·</span>
+              <span class="text-[10px] text-charcoal/60 font-medium truncate">{{ art.subtitle }}</span>
+            </div>
+
+            <h2 class="font-serif text-lg sm:text-xl font-bold text-charcoal mb-1.5 group-hover:text-terracotta transition-colors leading-snug">
+              <a href="javascript:void(0)" @click="openModal('{{ art.id }}', cardImg)">
+                {{ art.title }}
+              </a>
+            </h2>
+
+            <!-- Short Story: compact and readable -->
+            <p class="text-xs text-charcoal/80 leading-relaxed font-light mb-3 line-clamp-2 sm:line-clamp-3">
+              {{ art.short_story }}
+            </p>
+
+            <!-- Quick Snapshot Pills: compact -->
+            <div class="space-y-2 pt-2.5 border-t border-stone/30 text-xs">
+              <div class="flex items-start gap-2 flex-wrap">
+                <span class="text-[10px] uppercase font-bold text-charcoal/50 block mt-0.5">Products:</span>
+                <div class="flex flex-wrap gap-1">
+                  {% for prod in art.products[:3] %}
+                  <span class="px-2 py-0.5 rounded-md bg-ivory border border-stone/50 text-[10px] text-charcoal font-medium">
+                    {{ prod }}
+                  </span>
+                  {% endfor %}
+                  {% if art.products|length > 3 %}
+                  <span class="px-1.5 py-0.5 rounded-md bg-ivory border border-stone/50 text-[10px] text-charcoal/60">
+                    +{{ art.products|length - 3 }}
+                  </span>
+                  {% endif %}
+                </div>
+              </div>
+
+              <div class="flex items-center justify-between gap-2 pt-1.5 border-t border-stone/20">
+                <div class="flex items-center gap-1 text-[11px] text-charcoal/80 truncate">
+                  <i data-lucide="store" class="w-3 h-3 text-pine flex-shrink-0"></i>
+                  <span class="truncate max-w-[190px]">{{ art.vendor_cluster.name }}</span>
+                </div>
+                <span class="text-[11px] font-bold text-pine flex-shrink-0">
+                  {{ art.vendor_cluster.price_range }}
+                </span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- 3. ACTION: CLICK TO VIEW FULL STORY -->
+        <div class="p-4 pt-0 sm:p-5 sm:pt-0">
+          <button type="button"
+                  @click="openModal('{{ art.id }}', cardImg)"
+                  class="w-full py-2.5 px-3 rounded-xl bg-terracotta hover:bg-terracotta-hover text-white text-xs font-semibold transition-all shadow-sm flex items-center justify-center gap-1.5 group-hover:shadow-md">
+            <span>Explore Full Artisan Story, Route & Contacts</span>
+            <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+
+      </article>
+      {% endfor %}
+    </div>
+
+    <!-- Bottom Navigation -->
+    <div class="mt-16 pt-8 border-t border-stone/40 flex items-center justify-between">
+      <a href="{{ url_for('culture.index') }}"
+         class="inline-flex items-center gap-2 text-xs font-bold text-charcoal hover:text-terracotta transition-colors">
+        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+        <span>Explore All Festivals & Living Traditions</span>
+      </a>
+
+      <a href="{{ url_for('trip_planner.index') }}"
+         class="px-5 py-2.5 rounded-full bg-terracotta text-white text-xs font-bold hover:bg-terracotta-hover transition-colors shadow-sm">
+        Plan Your Cultural Tour Itinerary →
+      </a>
+    </div>
+
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- MASTER ARTISAN MODAL: "THE OTHER INFORMATION IN BEST FORMAT" -->
+  <!-- ============================================================== -->
+  <div x-show="selectedArt"
+       class="fixed inset-0 z-50 overflow-y-auto bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6"
+       x-transition:enter="transition ease-out duration-300"
+       x-transition:enter-start="opacity-0"
+       x-transition:enter-end="opacity-100"
+       x-transition:leave="transition ease-in duration-200"
+       x-transition:leave-start="opacity-100"
+       x-transition:leave-end="opacity-0"
+       @keydown.escape.window="closeModal()"
+       style="display: none;">
+
+    <div class="relative w-full max-w-4xl max-h-[92vh] bg-surface rounded-3xl shadow-2xl border border-stone/50 overflow-hidden flex flex-col"
+         @click.outside="closeModal()"
+         x-transition:enter="transition ease-out duration-300 transform"
+         x-transition:enter-start="opacity-0 translate-y-4 scale-95"
+         x-transition:enter-end="opacity-100 translate-y-0 scale-100">
+
+      <!-- STICKY MODAL TOP BAR -->
+      <div class="p-4 sm:p-5 border-b border-stone/30 bg-surface/95 backdrop-blur-md flex items-center justify-between gap-4 z-10 sticky top-0">
+        <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
+          <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-pine text-ivory text-[10px] font-bold uppercase tracking-wider">
+            <i data-lucide="award" class="w-3 h-3 text-emerald-300"></i>
+            <span x-text="selectedArt?.gi_tag_badge"></span>
+          </span>
+          <span class="px-2 py-0.5 rounded-md bg-stone/30 text-charcoal text-[10px] font-bold uppercase"
+                x-text="selectedArt?.region"></span>
+          <span class="text-xs text-charcoal/60 font-medium hidden sm:inline"
+                x-text="selectedArt?.district"></span>
+        </div>
+
+        <button type="button"
+                @click="closeModal()"
+                class="w-9 h-9 rounded-full bg-ivory hover:bg-stone/40 text-charcoal flex items-center justify-center transition-colors border border-stone/40"
+                aria-label="Close dialog">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- SCROLLABLE BODY: COMPLETE IN-DEPTH INFORMATION IN BEST FORMAT -->
+      <div class="overflow-y-auto p-4 sm:p-8 space-y-8">
+
+        <!-- 1. HIGH-RESOLUTION PHOTO GALLERY SHOWCASE -->
+        <div class="space-y-3">
+          <div class="relative aspect-[16/10] sm:aspect-[2/1] w-full rounded-2xl overflow-hidden bg-charcoal border border-stone/40 shadow-md">
+            <img :src="modalImg"
+                 :alt="selectedArt?.title"
+                 class="w-full h-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20"></div>
+
+            <div class="absolute bottom-3 left-4 right-4 text-white flex items-end justify-between">
+              <div>
+                <span class="text-[10px] uppercase font-bold text-terracotta tracking-widest block"
+                      x-text="selectedArt?.district"></span>
+                <h3 class="text-2xl sm:text-3xl lg:text-4xl font-serif font-bold text-white drop-shadow-sm leading-tight"
+                    x-text="selectedArt?.title"></h3>
+              </div>
+              <span class="text-[10px] bg-black/60 px-2.5 py-1 rounded-md text-white/80 border border-white/20">
+                Authentic Documentary Photography
+              </span>
+            </div>
+          </div>
+
+          <!-- Thumbnail Switcher -->
+          <div class="flex items-center gap-2.5 overflow-x-auto pb-1"
+               x-show="selectedArt?.gallery && selectedArt.gallery.length > 1">
+            <template x-for="(img, idx) in selectedArt?.gallery || []" :key="idx">
+              <button type="button"
+                      @click="modalImg = img"
+                      :class="modalImg === img ? 'ring-2 ring-terracotta scale-105 opacity-100' : 'opacity-65 hover:opacity-100'"
+                      class="w-20 h-14 rounded-xl overflow-hidden bg-charcoal/60 flex-shrink-0 transition-all border border-stone/50">
+                <img :src="img" :alt="'Angle ' + (idx + 1)" class="w-full h-full object-cover">
+              </button>
+            </template>
+            <span class="text-[11px] text-charcoal/50 ml-2 font-light hidden sm:inline">
+              Click any photo to view in high resolution
+            </span>
+          </div>
+        </div>
+
+        <!-- 2. FULL CULTURAL LORE & GENERATIONAL STORY -->
+        <div class="space-y-3">
+          <div class="flex items-center gap-2">
+            <i data-lucide="book-open" class="w-5 h-5 text-terracotta"></i>
+            <h4 class="font-serif text-2xl sm:text-3xl font-bold text-charcoal">Sacred Roots & Generational Story</h4>
+          </div>
+          <div class="text-xs sm:text-sm text-charcoal/80 leading-relaxed font-light whitespace-pre-line space-y-3"
+               x-text="selectedArt?.story">
+          </div>
+        </div>
+
+        <!-- 3. WHY THIS ART IS UNIQUE TO UTTARAKHAND CALLOUT -->
+        <div class="p-5 rounded-2xl bg-amber-500/10 border border-amber-500/25 flex items-start gap-3">
+          <div class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-700 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <i data-lucide="sparkles" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h5 class="font-bold text-charcoal text-xs sm:text-sm mb-1">What Makes This Craft Unique to Uttarakhand</h5>
+            <p class="text-xs sm:text-sm text-charcoal/80 leading-relaxed font-light"
+               x-text="selectedArt?.what_makes_unique"></p>
+          </div>
+        </div>
+
+        <!-- 4. AUTHENTIC PRODUCTS & NATURAL RAW MATERIALS -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <!-- Products -->
+          <div class="p-4 rounded-2xl bg-ivory border border-stone/50 space-y-2">
+            <span class="text-[10px] uppercase font-bold text-charcoal/50 flex items-center gap-1.5">
+              <i data-lucide="package" class="w-3.5 h-3.5 text-terracotta"></i>
+              <span>Authentic Handcrafted Products:</span>
+            </span>
+            <div class="flex flex-wrap gap-1.5 pt-1">
+              <template x-for="prod in selectedArt?.products || []" :key="prod">
+                <span class="px-2.5 py-1 rounded-lg bg-surface border border-stone/50 text-xs text-charcoal font-medium"
+                      x-text="prod"></span>
+              </template>
+            </div>
+          </div>
+
+          <!-- Raw Materials -->
+          <div class="p-4 rounded-2xl bg-ivory border border-stone/50 space-y-2">
+            <span class="text-[10px] uppercase font-bold text-charcoal/50 flex items-center gap-1.5">
+              <i data-lucide="leaf" class="w-3.5 h-3.5 text-pine"></i>
+              <span>Sub-Alpine Natural Raw Materials:</span>
+            </span>
+            <div class="flex flex-wrap gap-1.5 pt-1">
+              <template x-for="mat in selectedArt?.raw_materials || []" :key="mat">
+                <span class="px-2.5 py-1 rounded-lg bg-surface border border-stone/50 text-xs text-charcoal font-medium"
+                      x-text="mat"></span>
+              </template>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5. VERIFIED ARTISAN COOPERATIVE & WORKSHOP ACCESS -->
+        <div class="p-6 rounded-3xl bg-pine/5 border border-pine/25 space-y-5">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-pine/20">
+            <div class="flex items-center gap-2 text-pine font-bold text-xs sm:text-sm uppercase tracking-wider">
+              <i data-lucide="store" class="w-4 h-4 text-terracotta"></i>
+              <span>Verified Artisan Cooperative Hub</span>
+            </div>
+            <span class="text-xs font-bold text-pine px-3 py-1 rounded-lg bg-pine/10 border border-pine/20 self-start sm:self-center">
+              100% Direct to Village Families · 0% Middleman
+            </span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+            <div>
+              <span class="text-[10px] uppercase font-bold text-charcoal/50 block">Cooperative & Master Artisan</span>
+              <strong class="text-charcoal block text-sm font-serif" x-text="selectedArt?.vendor_cluster?.name"></strong>
+              <span class="text-charcoal/70 text-xs font-light" x-text="selectedArt?.vendor_cluster?.artisan_leader"></span>
+            </div>
+
+            <div>
+              <span class="text-[10px] uppercase font-bold text-charcoal/50 block">Direct Fair-Trade Price Guide</span>
+              <strong class="text-pine block text-sm font-bold" x-text="selectedArt?.vendor_cluster?.price_range"></strong>
+              <span class="text-charcoal/70 text-xs font-light" x-text="selectedArt?.vendor_cluster?.visiting_hours"></span>
+            </div>
+          </div>
+
+          <!-- Direct Contact Actions: Call & WhatsApp -->
+          <div class="flex flex-wrap items-center gap-3 pt-2">
+            <a :href="'tel:' + selectedArt?.vendor_cluster?.phone"
+               class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-pine text-white text-xs font-bold hover:bg-pine-hover transition-colors shadow-sm">
+              <i data-lucide="phone-call" class="w-3.5 h-3.5"></i>
+              <span>Call Cooperative: <span x-text="selectedArt?.vendor_cluster?.phone"></span></span>
+            </a>
+
+            <a :href="'https://wa.me/' + (selectedArt?.vendor_cluster?.whatsapp || '919411582341') + '?text=Hello!%20I%20saw%20your%20craft%20on%20BeyondTour%20and%20would%20like%20to%20visit%20your%20workshop.'"
+               target="_blank"
+               rel="noopener noreferrer"
+               class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 text-white text-xs font-bold hover:bg-emerald-700 transition-colors shadow-sm">
+              <i data-lucide="message-circle" class="w-3.5 h-3.5"></i>
+              <span>WhatsApp Inquiry</span>
+            </a>
+          </div>
+
+          <!-- Exact Transit Route -->
+          <div class="pt-3 border-t border-pine/20 text-xs text-charcoal/80 space-y-1">
+            <span class="text-[10px] uppercase font-bold text-charcoal/60 flex items-center gap-1.5">
+              <i data-lucide="navigation" class="w-3.5 h-3.5 text-terracotta"></i>
+              <span>Exact Workshop Transit Route & Road Directions:</span>
+            </span>
+            <p class="font-light text-xs sm:text-sm leading-relaxed" x-text="selectedArt?.vendor_cluster?.how_to_reach"></p>
+          </div>
+        </div>
+
+        <!-- 6. BEYONDTOUR ECOSYSTEM ACTIONS -->
+        <div class="space-y-3 pt-2">
+          <span class="text-[10px] uppercase font-bold text-charcoal/50 tracking-wider block">
+            Connect With the BeyondTour Travel Ecosystem:
+          </span>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+            <a :href="selectedArt?.how_tourism_reaches_via_website?.homestay_url"
+               class="p-4 rounded-2xl bg-surface border border-stone/60 hover:border-terracotta transition-colors flex flex-col justify-between space-y-2 group shadow-2xs">
+              <div class="w-8 h-8 rounded-xl bg-terracotta/10 text-terracotta flex items-center justify-center">
+                <i data-lucide="home" class="w-4 h-4"></i>
+              </div>
+              <div>
+                <strong class="text-charcoal block group-hover:text-terracotta transition-colors">Stay With Artisans</strong>
+                <span class="text-[11px] text-charcoal/70 font-light" x-text="selectedArt?.how_tourism_reaches_via_website?.homestay_label"></span>
+              </div>
+              <span class="text-[11px] text-terracotta font-bold flex items-center gap-1">
+                Explore Homestays →
+              </span>
+            </a>
+
+            <a :href="selectedArt?.how_tourism_reaches_via_website?.guide_url"
+               class="p-4 rounded-2xl bg-surface border border-stone/60 hover:border-pine transition-colors flex flex-col justify-between space-y-2 group shadow-2xs">
+              <div class="w-8 h-8 rounded-xl bg-pine/10 text-pine flex items-center justify-center">
+                <i data-lucide="user-check" class="w-4 h-4"></i>
+              </div>
+              <div>
+                <strong class="text-charcoal block group-hover:text-pine transition-colors">Hire Certified Guide</strong>
+                <span class="text-[11px] text-charcoal/70 font-light" x-text="selectedArt?.how_tourism_reaches_via_website?.guide_label"></span>
+              </div>
+              <span class="text-[11px] text-pine font-bold flex items-center gap-1">
+                Meet Local Guides →
+              </span>
+            </a>
+
+            <a :href="selectedArt?.how_tourism_reaches_via_website?.trip_planner_url"
+               class="p-4 rounded-2xl bg-surface border border-stone/60 hover:border-amber-600 transition-colors flex flex-col justify-between space-y-2 group shadow-2xs">
+              <div class="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center">
+                <i data-lucide="compass" class="w-4 h-4"></i>
+              </div>
+              <div>
+                <strong class="text-charcoal block group-hover:text-amber-600 transition-colors">Smart Trip Planner</strong>
+                <span class="text-[11px] text-charcoal/70 font-light">Add artisan village visits into your customized Uttarakhand travel route.</span>
+              </div>
+              <span class="text-[11px] text-amber-600 font-bold flex items-center gap-1">
+                Add to Itinerary →
+              </span>
+            </a>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- MODAL FOOTER -->
+      <div class="p-4 sm:p-5 border-t border-stone/30 bg-ivory/80 flex items-center justify-between">
+        <button type="button"
+                @click="closeModal()"
+                class="px-5 py-2.5 rounded-xl bg-surface border border-stone/60 text-xs font-bold text-charcoal hover:bg-stone/30 transition-colors">
+          Close Window
+        </button>
+
+        <a :href="selectedArt?.how_tourism_reaches_via_website?.trip_planner_url"
+           class="px-6 py-2.5 rounded-xl bg-terracotta hover:bg-terracotta-hover text-white text-xs font-bold transition-colors shadow-sm flex items-center gap-2">
+          <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
+          <span>Add Craft Tour to Trip Itinerary</span>
+        </a>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/culture-art.js') }}"></script>
+{% endblock %}

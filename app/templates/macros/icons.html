@@ -1,0 +1,7 @@
+{# Macro to render stroke-based SVG icons from inline sprite sheet with zero emojis #}
+{% macro render_icon(name, class="w-4 h-4", stroke="currentColor", fill="none", title="") %}
+<svg class="{{ class }}" fill="{{ fill }}" stroke="{{ stroke }}" aria-hidden="{% if title %}false{% else %}true{% endif %}" role="img">
+  {% if title %}<title>{{ title }}</title>{% endif %}
+  <use href="#icon-{{ name }}"></use>
+</svg>
+{% endmacro %}

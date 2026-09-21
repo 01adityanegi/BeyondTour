@@ -1,0 +1,171 @@
+<div class="relative bg-surface rounded-3xl overflow-y-auto md:overflow-hidden shadow-2xl border border-stone/50 max-w-4xl w-full max-h-[92vh] flex flex-col md:flex-row text-charcoal">
+  <!-- Close Button -->
+  <button @click="modalOpen = false"
+          class="absolute top-4 right-4 z-30 w-9 h-9 rounded-full bg-black/60 hover:bg-black/80 text-white flex items-center justify-center backdrop-blur-sm transition-all shadow-md focus:outline-none"
+          aria-label="Close modal">
+    <i data-lucide="x" class="w-5 h-5"></i>
+  </button>
+
+  <!-- Left / Media Column -->
+  <div class="md:w-3/5 bg-black flex items-center justify-center relative overflow-hidden min-h-[320px] md:min-h-[500px]">
+    {% if post.media_type == 'youtube' or (post.youtube_id and (post.video_format == '16:9' or post.aspect_ratio == '16:9')) %}
+      <!-- 16:9 YouTube Video -->
+      <div class="w-full aspect-video">
+        <iframe src="https://www.youtube-nocookie.com/embed/{{ post.youtube_id }}?autoplay=1&rel=0"
+                class="w-full h-full"
+                frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen></iframe>
+      </div>
+    {% elif post.media_type == 'youtube_shorts' or (post.youtube_id and (post.video_format == '9:16' or post.aspect_ratio == '9:16')) %}
+      <!-- 9:16 YouTube Shorts -->
+      <div class="w-full max-w-[280px] sm:max-w-[300px] aspect-[9/16] my-4 rounded-2xl overflow-hidden border border-white/20 shadow-2xl">
+        <iframe src="https://www.youtube-nocookie.com/embed/{{ post.youtube_id }}?autoplay=1&rel=0&loop=1"
+                class="w-full h-full"
+                frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen></iframe>
+      </div>
+    {% elif post.media_type == 'instagram' and post.instagram_shortcode %}
+      <!-- Instagram Embed -->
+      <div class="w-full h-full max-h-[550px] overflow-y-auto flex items-center justify-center p-4 bg-stone/20">
+        <iframe src="https://www.instagram.com/p/{{ post.instagram_shortcode }}/embed/"
+                class="w-full max-w-[380px] rounded-xl"
+                height="480"
+                frameborder="0"
+                scrolling="no"
+                allowtransparency="true"></iframe>
+      </div>
+    {% elif post.media_type == 'video' and post.media_url %}
+      <!-- Direct Video Player (MP4/WebM) -->
+      <div class="w-full h-full flex items-center justify-center p-2 bg-black">
+        <video src="{{ post.media_url }}" controls autoplay playsinline class="max-h-[550px] w-full rounded-xl object-contain"></video>
+      </div>
+    {% elif post.images %}
+      <!-- Photo Carousel / High Res Image -->
+      {% set img_list = post.images|from_json %}
+      {% if img_list is iterable and img_list is not string and img_list|length > 0 %}
+        <div class="relative w-full h-full flex items-center justify-center">
+          <img src="{{ img_list[0] }}" alt="Trip photo from {{ post.district_tag }}"
+               class="max-h-[550px] w-full object-contain">
+          {% if img_list|length > 1 %}
+          <div class="absolute bottom-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-black/70 text-white text-[11px] font-medium backdrop-blur-md">
+            1 of {{ img_list|length }} Photos
+          </div>
+          {% endif %}
+        </div>
+      {% else %}
+        <img src="{{ post.thumbnail_url }}" alt="Trip photo" class="max-h-[550px] w-full object-cover">
+      {% endif %}
+    {% else %}
+      <img src="{{ post.thumbnail_url }}" alt="Trip cover" class="max-h-[550px] w-full object-cover">
+    {% endif %}
+  </div>
+
+  <!-- Right / Post Content & Discussion Column -->
+  <div class="md:w-2/5 flex flex-col justify-between p-6 sm:p-7 bg-surface overflow-y-auto max-h-[92vh]">
+    <div>
+      <!-- Creator Info & Location Badge -->
+      <div class="flex items-center justify-between pb-4 border-b border-stone/30">
+        <div class="flex items-center gap-3">
+          {% if post.user and post.user.avatar_url %}
+            <img src="{{ post.user.avatar_url }}" alt="{{ post.user.name }}" class="w-10 h-10 rounded-full object-cover border border-stone/60">
+          {% else %}
+            <div class="w-10 h-10 rounded-full bg-sage text-white font-bold text-sm flex items-center justify-center">
+              {{ post.user.name[0].upper() if post.user else 'T' }}
+            </div>
+          {% endif %}
+          <div>
+            <h4 class="font-bold text-charcoal text-sm leading-snug">{{ post.user.name if post.user else 'Mountain Traveler' }}</h4>
+            <span class="text-[11px] text-charcoal/50">{{ post.created_at.strftime('%B %d, %Y') }}</span>
+          </div>
+        </div>
+
+        <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-terracotta/10 text-terracotta border border-terracotta/20">
+          <i data-lucide="map-pin" class="w-3 h-3"></i>
+          <span>{{ post.district_tag }}</span>
+        </span>
+      </div>
+
+      <!-- Caption -->
+      <div class="py-4 text-xs sm:text-sm text-charcoal/85 leading-relaxed font-light whitespace-pre-line border-b border-stone/20">
+        {{ post.content }}
+      </div>
+
+      <!-- Live Interactive Stats Bar -->
+      <div class="flex items-center justify-between py-3 border-b border-stone/30">
+        <div class="flex items-center gap-4">
+          {% if current_user.is_authenticated %}
+            <button hx-post="{{ url_for('community.like_post', post_id=post.id) }}"
+                    hx-swap="outerHTML"
+                    class="flex items-center gap-1.5 {% if user_liked %}text-terracotta{% else %}text-charcoal/60 hover:text-terracotta{% endif %} text-xs font-semibold transition-colors focus:outline-none group">
+              <svg class="w-4 h-4 transition-transform active:scale-125 group-hover:scale-110" viewBox="0 0 24 24" fill="{% if user_liked %}currentColor{% else %}none{% endif %}" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+              </svg>
+              <span>{{ post.likes_count or 0 }}</span>
+            </button>
+          {% else %}
+            <a href="{{ url_for('auth.login') }}" class="flex items-center gap-1.5 text-charcoal/60 hover:text-terracotta text-xs font-semibold">
+              <i data-lucide="heart" class="w-4 h-4"></i>
+              <span>{{ post.likes_count or 0 }}</span>
+            </a>
+          {% endif %}
+
+          <span class="flex items-center gap-1.5 text-charcoal/60 text-xs font-medium">
+            <i data-lucide="message-circle" class="w-4 h-4"></i>
+            <span>{{ post.comments.filter_by(is_hidden=False).count() }}</span>
+          </span>
+        </div>
+
+        {% if post.media_type in ('youtube', 'youtube_shorts') and post.youtube_id %}
+        <a href="https://www.youtube.com/watch?v={{ post.youtube_id }}" target="_blank" rel="noopener noreferrer"
+           class="inline-flex items-center gap-1 text-[11px] font-semibold text-red-600 hover:underline">
+          <i data-lucide="external-link" class="w-3 h-3"></i>
+          <span>YouTube</span>
+        </a>
+        {% elif post.media_type == 'instagram' and post.media_url %}
+        <a href="{{ post.media_url }}" target="_blank" rel="noopener noreferrer"
+           class="inline-flex items-center gap-1 text-[11px] font-semibold text-terracotta hover:underline">
+          <i data-lucide="external-link" class="w-3 h-3"></i>
+          <span>Instagram</span>
+        </a>
+        {% endif %}
+      </div>
+
+      <!-- Comments Stream -->
+      <div class="mt-4">
+        <h5 class="text-xs font-bold uppercase tracking-wider text-charcoal/60 mb-2">Comments</h5>
+        <div id="modal-comments-{{ post.id }}" class="space-y-2 max-h-48 overflow-y-auto pr-1">
+          {% for comment in post.comments.filter_by(is_hidden=False).all() %}
+            {% include 'community/_comment_item.html' %}
+          {% else %}
+            <p id="no-modal-comments-{{ post.id }}" class="text-xs text-charcoal/50 py-2 font-light">No comments yet. Start the conversation!</p>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Comment Form -->
+    <div class="pt-4 border-t border-stone/30 mt-4">
+      {% if current_user.is_authenticated %}
+      <form hx-post="{{ url_for('community.comment_post', post_id=post.id) }}"
+            hx-target="#modal-comments-{{ post.id }}"
+            hx-swap="beforeend"
+            @htmx:after-request="if (event.detail.successful) { $el.reset(); const nc = document.getElementById('no-modal-comments-{{ post.id }}'); if (nc) nc.remove(); }"
+            class="flex items-center gap-2">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="text" name="content" placeholder="Add a comment..." required
+               class="flex-grow text-xs px-3.5 py-2.5 rounded-xl border border-stone/60 bg-ivory focus:outline-none focus:border-terracotta text-charcoal">
+        <button type="submit"
+                class="px-4 py-2.5 rounded-xl bg-terracotta hover:bg-terracotta-hover text-white text-xs font-semibold transition-all shadow-xs">
+          Post
+        </button>
+      </form>
+      {% else %}
+      <p class="text-xs text-charcoal/60 font-light text-center py-2">
+        <a href="{{ url_for('auth.login') }}" class="text-terracotta font-semibold hover:underline">Log in</a> to leave a comment or like this story.
+      </p>
+      {% endif %}
+    </div>
+  </div>
+</div>

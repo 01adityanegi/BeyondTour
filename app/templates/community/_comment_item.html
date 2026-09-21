@@ -1,0 +1,12 @@
+<div class="flex items-start gap-2.5 py-2.5 border-b border-stone/20 last:border-0 text-xs">
+  <div class="w-7 h-7 rounded-full bg-sage text-white font-semibold text-[11px] flex items-center justify-center flex-shrink-0">
+    {{ comment.user.name[0].upper() if comment.user else 'U' }}
+  </div>
+  <div class="flex-grow">
+    <div class="flex items-center justify-between">
+      <span class="font-semibold text-charcoal">{{ comment.user.name if comment.user else 'Traveler' }}</span>
+      <span class="text-[10px] text-charcoal/40">{{ comment.created_at.strftime('%b %d') }}</span>
+    </div>
+    <p class="text-charcoal/80 mt-0.5 font-light leading-relaxed">{{ comment.content }}</p>
+  </div>
+</div>

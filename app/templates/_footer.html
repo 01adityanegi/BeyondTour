@@ -1,0 +1,129 @@
+<!-- Beyond Tour Footer (Deep Pine #16302B, Warm Ivory #F7F3EC) -->
+<footer class="bg-pine text-ivory/80 mt-20 border-t border-stone/20">
+  <!-- Subtle top accent line in Ember Terracotta -->
+  <div class="h-0.5 bg-gradient-to-r from-pine via-terracotta to-pine"></div>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
+
+      <!-- Brand Column -->
+      <div class="lg:col-span-1">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center">
+            <svg class="w-7 h-7" viewBox="0 0 32 32" fill="none">
+              <circle cx="23" cy="9" r="2.5" fill="#C1622D" />
+              <path d="M3 24L11.5 11L18 20L22.5 13.5L29 24H3Z" stroke="#F7F3EC" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+              <path d="M11.5 11L15 16.5" stroke="#C1622D" stroke-width="1.5" stroke-linecap="round" />
+            </svg>
+          </div>
+          <div>
+            <span class="font-serif font-semibold text-xl text-ivory">Beyond<span class="text-terracotta font-normal">Tour</span></span>
+            <span class="block text-[10px] tracking-widest uppercase text-ivory/40 font-sans">Uttarakhand</span>
+          </div>
+        </div>
+        <p class="text-sm leading-relaxed text-ivory/60 mb-6">
+          Go beyond the guidebook. Discover the real Uttarakhand — its festivals, art, food, and hidden trails — with AI-powered tools and local expertise.
+        </p>
+        <div class="flex items-center gap-3">
+          <a href="#" class="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-terracotta hover:text-white transition-all text-ivory/70">
+            <i data-lucide="instagram" class="w-4 h-4"></i>
+          </a>
+          <a href="#" class="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-terracotta hover:text-white transition-all text-ivory/70">
+            <i data-lucide="twitter" class="w-4 h-4"></i>
+          </a>
+          <a href="#" class="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-terracotta hover:text-white transition-all text-ivory/70">
+            <i data-lucide="youtube" class="w-4 h-4"></i>
+          </a>
+        </div>
+      </div>
+
+      <!-- Explore Column -->
+      <div>
+        <h3 class="font-semibold text-ivory mb-5 text-sm uppercase tracking-wider">Explore</h3>
+        <ul class="space-y-3 text-sm">
+          <li><a href="{{ url_for('destinations.index') }}" class="hover:text-terracotta transition-colors">Destinations</a></li>
+          <li><a href="{{ url_for('culture.index') }}" class="hover:text-terracotta transition-colors">Culture and Festivals</a></li>
+          <li><a href="{{ url_for('culture.art') }}" class="hover:text-terracotta transition-colors">Art and Craft</a></li>
+          <li><a href="{{ url_for('culture.food') }}" class="hover:text-terracotta transition-colors">Local Food</a></li>
+          <li><a href="{{ url_for('hotels.index') }}" class="hover:text-terracotta transition-colors">Hotels and Homestays</a></li>
+          <li><a href="{{ url_for('guides.index') }}" class="hover:text-terracotta transition-colors">Local Guides</a></li>
+          <li><a href="{{ url_for('community.index') }}" class="hover:text-terracotta transition-colors">Community Stories</a></li>
+          <li><a href="{{ url_for('main.about') }}" class="hover:text-terracotta transition-colors font-medium">About Beyond Tour</a></li>
+          <li><a href="{{ url_for('safety.emergency_info') }}" class="hover:text-terracotta transition-colors">Safety & Emergency</a></li>
+        </ul>
+      </div>
+
+      <!-- Featured Districts Column -->
+      <div>
+        <h3 class="font-semibold text-ivory mb-5 text-sm uppercase tracking-wider">Featured Districts</h3>
+        <ul class="space-y-3 text-sm">
+          <li>
+            <a href="{{ url_for('destinations.district_detail', slug='nainital') }}" class="hover:text-terracotta transition-colors flex items-center justify-between group">
+              <span>Nainital</span>
+              <span class="text-xs text-ivory/40 group-hover:text-terracotta">Lakes and Ridge</span>
+            </a>
+          </li>
+          <li>
+            <a href="{{ url_for('destinations.district_detail', slug='almora') }}" class="hover:text-terracotta transition-colors flex items-center justify-between group">
+              <span>Almora</span>
+              <span class="text-xs text-ivory/40 group-hover:text-terracotta">Aipan and Heritage</span>
+            </a>
+          </li>
+          <li>
+            <a href="{{ url_for('destinations.district_detail', slug='pithoragarh') }}" class="hover:text-terracotta transition-colors flex items-center justify-between group">
+              <span>Pithoragarh</span>
+              <span class="text-xs text-ivory/40 group-hover:text-terracotta">Glaciers and Fort</span>
+            </a>
+          </li>
+          <li>
+            <a href="{{ url_for('destinations.district_detail', slug='chamoli') }}" class="hover:text-terracotta transition-colors flex items-center justify-between group">
+              <span>Chamoli</span>
+              <span class="text-xs text-ivory/40 group-hover:text-terracotta">Badrinath and Bugyals</span>
+            </a>
+          </li>
+          <li class="pt-2 border-t border-white/10 space-y-1.5">
+            <a href="{{ url_for('trip_planner.index') }}" class="text-terracotta hover:underline text-xs flex items-center gap-1.5 font-medium">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+              Plan AI Itinerary
+            </a>
+            <a href="{{ url_for('trip_planner.smart_route') }}" class="text-ivory/80 hover:text-terracotta text-xs flex items-center gap-1.5 font-medium transition-colors">
+              <i data-lucide="map" class="w-3.5 h-3.5 text-terracotta"></i>
+              Smart Route Planner
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Region Quick Info -->
+      <div>
+        <h3 class="font-semibold text-ivory mb-5 text-sm uppercase tracking-wider">Regions and Season</h3>
+        <div class="space-y-3">
+          <div class="p-3.5 rounded-xl bg-white/5 border border-white/10">
+            <p class="text-xs font-semibold text-terracotta mb-1 tracking-wider uppercase">Kumaon Belt</p>
+            <p class="text-xs text-ivory/60">Nainital · Almora · Pithoragarh · Bageshwar · Champawat</p>
+          </div>
+          <div class="p-3.5 rounded-xl bg-white/5 border border-white/10">
+            <p class="text-xs font-semibold text-sage mb-1 tracking-wider uppercase">Garhwal Belt</p>
+            <p class="text-xs text-ivory/60">Dehradun · Rishikesh · Haridwar · Chamoli · Uttarkashi</p>
+          </div>
+          <div class="flex items-center gap-2 text-xs text-ivory/50 pt-1">
+            <i data-lucide="calendar" class="w-4 h-4 text-terracotta"></i>
+            <span>Best Season: Mar–Jun and Sep–Nov</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Bar -->
+    <div class="border-t border-white/10 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <p class="text-xs text-ivory/50">
+        © 2026 Beyond Tour. Promoting authentic culture, art, and community tourism in Uttarakhand.
+      </p>
+      <div class="flex items-center gap-6 text-xs text-ivory/50">
+        <a href="#" class="hover:text-ivory transition-colors">Privacy Policy</a>
+        <a href="#" class="hover:text-ivory transition-colors">Terms of Use</a>
+        <a href="{{ url_for('main.about') }}" class="hover:text-ivory transition-colors">Responsible Travel</a>
+      </div>
+    </div>
+  </div>
+</footer>

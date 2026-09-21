@@ -1,0 +1,271 @@
+{% extends '_base.html' %}
+{% block title %}{{ hotel.name }} — Beyond Tour{% endblock %}
+{% block content %}
+<div class="pt-0 bg-ivory min-h-screen">
+  <div class="relative h-96 overflow-hidden">
+    <img src="{{ hotel.cover_image_url or 'https://images.unsplash.com/photo-1604537529428-15bcbeecfe4d?w=1400&q=80' }}" alt="{{ hotel.name }}" class="w-full h-full object-cover">
+    <div class="absolute inset-0 bg-gradient-to-t from-pine/90 via-pine/40 to-transparent"></div>
+    <div class="absolute bottom-8 left-8 right-8 max-w-4xl mx-auto">
+      <div class="flex items-center gap-2 mb-3 flex-wrap">
+        <span class="px-3 py-1 bg-terracotta text-white text-xs font-semibold rounded-full capitalize shadow-sm">{{ hotel.hotel_type }}</span>
+        {% if hotel.verification_status == 'verified' %}
+        <span class="px-3 py-1 bg-pine text-ivory text-xs font-semibold rounded-full flex items-center gap-1 shadow-sm">
+          <i data-lucide="badge-check" class="w-3.5 h-3.5 text-sage"></i> Host Verified
+        </span>
+        {% endif %}
+      </div>
+      <h1 class="font-serif text-4xl lg:text-5xl font-bold text-white mb-2">{{ hotel.name }}</h1>
+      {% if hotel.host_name %}<p class="text-ivory/80 text-sm">Hosted by {{ hotel.host_name }}</p>{% endif %}
+    </div>
+  </div>
+
+  <!-- Admin Control Bar -->
+  {% if current_user.is_authenticated and current_user.role == 'admin' %}
+  <div class="bg-rose-50 border-b border-rose-200 px-6 py-3 flex items-center justify-between gap-4 text-xs">
+    <div class="flex items-center gap-2 text-rose-900 font-semibold">
+      <i data-lucide="shield-alert" class="w-4 h-4 text-rose-600"></i>
+      <span>Admin Controls: Moderator Privileges</span>
+    </div>
+    <form action="{{ url_for('admin.hotel_delete', hotel_id=hotel.id) }}" method="POST" onsubmit="return confirm('Are you sure you want to permanently delete this stay and all its data from the site?');">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button type="submit" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl transition-colors inline-flex items-center gap-1.5 shadow-sm">
+        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+        <span>Delete Stay from Site</span>
+      </button>
+    </form>
+  </div>
+  {% endif %}
+
+  <!-- Price-above-band notice -->
+  {% if price_flag and price_flag.is_above_band %}
+  <div class="bg-amber-50 border-b border-amber-200 px-6 py-2.5 flex items-center gap-2 text-sm text-amber-800">
+    <i data-lucide="triangle-alert" class="w-4 h-4 text-amber-500 flex-shrink-0"></i>
+    <span>{{ price_flag.label }}</span>
+  </div>
+  {% endif %}
+
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 py-12">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div class="lg:col-span-2 space-y-6">
+        {% if hotel.host_story %}
+        <div class="bg-white rounded-card shadow-card p-6 border border-stone/40">
+          <h2 class="font-serif text-xl font-bold text-charcoal mb-3">The Host Story</h2>
+          <p class="text-charcoal/70 leading-relaxed text-sm">{{ hotel.host_story }}</p>
+        </div>
+        {% endif %}
+        {% if hotel.amenities %}
+        {% set amenity_list = hotel.amenities | from_json %}
+        <div class="bg-white rounded-card shadow-card p-6 border border-stone/40">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="font-serif text-xl font-bold text-charcoal flex items-center gap-2">
+              <i data-lucide="sparkles" class="w-5 h-5 text-terracotta"></i>
+              <span>Amenities & Facilities</span>
+            </h2>
+            <span class="text-xs text-charcoal/50">{{ amenity_list|length }} available</span>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+            {% for item in amenity_list %}
+            {% set clean_item = item|replace('-', ' ')|replace('_', ' ')|lower %}
+            <div class="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl bg-ivory border border-stone/50 text-charcoal text-sm">
+              {% if 'wifi' in clean_item %}
+                <i data-lucide="wifi" class="w-4 h-4 text-pine flex-shrink-0"></i>
+              {% elif 'park' in clean_item %}
+                <i data-lucide="car" class="w-4 h-4 text-pine flex-shrink-0"></i>
+              {% elif 'mountain' in clean_item or 'peak' in clean_item %}
+                <i data-lucide="mountain-snow" class="w-4 h-4 text-pine flex-shrink-0"></i>
+              {% elif 'lake' in clean_item or 'river' in clean_item or 'water' in clean_item %}
+                <i data-lucide="waves" class="w-4 h-4 text-pine flex-shrink-0"></i>
+              {% elif 'restaurant' in clean_item or 'meal' in clean_item or 'dining' in clean_item or 'food' in clean_item %}
+                <i data-lucide="utensils" class="w-4 h-4 text-pine flex-shrink-0"></i>
+              {% elif 'bonfire' in clean_item or 'fire' in clean_item %}
+                <i data-lucide="flame" class="w-4 h-4 text-terracotta flex-shrink-0"></i>
+              {% elif 'guide' in clean_item or 'trek' in clean_item or 'hike' in clean_item %}
+                <i data-lucide="compass" class="w-4 h-4 text-pine flex-shrink-0"></i>
+              {% elif 'workshop' in clean_item or 'craft' in clean_item %}
+                <i data-lucide="palette" class="w-4 h-4 text-pine flex-shrink-0"></i>
+              {% else %}
+                <i data-lucide="check-circle" class="w-4 h-4 text-pine flex-shrink-0"></i>
+              {% endif %}
+              <span class="capitalize font-medium text-xs sm:text-sm text-charcoal/90">{{ clean_item }}</span>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+
+        {% set hotel_img_list = hotel.images | from_json %}
+        {% if hotel_img_list and hotel_img_list|length > 0 %}
+        <div class="bg-white rounded-card shadow-card p-6 border border-stone/40">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="font-serif text-xl font-bold text-charcoal flex items-center gap-2">
+              <i data-lucide="camera" class="w-5 h-5 text-terracotta"></i>
+              <span>Photos & Surroundings</span>
+            </h2>
+            <span class="text-xs text-charcoal/50">{{ hotel_img_list|length }} photos</span>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            {% for img in hotel_img_list %}
+            <div class="h-36 sm:h-44 rounded-xl overflow-hidden shadow-sm group relative">
+              <img src="{{ img }}" alt="{{ hotel.name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- Real Guest Reviews Section -->
+        <div class="bg-white rounded-card shadow-card p-6 border border-stone/40">
+          <div class="flex items-center justify-between mb-6 pb-4 border-b border-stone/30">
+            <div>
+              <h2 class="font-serif text-xl font-bold text-charcoal flex items-center gap-2">
+                <i data-lucide="message-square" class="w-5 h-5 text-terracotta"></i>
+                <span>Guest Reviews & Experiences</span>
+              </h2>
+              {% if hotel.rating %}
+              <div class="flex items-center gap-2 mt-1">
+                <div class="flex items-center gap-1">
+                  {% for i in range(5) %}
+                  <i data-lucide="star" class="w-3.5 h-3.5 {% if i < hotel.rating|round|int %}text-terracotta fill-terracotta{% else %}text-stone/40{% endif %}"></i>
+                  {% endfor %}
+                </div>
+                <span class="font-bold text-sm text-charcoal">{{ "%.1f"|format(hotel.rating) }}</span>
+                <span class="text-xs text-charcoal/50">· {{ reviews|length if reviews else hotel.review_count }} verified reviews</span>
+              </div>
+              {% endif %}
+            </div>
+            <a href="{{ url_for('reviews.write') }}?target_type=hotel&target_id={{ hotel.id }}"
+               class="px-3.5 py-2 rounded-xl text-xs font-semibold bg-terracotta/10 text-terracotta border border-terracotta/20 hover:bg-terracotta hover:text-white transition-all flex items-center gap-1.5">
+              <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+              <span>Write a Review</span>
+            </a>
+          </div>
+
+          {% if reviews %}
+          <div class="space-y-5 divide-y divide-stone/25">
+            {% for r in reviews %}
+            <div class="pt-5 first:pt-0">
+              <div class="flex items-start justify-between gap-3 mb-2">
+                <div class="flex items-center gap-3">
+                  <div class="w-9 h-9 rounded-full bg-pine/10 text-pine font-bold text-sm flex items-center justify-center border border-pine/20 flex-shrink-0">
+                    {{ r.user.name[0] if r.user and r.user.name else 'T' }}
+                  </div>
+                  <div>
+                    <h4 class="font-semibold text-sm text-charcoal leading-tight">{{ r.user.name if r.user else 'Verified Guest' }}</h4>
+                    <p class="text-[11px] text-charcoal/50 flex items-center gap-1 mt-0.5">
+                      <i data-lucide="map-pin" class="w-3 h-3 text-terracotta"></i>
+                      <span>{{ r.user.home_city if r.user and r.user.home_city else 'India' }}</span>
+                      <span>·</span>
+                      <span>{{ r.created_at.strftime('%b %d, %Y') }}</span>
+                    </p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-0.5 px-2 py-0.5 rounded-md bg-stone/20">
+                  {% for i in range(r.rating or 5) %}
+                  <i data-lucide="star" class="w-3 h-3 text-terracotta fill-terracotta"></i>
+                  {% endfor %}
+                </div>
+              </div>
+              <p class="text-xs sm:text-sm text-charcoal/80 leading-relaxed pl-12 font-light">{{ r.comment }}</p>
+            </div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <div class="text-center py-8 bg-ivory/50 rounded-2xl border border-dashed border-stone/60">
+            <i data-lucide="message-circle" class="w-8 h-8 text-charcoal/30 mx-auto mb-2"></i>
+            <p class="text-sm font-medium text-charcoal">No written reviews yet for {{ hotel.name }}</p>
+            <p class="text-xs text-charcoal/50 mt-1 max-w-sm mx-auto">Have you stayed here? Be the first traveler to share your authentic experience!</p>
+            <a href="{{ url_for('reviews.write') }}?target_type=hotel&target_id={{ hotel.id }}"
+               class="mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold bg-terracotta text-white hover:bg-terracotta-hover transition-colors shadow-xs">
+              <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+              <span>Be the first to review</span>
+            </a>
+          </div>
+          {% endif %}
+        </div>
+
+
+        <!-- Weather Widget -->
+        {% if weather %}
+        <div class="bg-white rounded-card shadow-card border border-stone/40 overflow-hidden">
+          <div class="bg-pine px-5 py-3 flex items-center justify-between">
+            <span class="text-ivory text-sm font-semibold flex items-center gap-2">
+              <i data-lucide="cloud-sun" class="w-4 h-4 text-terracotta"></i>
+              Local Weather
+            </span>
+            {% if weather.is_stub %}<span class="text-ivory/50 text-[10px]">Demo data</span>{% endif %}
+          </div>
+          <div class="px-5 py-4 border-b border-stone/30">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-3xl font-bold text-charcoal">{{ weather.current.temp }}°C</p>
+                <p class="text-charcoal/60 text-sm mt-0.5">{{ weather.current.description }}</p>
+                <p class="text-charcoal/50 text-xs mt-1">Feels like {{ weather.current.feels_like }}°C · {{ weather.current.humidity }}% humidity</p>
+              </div>
+              <i data-lucide="{{ weather.current.icon or 'sun' }}" class="w-10 h-10 text-amber-500 flex-shrink-0"></i>
+            </div>
+            {% if weather.advisories %}
+            <div class="mt-3 pt-3 border-t border-stone/30">
+              <p class="text-xs text-amber-700 flex items-start gap-1.5">
+                <i data-lucide="triangle-alert" class="w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-amber-500"></i>
+                {{ weather.advisories[0] }}
+              </p>
+            </div>
+            {% endif %}
+          </div>
+          <div class="grid grid-cols-3 divide-x divide-stone/30 px-2 py-3">
+            {% for day in weather.daily %}
+            <div class="text-center px-2">
+              <p class="text-xs text-charcoal/50 font-medium mb-1">{{ day.day }}</p>
+              <div class="flex justify-center my-1 text-terracotta"><i data-lucide="{{ day.icon or 'sun' }}" class="w-5 h-5"></i></div>
+              <p class="text-xs font-semibold text-charcoal mt-1">{{ day.high }}° / <span class="text-charcoal/50">{{ day.low }}°</span></p>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+      </div>
+
+      <div class="space-y-5">
+        <div class="bg-white rounded-card shadow-card p-6 border border-stone/40">
+          {% if hotel.price_min %}
+          <p class="font-serif text-3xl font-bold text-charcoal mb-1">₹{{ hotel.price_min }}<span class="text-sm text-charcoal/50 font-normal">/night</span></p>
+          {% if price_flag and price_flag.median %}
+          <p class="text-xs text-charcoal/50 mb-2">Typical in {{ hotel.district }}: ₹{{ price_flag.median|int }}</p>
+          {% endif %}
+          {% endif %}
+          {% if hotel.rating %}
+          <div class="flex items-center gap-1.5 mb-5 mt-2">
+            <i data-lucide="star" class="w-4 h-4 text-terracotta fill-terracotta"></i>
+            <span class="font-semibold text-charcoal">{{ "%.1f"|format(hotel.rating) }}</span>
+            <span class="text-charcoal/50 text-xs">({{ hotel.review_count }} reviews)</span>
+          </div>
+          {% endif %}
+          <a href="{{ url_for('reviews.write') }}?target_type=hotel&target_id={{ hotel.id }}" class="block w-full text-center py-3 bg-terracotta text-white font-semibold rounded-xl hover:bg-terracotta-hover transition-colors text-sm shadow-sm">Request Booking</a>
+        </div>
+
+        <!-- Safety Trust Badge -->
+        <div class="bg-surface rounded-card p-4 border border-stone/40 shadow-card">
+          <h4 class="font-semibold text-charcoal text-xs uppercase tracking-wide mb-3">Trust & Safety</h4>
+          <div class="space-y-2 text-xs text-charcoal/70">
+            {% if hotel.verification_status == 'verified' %}
+            <div class="flex items-center gap-2 text-pine font-semibold">
+              <i data-lucide="shield-check" class="w-4 h-4 text-sage"></i>
+              <span>Host ID Verified by BeyondTour</span>
+            </div>
+            {% else %}
+            <div class="flex items-center gap-2">
+              <i data-lucide="shield" class="w-4 h-4 text-charcoal/40"></i>
+              <span>Verification pending</span>
+            </div>
+            {% endif %}
+            <div class="flex items-center gap-2">
+              <i data-lucide="star" class="w-4 h-4 text-terracotta"></i>
+              <span>{{ hotel.review_count }} verified guest reviews</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

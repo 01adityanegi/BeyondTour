@@ -1,0 +1,259 @@
+{% extends '_base.html' %}
+{% block title %}Hotels, Homestays & Dining — Beyond Tour{% endblock %}
+{% block meta_description %}Discover verified homestays, boutique heritage hotels, and authentic regional dining spots across Uttarakhand.{% endblock %}
+
+{% block content %}
+<div class="pt-4 sm:pt-6 pb-20 bg-ivory min-h-screen">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-2 pb-12">
+
+    <!-- Header -->
+    <div class="mb-8 text-center max-w-3xl mx-auto">
+      <h1 class="font-serif text-4xl sm:text-5xl font-bold text-charcoal mb-2">Hotels and Homestays</h1>
+      <p class="text-xs sm:text-sm text-charcoal/70 font-light">
+        Verified hosts, local Kumaoni/Garhwali food, and lowest price sorting by default
+      </p>
+    </div>
+
+    <!-- Compact Zero-Scroll Destination Pill Bar -->
+    <div class="mb-6 bg-white/60 p-3.5 sm:p-4 rounded-2xl border border-stone/40 shadow-xs backdrop-blur-sm">
+      <div class="flex items-center justify-between mb-2.5 px-1">
+        <span class="text-[11px] uppercase font-bold tracking-widest text-terracotta flex items-center gap-1.5">
+          <i data-lucide="map-pin" class="w-3.5 h-3.5 text-terracotta"></i>
+          <span>Select City / Destination</span>
+        </span>
+        {% if active_district %}
+        <a href="{{ url_for('hotels.index', type=active_type, budget=active_budget, sort=active_sort) }}" class="text-xs font-semibold text-terracotta hover:underline flex items-center gap-1">
+          <span>Show all locations</span>
+          <i data-lucide="rotate-ccw" class="w-3 h-3"></i>
+        </a>
+        {% else %}
+        <span class="text-xs text-charcoal/50">{{ location_cards|length }} core districts: Almora, Nainital, Pithoragarh & Uttarkashi</span>
+        {% endif %}
+      </div>
+
+      <div class="flex items-center gap-2 overflow-x-auto pb-1.5 scrollbar-none no-scrollbar">
+        <!-- All Stays Pill -->
+        <a href="{{ url_for('hotels.index', type=active_type, budget=active_budget, sort=active_sort) }}"
+           class="flex-shrink-0 inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold transition-all {% if not active_district %}bg-pine text-white shadow-md ring-2 ring-pine/30{% else %}bg-white text-charcoal/80 hover:bg-stone/20 border border-stone/50 hover:text-charcoal{% endif %}">
+          <i data-lucide="globe" class="w-3.5 h-3.5"></i>
+          <span>All Locations ({{ counts.stays }})</span>
+        </a>
+
+        {% for card in location_cards %}
+        {% set is_active = (active_district|lower == card.slug or active_district|lower == card.name|lower or card.slug in active_district|lower) %}
+        <a href="{{ url_for('hotels.index', district=card.slug, type=active_type, budget=active_budget, sort=active_sort) }}"
+           class="flex-shrink-0 inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all {% if is_active %}bg-terracotta text-white shadow-md ring-2 ring-terracotta/30 scale-[1.02]{% else %}bg-white text-charcoal/80 hover:bg-stone/20 border border-stone/50 hover:text-charcoal{% endif %}">
+          <span>{{ card.name }}</span>
+          {% if is_active %}
+          <span class="px-1.5 py-0.2 rounded-full bg-white/20 text-[10px] font-bold">Selected</span>
+          {% else %}
+          <span class="px-1.5 py-0.2 rounded-full bg-stone/20 text-charcoal/60 text-[10px] font-medium">₹{{ card.min_price }}+</span>
+          {% endif %}
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Active District Status & Filters Bar -->
+    <div class="bg-surface rounded-2xl shadow-card p-4 sm:p-5 mb-8 border border-stone/50">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <!-- District status -->
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-terracotta/15 text-terracotta flex items-center justify-center flex-shrink-0">
+            <i data-lucide="sliders-horizontal" class="w-4 h-4"></i>
+          </div>
+          <div>
+            {% if active_district %}
+            <div class="flex items-center gap-2">
+              <span class="text-xs text-charcoal/60 uppercase tracking-wider">Filtered by:</span>
+              <span class="font-bold text-charcoal capitalize text-sm">{{ active_district }}</span>
+              <a href="{{ url_for('hotels.index', type=active_type, budget=active_budget, sort=active_sort) }}" class="inline-flex items-center gap-1 text-[11px] font-semibold text-terracotta hover:underline ml-1">
+                (Clear <i data-lucide="x" class="w-3 h-3"></i>)
+              </a>
+            </div>
+            <p class="text-xs text-charcoal/60">{{ counts.stays }} verified stays in {{ active_district|capitalize }} starting from ₹700 – ₹3,000 / night</p>
+            {% else %}
+            <p class="font-bold text-charcoal text-sm">All Uttarakhand Stays (₹700 – ₹3,000 / night)</p>
+            <p class="text-xs text-charcoal/60">Showing {{ hotels|length }} verified hotels and homestays across all 11 destinations</p>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Type Filter Tabs (Homestays, Hotels, Dining) -->
+        <div class="flex flex-wrap items-center gap-2">
+          <a href="{{ url_for('hotels.index', district=active_district, budget=active_budget, sort=active_sort) }}"
+             class="px-4 py-2 rounded-xl text-xs font-semibold transition-all {% if not active_type %}bg-terracotta text-white shadow-xs{% else %}bg-ivory border border-stone/40 text-charcoal hover:border-terracotta{% endif %}">
+            All Stays ({{ counts.stays }})
+          </a>
+          <a href="{{ url_for('hotels.index', district=active_district, type='homestay', budget=active_budget, sort=active_sort) }}"
+             class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold transition-all {% if active_type == 'homestay' %}bg-terracotta text-white shadow-xs{% else %}bg-ivory border border-stone/40 text-charcoal hover:border-terracotta{% endif %}">
+            <i data-lucide="home" class="w-3.5 h-3.5"></i> Homestays ({{ counts.homestay }})
+          </a>
+          <a href="{{ url_for('hotels.index', district=active_district, type='hotel', budget=active_budget, sort=active_sort) }}"
+             class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold transition-all {% if active_type == 'hotel' %}bg-terracotta text-white shadow-xs{% else %}bg-ivory border border-stone/40 text-charcoal hover:border-terracotta{% endif %}">
+            <i data-lucide="building" class="w-3.5 h-3.5"></i> Hotels ({{ counts.hotel }})
+          </a>
+          {% if counts.restaurant > 0 %}
+          <a href="{{ url_for('hotels.index', district=active_district, type='restaurant', budget=active_budget, sort=active_sort) }}"
+             class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold transition-all {% if active_type in ('restaurant', 'dining') %}bg-terracotta text-white shadow-xs{% else %}bg-ivory border border-stone/40 text-charcoal hover:border-terracotta{% endif %}">
+            <i data-lucide="utensils" class="w-3.5 h-3.5"></i> Local Dining ({{ counts.restaurant }})
+          </a>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Budget Filter & Sorting Toolbar -->
+      <div class="mt-4 pt-4 border-t border-stone/25 flex flex-col lg:flex-row lg:items-center justify-between gap-3 text-xs">
+        <!-- Price Range Pills -->
+        <div class="flex flex-wrap items-center gap-1.5">
+          <span class="text-[11px] font-bold text-charcoal/60 uppercase tracking-wider mr-1">Budget Range:</span>
+          <a href="{{ url_for('hotels.index', district=active_district, type=active_type, sort=active_sort) }}"
+             class="px-3 py-1.5 rounded-lg font-semibold transition-all {% if not active_budget %}bg-pine text-white shadow-2xs{% else %}bg-ivory border border-stone/40 text-charcoal hover:border-pine{% endif %}">
+            All (₹700 – ₹3,000)
+          </a>
+          <a href="{{ url_for('hotels.index', district=active_district, type=active_type, budget='700-1200', sort=active_sort) }}"
+             class="px-3 py-1.5 rounded-lg font-semibold transition-all {% if active_budget == '700-1200' %}bg-pine text-white shadow-2xs{% else %}bg-ivory border border-stone/40 text-charcoal hover:border-pine{% endif %}">
+            ₹700 – ₹1,200 (Budget Homestays)
+          </a>
+          <a href="{{ url_for('hotels.index', district=active_district, type=active_type, budget='1200-2000', sort=active_sort) }}"
+             class="px-3 py-1.5 rounded-lg font-semibold transition-all {% if active_budget == '1200-2000' %}bg-pine text-white shadow-2xs{% else %}bg-ivory border border-stone/40 text-charcoal hover:border-pine{% endif %}">
+            ₹1,200 – ₹2,000 (Comfort Stays)
+          </a>
+          <a href="{{ url_for('hotels.index', district=active_district, type=active_type, budget='2000-3000', sort=active_sort) }}"
+             class="px-3 py-1.5 rounded-lg font-semibold transition-all {% if active_budget == '2000-3000' %}bg-pine text-white shadow-2xs{% else %}bg-ivory border border-stone/40 text-charcoal hover:border-pine{% endif %}">
+            ₹2,000 – ₹3,000 (Scenic Mountain Lodges)
+          </a>
+        </div>
+
+        <!-- Sort options -->
+        <div class="flex items-center gap-1.5 self-end lg:self-center">
+          <span class="text-[11px] font-bold text-charcoal/60 uppercase tracking-wider">Sort:</span>
+          <div class="flex items-center bg-ivory rounded-lg border border-stone/40 p-0.5">
+            <a href="{{ url_for('hotels.index', district=active_district, type=active_type, budget=active_budget, sort='price_asc') }}"
+               class="px-2.5 py-1 rounded-md text-xs font-semibold transition-all {% if active_sort == 'price_asc' or not active_sort %}bg-terracotta text-white shadow-2xs{% else %}text-charcoal/70 hover:text-charcoal{% endif %}">
+              Lowest Price First
+            </a>
+            <a href="{{ url_for('hotels.index', district=active_district, type=active_type, budget=active_budget, sort='rating') }}"
+               class="px-2.5 py-1 rounded-md text-xs font-semibold transition-all {% if active_sort == 'rating' %}bg-terracotta text-white shadow-2xs{% else %}text-charcoal/70 hover:text-charcoal{% endif %}">
+              Top Rated
+            </a>
+            <a href="{{ url_for('hotels.index', district=active_district, type=active_type, budget=active_budget, sort='price_desc') }}"
+               class="px-2.5 py-1 rounded-md text-xs font-semibold transition-all {% if active_sort == 'price_desc' %}bg-terracotta text-white shadow-2xs{% else %}text-charcoal/70 hover:text-charcoal{% endif %}">
+              Highest Price
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Listings Grid -->
+    {% if hotels %}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {% for hotel in hotels %}
+      {% set is_dining = (hotel.hotel_type in ('restaurant', 'cafe')) %}
+      <a href="{{ url_for('hotels.detail', hotel_id=hotel.id) }}" class="group bg-surface rounded-card overflow-hidden shadow-card card-hover border border-stone/40 flex flex-col justify-between">
+        <div>
+          <div class="relative h-52 overflow-hidden">
+            <img src="{{ hotel.cover_image_url or 'https://images.unsplash.com/photo-1604537529428-15bcbeecfe4d?w=600&q=80' }}" alt="{{ hotel.name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" loading="lazy">
+            
+            <!-- Type Badge -->
+            <div class="absolute top-3 left-3 px-3 py-1 text-xs font-semibold rounded-full shadow-xs flex items-center gap-1.5
+                        {% if is_dining %}bg-amber-600 text-white{% elif hotel.hotel_type == 'homestay' %}bg-pine text-ivory{% else %}bg-terracotta text-white{% endif %}">
+              {% if is_dining %}
+                <i data-lucide="utensils" class="w-3 h-3"></i> Dining / Cafe
+              {% elif hotel.hotel_type == 'homestay' %}
+                <i data-lucide="home" class="w-3 h-3"></i> Homestay
+              {% else %}
+                <i data-lucide="building" class="w-3 h-3"></i> Hotel
+              {% endif %}
+            </div>
+
+            <!-- District Tag -->
+            <div class="absolute bottom-3 left-3 px-2.5 py-0.5 rounded-full bg-black/60 backdrop-blur-xs text-white text-[11px] font-medium flex items-center gap-1">
+              <i data-lucide="map-pin" class="w-3 h-3 text-amber-400"></i>
+              <span>{{ hotel.district }}</span>
+            </div>
+
+            <!-- Rating -->
+            {% if hotel.rating %}
+            <div class="absolute top-3 right-3 px-2.5 py-1 bg-white/95 rounded-lg flex items-center gap-1 shadow-sm backdrop-blur-xs">
+              <i data-lucide="star" class="w-3.5 h-3.5 text-terracotta fill-terracotta"></i>
+              <span class="text-charcoal text-xs font-bold">{{ "%.1f"|format(hotel.rating) }}</span>
+              <span class="text-[10px] text-charcoal/50">({{ hotel.review_count }})</span>
+            </div>
+            {% endif %}
+          </div>
+
+          <div class="p-5">
+            <h3 class="font-serif text-xl font-bold text-charcoal mb-1 group-hover:text-terracotta transition-colors">{{ hotel.name }}</h3>
+            {% if hotel.host_name %}
+            <p class="text-xs text-charcoal/60 mb-2.5 flex items-center gap-1">
+              <i data-lucide="user-check" class="w-3 h-3 text-terracotta"></i>
+              <span>{% if is_dining %}Managed by {{ hotel.host_name }}{% else %}Hosted by {{ hotel.host_name }}{% endif %}</span>
+            </p>
+            {% endif %}
+
+            {% if hotel.host_story %}
+            <p class="text-xs text-charcoal/70 line-clamp-2 leading-relaxed font-light mb-3">
+              {{ hotel.host_story }}
+            </p>
+            {% endif %}
+
+            {% if hotel.amenities %}
+            {% set ams = hotel.amenities|from_json %}
+            {% if ams and ams|length > 0 %}
+            <div class="flex flex-wrap items-center gap-1.5 mt-2">
+              {% for a in ams[:3] %}
+              <span class="px-2 py-0.5 rounded-full text-[10px] bg-ivory border border-stone/50 text-charcoal/75 capitalize font-medium">
+                {{ a|replace('-', ' ')|replace('_', ' ') }}
+              </span>
+              {% endfor %}
+              {% if ams|length > 3 %}
+              <span class="text-[10px] text-charcoal/40 font-medium">+{{ ams|length - 3 }} more</span>
+              {% endif %}
+            </div>
+            {% endif %}
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="px-5 pb-5 pt-3 border-t border-stone/25 flex items-center justify-between">
+          <div>
+            {% if is_dining %}
+              <span class="text-charcoal font-bold text-base">₹{{ hotel.price_min }} <span class="text-xs font-normal text-charcoal/60">avg/person</span></span>
+            {% elif hotel.price_min %}
+              <span class="text-charcoal font-bold text-base">₹{{ hotel.price_min }} <span class="text-xs font-normal text-charcoal/60">/ night</span></span>
+            {% else %}
+              <span class="text-xs text-charcoal/50">Inquire for pricing</span>
+            {% endif %}
+          </div>
+          <span class="text-xs text-terracotta font-semibold flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
+            <span>{% if is_dining %}View Menu{% else %}View Details{% endif %}</span>
+            <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+          </span>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-20 bg-surface rounded-card border border-stone/40 p-8 max-w-lg mx-auto">
+      <div class="w-14 h-14 rounded-full bg-terracotta/10 text-terracotta mx-auto mb-4 flex items-center justify-center">
+        <i data-lucide="home" class="w-7 h-7"></i>
+      </div>
+      <h3 class="font-serif text-2xl text-charcoal font-bold mb-1">No listings found</h3>
+      <p class="text-charcoal/60 text-xs mb-5">
+        {% if active_district %}
+        No listings matching "{{ active_district|capitalize }}"{% if active_type %} and "{{ active_type }}"{% endif %}.
+        {% else %}
+        No listings matching current filter.
+        {% endif %}
+      </p>
+      <a href="{{ url_for('hotels.index') }}" class="px-5 py-2.5 rounded-full bg-terracotta text-white text-xs font-semibold shadow-sm hover:bg-terracotta-hover transition-colors inline-flex items-center gap-1.5">
+        <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+        <span>Show All Uttarakhand Listings</span>
+      </a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

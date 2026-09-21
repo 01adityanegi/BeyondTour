@@ -1,0 +1,10 @@
+<button type="button"
+        hx-post="{{ url_for('wishlist.toggle') }}"
+        hx-vals='{"target_type": "{{ target_type }}", "target_id": {{ target_id }}}'
+        hx-swap="outerHTML"
+        aria-label="{% if saved %}Remove from wishlist{% else %}Save to wishlist{% endif %}"
+        class="w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 shadow-sm border focus:outline-none {% if saved %}bg-terracotta text-white border-terracotta shadow-terracotta/20{% else %}bg-white/90 backdrop-blur-sm text-charcoal/70 hover:text-terracotta border-white/60 hover:bg-white{% endif %} {{ extra_class or '' }}">
+  <svg class="w-4 h-4 transition-transform active:scale-90" viewBox="0 0 24 24" fill="{% if saved %}currentColor{% else %}none{% endif %}" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+  </svg>
+</button>

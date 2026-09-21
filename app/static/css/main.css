@@ -1,0 +1,174 @@
+/* BeyondTour — Global Design System & Core Stylesheet */
+
+* {
+  box-sizing: border-box;
+}
+
+@font-face {
+  font-family: 'CleanAmpersand';
+  src: local('Georgia'), local('Times New Roman'), local('serif');
+  unicode-range: U+0026; /* strictly format character '&' */
+}
+
+body {
+  font-family: 'Manrope', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background-color: #F7F3EC;
+  color: #2B2A28;
+}
+
+.font-serif {
+  font-family: 'CleanAmpersand', 'Fraunces', Georgia, serif;
+}
+
+/* Decorative Himalayan Aipan Divider */
+.aipan-divider {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  margin: 2rem 0;
+}
+
+.aipan-divider::before,
+.aipan-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(193, 98, 45, 0.25), transparent);
+}
+
+.aipan-motif {
+  color: #C1622D;
+  font-size: 1.1rem;
+  letter-spacing: 6px;
+  opacity: 0.8;
+}
+
+/* Card hover lift & elevation */
+.card-hover {
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(22, 48, 43, 0.12);
+}
+
+/* Aspect ratios for media */
+.aspect-instagram { aspect-ratio: 4 / 5; }
+.aspect-instagram-sq { aspect-ratio: 1 / 1; }
+.aspect-shorts { aspect-ratio: 9 / 16; }
+.aspect-yt-video { aspect-ratio: 16 / 9; }
+
+/* Gradient text */
+.text-gradient {
+  background: linear-gradient(135deg, #16302B, #C1622D);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Scroll-reveal animation */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Himalayan frosted glass effect */
+.glass {
+  background: rgba(247, 243, 236, 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(220, 211, 196, 0.6);
+}
+
+/* Custom sleek scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F7F3EC;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(193, 98, 45, 0.35);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #C1622D;
+}
+
+/* Status chips & tags (Sage Moss only) */
+.tag-sage {
+  background-color: rgba(107, 143, 113, 0.15);
+  color: #16302B;
+  border: 1px solid rgba(107, 143, 113, 0.35);
+}
+
+/* Interactive button styles */
+.btn-terracotta {
+  background-color: #C1622D;
+  color: #FFFFFF;
+  transition: all 0.2s ease;
+}
+
+.btn-terracotta:hover {
+  background-color: #A65123;
+  box-shadow: 0 4px 14px rgba(193, 98, 45, 0.35);
+}
+
+/* Mobile Responsiveness & Overflow Prevention */
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
+  width: 100%;
+}
+
+@media (max-width: 640px) {
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+}
+
+@media (pointer: coarse) {
+  button, a, input, select {
+    touch-action: manipulation;
+  }
+}
+
+/* Global Leaflet map styling */
+.leaflet-popup-content-wrapper {
+  background: #16302b;
+  color: #f7f3ec;
+  border-radius: 16px;
+  padding: 0;
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.leaflet-popup-content {
+  margin: 0;
+  line-height: 1.4;
+}
+
+.leaflet-popup-tip {
+  background: #16302b;
+}
+
+.leaflet-container a.leaflet-popup-close-button {
+  color: #f7f3ec;
+  padding: 8px 8px 0 0;
+}
+
+.leaflet-container a.leaflet-popup-close-button:hover {
+  color: #c1622d;
+}

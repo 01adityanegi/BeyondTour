@@ -1,0 +1,155 @@
+{% extends '_base.html' %}
+{% block title %}Local Food of Uttarakhand — Beyond Tour{% endblock %}
+
+{% block content %}
+<div class="pt-4 sm:pt-6 pb-16 bg-ivory min-h-screen">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-2 pb-16">
+
+    <!-- Header -->
+    <div class="text-center mb-6">
+      <h1 class="font-serif text-3xl sm:text-4xl font-bold text-charcoal">
+        Local <span class="text-terracotta italic">Food</span>
+      </h1>
+    </div>
+
+    <!-- Region Filter -->
+    <div class="flex justify-center mb-8 sm:mb-12 px-2">
+      <div class="inline-flex items-center bg-white rounded-2xl shadow-card p-1 sm:p-1.5 gap-1 border border-stone/40 max-w-full">
+        <a href="{{ url_for('culture.food') }}?region=all"
+           onclick="sessionStorage.setItem('beyond_tour_region', 'all')"
+           class="px-3 sm:px-6 py-2 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold transition-all {% if active_region == 'all' %}bg-terracotta text-white shadow-md{% else %}text-charcoal/60 hover:text-charcoal{% endif %}">
+          All Dishes
+        </a>
+        <a href="{{ url_for('culture.food') }}?region=kumaon"
+           onclick="sessionStorage.setItem('beyond_tour_region', 'kumaon')"
+           class="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-6 py-2 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold transition-all {% if active_region == 'kumaon' %}bg-terracotta text-white shadow-md{% else %}text-charcoal/60 hover:text-charcoal{% endif %}">
+          <i data-lucide="sparkles" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i> Kumaon
+        </a>
+        <a href="{{ url_for('culture.food') }}?region=garhwal"
+           onclick="sessionStorage.setItem('beyond_tour_region', 'garhwal')"
+           class="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-6 py-2 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold transition-all {% if active_region == 'garhwal' %}bg-terracotta text-white shadow-md{% else %}text-charcoal/60 hover:text-charcoal{% endif %}">
+          <i data-lucide="mountain" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i> Garhwal
+        </a>
+      </div>
+    </div>
+
+    {% if foods %}
+    <!-- Food Cards Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      {% for food in foods %}
+      <div class="bg-white rounded-card overflow-hidden shadow-card card-hover reveal border border-stone/40"
+           x-data="{ flipped: false }">
+        <!-- Food Image -->
+        <div class="relative h-56 overflow-hidden group cursor-pointer" @click="flipped = !flipped">
+          <img src="{{ food.image_url or 'https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=600&q=80' }}"
+               alt="{{ food.name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
+          <div class="absolute inset-0 bg-gradient-to-t from-pine/80 via-pine/20 to-transparent"></div>
+
+          <!-- Tags -->
+          <div class="absolute top-3 left-3 flex gap-2">
+            <span class="px-2.5 py-1 rounded-full text-xs font-semibold
+              {% if food.region == 'kumaon' %}tag-terracotta{% else %}tag-sage{% endif %}">
+              {{ food.region | capitalize if food.region else 'Uttarakhand' }}
+            </span>
+            {% if food.category %}
+            <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-white/20 backdrop-blur text-white">{{ food.category }}</span>
+            {% endif %}
+          </div>
+
+          <div class="absolute bottom-3 left-3 right-3">
+            <h3 class="font-serif text-2xl font-bold text-white">{{ food.name }}</h3>
+          </div>
+        </div>
+
+        <!-- Info Panel -->
+        <div class="p-5">
+          <p class="text-charcoal/70 text-sm leading-relaxed mb-4">{{ food.description }}</p>
+
+          {% if food.ingredients %}
+          <div class="mb-4">
+            <p class="text-xs font-semibold text-charcoal uppercase tracking-wide mb-2">Key Ingredients</p>
+            <p class="text-charcoal/60 text-xs">{{ food.ingredients }}</p>
+          </div>
+          {% endif %}
+
+          {% if food.where_to_try %}
+          <div class="flex items-center gap-2 text-xs text-charcoal/70 font-medium">
+            <i data-lucide="map-pin" class="w-3.5 h-3.5 text-terracotta flex-shrink-0"></i>
+            <span>Where to try: {{ food.where_to_try }}</span>
+          </div>
+          {% endif %}
+
+          <div class="mt-4 pt-4 border-t border-stone/20 flex items-center justify-between">
+            <a href="{{ url_for('trip_planner.index') }}"
+               class="text-xs text-terracotta font-semibold hover:underline flex items-center gap-1">
+              Plan a food trail <i data-lucide="arrow-right" class="w-3 h-3"></i>
+            </a>
+            {% if food.destination %}
+            <a href="{{ url_for('destinations.detail', dest_id=food.destination_id) }}"
+               class="text-xs bg-stone/20 text-charcoal px-3 py-1.5 rounded-lg hover:bg-stone/40 transition-colors font-medium">
+              Find nearby
+            </a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    {% else %}
+    <!-- Default food showcase when no seed data -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      {% set default_foods = [
+        ('Bhatt ki Churkani', 'kumaon', 'A slow-cooked black soybean curry — a Kumaoni winter staple.', 'Black soybeans, garlic, dry spices', 'Almora dhabas', '/static/images/food/bhatt_ki_churkani.jpg'),
+        ('Madua ki Roti', 'garhwal', 'Rustic finger millet flatbread topped with melting homemade white butter, onions, and hill chillies.', 'Finger millet (mandua) flour, mountain white butter, hill chillies', 'Chamoli & Almora homestays', '/static/images/food/madua_ki_roti.jpg'),
+        ('Aloo ke Gutke', 'kumaon', 'Fiery pan-roasted potatoes with jakhiya seeds and Himalayan herbs.', 'Potatoes, jakhiya, dry red chilies, mustard oil', 'Every Kumaoni home and street stall', '/static/images/food/aloo_ke_gutke.jpg'),
+        ('Jhangora ki Kheer', 'kumaon', 'A creamy millet pudding — light, nourishing, and served at festivals.', 'Barnyard millet, milk, sugar, cardamom, dry fruits', 'Festival days and local homestays', '/static/images/food/jhangora_ki_kheer.jpg'),
+        ('Kafuli', 'garhwal', 'A rich leafy-green curry made from spinach or fenugreek, thickened with rice flour.', 'Spinach, fenugreek, rice flour, garlic, ghee', 'Rishikesh and Pauri restaurants', 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&q=80'),
+        ('Bal Mithai', 'kumaon', 'A dark-brown fudge made from khoya, coated in sugar balls — the pride of Almora.', 'Khoya, sugar, white sugar pearls', 'Almora — especially Sarthi Sweets', '/static/images/food/bal_mithai.jpg'),
+        ('Chainsoo', 'garhwal', 'Ground black gram slow-cooked into a smoky, thick dal with a deep earthy flavor.', 'Black gram, dry red chilies, ghee, garlic, hing', 'Pahari dhabas across Garhwal', '/static/images/food/chainsoo.jpg'),
+        ('Gahat (Kulath) ki Dal', 'kumaon', 'Horse-gram lentils cooked with garlic, ginger, and Pahadi spices, prized for its warming and medicinal qualities.', 'Horse-gram (kulath), garlic, ginger, dry spices, fresh coriander', 'Almora & Chamoli dhabas', '/static/images/food/gahat_dal.jpg'),
+      ] %}
+      {% for name, region, desc, ingredients, where, img in default_foods %}
+      <div class="bg-white rounded-card overflow-hidden shadow-card card-hover reveal border border-stone/40">
+        <div class="relative h-56 overflow-hidden">
+          <img src="{{ img }}" alt="{{ name }}" class="w-full h-full object-cover hover:scale-105 transition-transform duration-700">
+          <div class="absolute inset-0 bg-gradient-to-t from-pine/80 via-pine/20 to-transparent"></div>
+          <div class="absolute top-3 left-3">
+            <span class="px-2.5 py-1 rounded-full text-xs font-semibold {% if region == 'kumaon' %}tag-terracotta{% else %}tag-sage{% endif %}">{{ region | capitalize }}</span>
+          </div>
+          <div class="absolute bottom-3 left-3 right-3">
+            <h3 class="font-serif text-2xl font-bold text-white">{{ name }}</h3>
+          </div>
+        </div>
+        <div class="p-5">
+          <p class="text-charcoal/70 text-sm leading-relaxed mb-3">{{ desc }}</p>
+          <p class="text-xs text-charcoal/50 mb-3"><strong class="text-charcoal/70">Ingredients:</strong> {{ ingredients }}</p>
+          <div class="flex items-center gap-2 text-xs text-charcoal/70 font-medium mb-4">
+            <i data-lucide="map-pin" class="w-3.5 h-3.5 text-terracotta"></i><span>{{ where }}</span>
+          </div>
+          <a href="{{ url_for('trip_planner.index') }}"
+             class="text-xs text-terracotta font-semibold hover:underline flex items-center gap-1">Plan a food trail <i data-lucide="arrow-right" class="w-3 h-3"></i></a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Food Trail CTA -->
+    <div class="mt-16 p-8 bg-pine rounded-card text-ivory text-center reveal border border-stone/20">
+      <p class="text-terracotta font-semibold text-sm uppercase tracking-widest mb-3">Plan a Food Trail</p>
+      <h3 class="font-serif text-3xl font-bold mb-4 text-ivory">Taste Your Way Through Uttarakhand</h3>
+      <p class="text-ivory/70 mb-6 max-w-xl mx-auto">Let our AI build a food-focused itinerary — homestay dinners, local dhabas, and markets where you can watch Bal Mithai being made by hand.</p>
+      <a href="{{ url_for('trip_planner.index') }}"
+         class="inline-flex items-center gap-2 px-8 py-4 bg-terracotta text-white font-semibold rounded-2xl hover:bg-terracotta-dark transition-all hover:shadow-lg">
+        <i data-lucide="compass" class="w-5 h-5"></i> Create My Food Trail
+      </a>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/culture-food.js') }}"></script>
+{% endblock %}

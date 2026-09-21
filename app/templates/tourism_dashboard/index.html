@@ -1,0 +1,82 @@
+{% extends '_base.html' %}
+{% block title %}Tourism Dashboard — Beyond Tour{% endblock %}
+{% block extra_head %}<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>{% endblock %}
+{% block content %}
+<div class="pt-4 sm:pt-6 pb-16 bg-pine text-ivory min-h-screen">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-2 pb-12">
+    <div class="mb-8 text-center">
+      <div class="inline-flex items-center gap-2 px-3 py-1 bg-white/10 rounded-full text-xs font-semibold text-terracotta uppercase tracking-widest mb-3 border border-white/15">
+        <i data-lucide="shield" class="w-3.5 h-3.5"></i> Uttarakhand Tourism Board
+      </div>
+      <h1 class="font-serif text-4xl lg:text-5xl font-bold text-ivory">Tourism Intelligence Dashboard</h1>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
+      <div class="bg-white/5 border border-white/15 rounded-card p-5 text-ivory">
+        <p class="text-3xl font-serif font-bold text-terracotta">{{ total_destinations }}</p>
+        <p class="text-ivory/60 text-sm mt-1">Destinations</p>
+      </div>
+      <div class="bg-white/5 border border-white/15 rounded-card p-5 text-ivory">
+        <p class="text-3xl font-serif font-bold text-terracotta">{{ total_hotels }}</p>
+        <p class="text-ivory/60 text-sm mt-1">Homestays / Hotels</p>
+      </div>
+      <div class="bg-white/5 border border-white/15 rounded-card p-5 text-ivory">
+        <p class="text-3xl font-serif font-bold text-terracotta">{{ total_trips }}</p>
+        <p class="text-ivory/60 text-sm mt-1">Trips Planned</p>
+      </div>
+      <div class="bg-white/5 border border-white/15 rounded-card p-5 text-ivory">
+        <p class="text-3xl font-serif font-bold text-terracotta">{{ total_reviews }}</p>
+        <p class="text-ivory/60 text-sm mt-1">Reviews</p>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+      <!-- Region Distribution -->
+      <div class="bg-white/5 border border-white/15 rounded-card p-6">
+        <h3 class="font-serif text-xl font-semibold text-ivory mb-5">Region Distribution</h3>
+        <canvas id="regionChart" height="220"></canvas>
+      </div>
+      <!-- Top Destinations -->
+      <div class="bg-white/5 border border-white/15 rounded-card p-6">
+        <h3 class="font-serif text-xl font-semibold text-ivory mb-5">Destinations by Category</h3>
+        <canvas id="categoryChart" height="220"></canvas>
+      </div>
+    </div>
+
+    <!-- Recent Reviews -->
+    {% if recent_reviews %}
+    <div class="bg-white/5 border border-white/15 rounded-card p-6">
+      <h3 class="font-serif text-xl font-semibold text-ivory mb-5">Recent Traveler Feedback</h3>
+      <div class="space-y-3">
+        {% for review in recent_reviews %}
+        <div class="flex items-start gap-4 p-4 bg-white/5 rounded-xl border border-white/10">
+          <div class="flex gap-0.5 text-terracotta text-sm flex-shrink-0 pt-0.5">
+            {% for i in range(review.rating) %}
+            <i data-lucide="star" class="w-3.5 h-3.5 fill-terracotta"></i>
+            {% endfor %}
+          </div>
+          <div>
+            <p class="text-ivory/90 text-sm leading-relaxed">{{ review.comment | truncate(120) }}</p>
+            <p class="text-ivory/50 text-xs mt-1">{{ review.target_type | capitalize }} #{{ review.target_id }} · {{ review.created_at.strftime('%b %d, %Y') }}</p>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+<script id="tourism-chart-data" type="application/json">
+{{ {
+  'kumaonCount': kumaon_count,
+  'garhwalCount': garhwal_count,
+  'catLabels': cat_labels,
+  'catData': cat_data
+} | tojson }}
+</script>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/tourism-dashboard.js') }}"></script>
+{% endblock %}

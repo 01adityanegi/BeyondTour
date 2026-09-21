@@ -1,0 +1,449 @@
+{% extends '_base.html' %}
+{% block title %}{{ district.name }} District — Beyond Tour{% endblock %}
+{% block meta_description %}{{ district.overview }}{% endblock %}
+
+{% block content %}
+<!-- District Hero Section -->
+<section class="relative bg-pine text-ivory pt-8 pb-20 overflow-hidden">
+  <!-- Landscape Background Image with Deep Pine Gradients -->
+  <div class="absolute inset-0 z-0">
+    <img src="{{ district.hero_image }}" alt="{{ district.name }} landscape" class="w-full h-full object-cover opacity-35 scale-105 transition-transform duration-1000">
+    <div class="absolute inset-0 bg-gradient-to-t from-pine via-pine/70 to-pine/30"></div>
+  </div>
+
+  <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-2">
+    <!-- Breadcrumb -->
+    <div class="flex items-center gap-2 text-xs text-ivory/60 mb-6 font-medium">
+      <a href="{{ url_for('main.index') }}" class="hover:text-terracotta transition-colors">Home</a>
+      <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+      <a href="{{ url_for('destinations.index') }}" class="hover:text-terracotta transition-colors">Destinations</a>
+      <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+      <span class="text-terracotta font-semibold">{{ district.name }} District</span>
+    </div>
+
+    <div class="max-w-3xl">
+      <!-- Sage Moss District Chip -->
+      <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sage/20 border border-sage/40 text-xs font-semibold tracking-wider uppercase text-ivory mb-4">
+        <i data-lucide="map-pin" class="w-3.5 h-3.5 text-sage"></i>
+        <span>{{ district.region }} Himalayas</span>
+      </div>
+
+      <h1 class="font-serif text-5xl sm:text-6xl font-bold tracking-tight text-ivory mb-4 leading-tight">
+        {{ district.name }}
+      </h1>
+      <p class="text-lg text-terracotta font-serif italic mb-4">
+        {{ district.tagline }}
+      </p>
+      <p class="text-base text-ivory/80 leading-relaxed font-light mb-8">
+        {{ district.overview }}
+      </p>
+
+      <!-- Quick Facts Bar -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-6 border-t border-white/15">
+        <div>
+          <p class="text-[11px] uppercase tracking-widest text-ivory/50 font-semibold mb-1">Elevation</p>
+          <div class="flex items-center gap-1.5 text-sm font-medium text-ivory">
+            <i data-lucide="mountain" class="w-4 h-4 text-terracotta"></i>
+            <span>{{ district.altitude }}</span>
+          </div>
+        </div>
+        <div>
+          <p class="text-[11px] uppercase tracking-widest text-ivory/50 font-semibold mb-1">Best Time to Go</p>
+          <div class="flex items-center gap-1.5 text-xs font-medium text-ivory">
+            <i data-lucide="calendar" class="w-4 h-4 text-amber-300"></i>
+            <span class="line-clamp-2">{{ district.best_time.split('(')[0] }}</span>
+          </div>
+        </div>
+        <div>
+          <p class="text-[11px] uppercase tracking-widest text-ivory/50 font-semibold mb-1">Live Crowd Status</p>
+          {% if district_crowd %}
+          <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-white/15 backdrop-blur-sm border border-white/20 text-ivory">
+            <span class="w-2 h-2 rounded-full {{ district_crowd.color_class }} animate-pulse"></span>
+            <span>{{ district_crowd.label }}</span>
+          </div>
+          {% else %}
+          <span class="text-xs text-ivory/70">Normal</span>
+          {% endif %}
+        </div>
+        <div>
+          <p class="text-[11px] uppercase tracking-widest text-ivory/50 font-semibold mb-1">Trip Planner</p>
+          <a href="{{ url_for('trip_planner.index', destination=district.slug) }}" class="inline-flex items-center gap-1.5 text-xs font-semibold text-terracotta hover:underline bg-white/10 px-3 py-1 rounded-full">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+            <span>Plan AI Trip</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Best Time Recommendation Banner -->
+      {% if best_time_info and best_time_info.recommendation %}
+      <div class="mt-5 p-3.5 rounded-xl bg-white/10 border border-white/15 backdrop-blur-sm flex items-start gap-2.5 text-xs text-ivory/90">
+        <i data-lucide="compass" class="w-4 h-4 text-amber-300 flex-shrink-0 mt-0.5"></i>
+        <div>
+          <strong class="text-amber-300 font-semibold">Travel Advice:</strong> {{ best_time_info.recommendation }}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<!-- Main Container -->
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 space-y-24">
+
+  <!-- Section 1: Top Attractions in District -->
+  <section>
+    <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-10 pb-4 border-b border-stone">
+      <div>
+        <span class="text-xs font-semibold uppercase tracking-widest text-terracotta mb-1 block">Places to Explore</span>
+        <h2 class="font-serif text-3xl sm:text-4xl font-bold text-charcoal flex items-center gap-3">
+          <i data-lucide="compass" class="w-8 h-8 text-terracotta stroke-[1.5]"></i>
+          <span>Top Attractions in {{ district.name }}</span>
+        </h2>
+      </div>
+      <p class="text-xs text-charcoal/60 mt-2 sm:mt-0 font-medium">
+        {{ attractions|length }} destination{% if attractions|length != 1 %}s{% endif %} documented
+      </p>
+    </div>
+
+    {% if attractions %}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      {% for dest in attractions %}
+      <article class="bg-surface rounded-card overflow-hidden shadow-card card-hover flex flex-col justify-between border border-stone/40">
+        <div>
+          <!-- Image Container -->
+          <div class="relative h-56 overflow-hidden">
+            <img src="{{ dest.cover_image_url }}" alt="{{ dest.name }}" class="w-full h-full object-cover hover:scale-105 transition-transform duration-500">
+            <div class="absolute top-3 left-3">
+              <span class="px-2.5 py-1 rounded-full bg-pine/90 text-ivory text-xs font-medium uppercase tracking-wider backdrop-blur-sm">
+                {{ dest.category }}
+              </span>
+            </div>
+            {% if dest.altitude_m %}
+            <div class="absolute bottom-3 right-3">
+              <span class="px-2 py-0.5 rounded-md bg-black/60 text-ivory text-xs flex items-center gap-1 backdrop-blur-sm">
+                <i data-lucide="mountain" class="w-3 h-3 text-terracotta"></i>
+                <span>{{ dest.altitude_m }}m</span>
+              </span>
+            </div>
+            {% endif %}
+          </div>
+
+          <!-- Content -->
+          <div class="p-6">
+            <h3 class="font-serif text-xl font-bold text-charcoal mb-1 hover:text-terracotta transition-colors">
+              <a href="{{ url_for('destinations.detail', dest_id=dest.id) }}">{{ dest.name }}</a>
+            </h3>
+
+            <!-- Live Crowd Badge -->
+            {% if crowd_scores and crowd_scores.get(dest.id) %}
+            {% set c = crowd_scores[dest.id] %}
+            <div class="mb-3 flex items-center gap-2">
+              <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold {{ c.bg_light }} {{ c.text_class }} border {{ c.border }} shadow-xs">
+                <span class="w-2 h-2 rounded-full {{ c.color_class }} animate-pulse"></span>
+                <span>{{ c.label }}</span>
+              </span>
+              <span class="text-[10px] text-charcoal/50">Live status</span>
+            </div>
+            {% endif %}
+
+            <p class="text-charcoal/70 text-xs line-clamp-3 leading-relaxed mb-4">
+              {{ dest.description }}
+            </p>
+          </div>
+        </div>
+
+        <div class="px-6 pb-6 pt-2 border-t border-stone/30 flex items-center justify-between">
+          <span class="text-xs text-charcoal/70 flex items-center gap-1.5 font-medium">
+            <i data-lucide="calendar" class="w-3.5 h-3.5 text-terracotta"></i>
+            <span><strong class="text-charcoal font-semibold">Best Time:</strong> {{ dest.best_time.split(',')[0] if dest.best_time else 'Oct–May' }}</span>
+          </span>
+          <a href="{{ url_for('destinations.detail', dest_id=dest.id) }}"
+             class="inline-flex items-center gap-1 text-xs font-semibold text-terracotta hover:text-terracotta-hover">
+            <span>Explore</span>
+            <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+          </a>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="bg-surface rounded-card p-10 text-center border border-stone text-charcoal/60">
+      <i data-lucide="map" class="w-10 h-10 mx-auto text-charcoal/30 mb-3"></i>
+      <p>Attractions catalog for {{ district.name }} is being updated by our mountain scouts.</p>
+    </div>
+    {% endif %}
+  </section>
+
+  <!-- Section 2: Local Culture & Food Callouts -->
+  <section class="bg-white rounded-card p-8 sm:p-12 shadow-card border border-stone/50">
+    <div class="max-w-2xl mb-8">
+      <span class="text-xs font-semibold uppercase tracking-widest text-terracotta mb-1 block">Living Heritage</span>
+      <h2 class="font-serif text-3xl font-bold text-charcoal flex items-center gap-2.5">
+        <i data-lucide="heart" class="w-7 h-7 text-terracotta stroke-[1.5]"></i>
+        <span>Culture, Traditions & Local Flavors</span>
+      </h2>
+      <p class="text-sm text-charcoal/70 mt-2">
+        Authentic traditions, art techniques, and mountain flavors native to {{ district.name }} and the Kumaon region.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <!-- Culture Callouts -->
+      <div class="space-y-4">
+        <div class="flex items-center justify-between pb-2 border-b border-stone/50">
+          <h3 class="font-serif font-semibold text-lg text-charcoal flex items-center gap-2">
+            <i data-lucide="sparkles" class="w-4 h-4 text-terracotta"></i>
+            <span>Regional Festivals & Art</span>
+          </h3>
+          <a href="{{ url_for('culture.index') }}" class="text-xs text-terracotta hover:underline">View all</a>
+        </div>
+        {% for entry in culture_callouts %}
+        <div class="p-4 rounded-xl bg-ivory border border-stone/40 flex items-start gap-3">
+          <img src="{{ entry.cover_image_url }}" alt="{{ entry.title }}" class="w-14 h-14 rounded-lg object-cover flex-shrink-0">
+          <div>
+            <span class="text-[10px] font-semibold tracking-wider uppercase px-2 py-0.5 rounded-full bg-sage/15 text-pine border border-sage/30">
+              {{ entry.entry_type }}
+            </span>
+            <h4 class="font-semibold text-sm text-charcoal mt-1">{{ entry.title }}</h4>
+            <p class="text-xs text-charcoal/70 line-clamp-2 mt-0.5">{{ entry.subtitle or (entry.story_text[:90] if entry.story_text else '') }}</p>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- Food Callouts -->
+      <div class="space-y-4">
+        <div class="flex items-center justify-between pb-2 border-b border-stone/50">
+          <h3 class="font-serif font-semibold text-lg text-charcoal flex items-center gap-2">
+            <i data-lucide="utensils" class="w-4 h-4 text-terracotta"></i>
+            <span>Local Mountain Dishes</span>
+          </h3>
+          <a href="{{ url_for('culture.food') }}" class="text-xs text-terracotta hover:underline">View food trail</a>
+        </div>
+        {% for food in food_callouts %}
+        <div class="p-4 rounded-xl bg-ivory border border-stone/40 flex items-start gap-3">
+          <img src="{{ food.image_url }}" alt="{{ food.name }}" class="w-14 h-14 rounded-lg object-cover flex-shrink-0">
+          <div>
+            <span class="text-[10px] font-semibold tracking-wider uppercase px-2 py-0.5 rounded-full bg-stone/40 text-charcoal">
+              {{ food.category }}
+            </span>
+            <h4 class="font-semibold text-sm text-charcoal mt-1">{{ food.name }}</h4>
+            <p class="text-xs text-charcoal/70 line-clamp-2 mt-0.5">{{ food.description[:90] if food.description else '' }}...</p>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 3: Hotels & Homestays Grid (Sample Data verified) -->
+  <section id="hotels">
+    <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-10 pb-4 border-b border-stone">
+      <div>
+        <span class="text-xs font-semibold uppercase tracking-widest text-terracotta mb-1 block">Where to Stay</span>
+        <h2 class="font-serif text-3xl sm:text-4xl font-bold text-charcoal flex items-center gap-3">
+          <i data-lucide="home" class="w-8 h-8 text-terracotta stroke-[1.5]"></i>
+          <span>Hotels & Homestays in {{ district.name }}</span>
+        </h2>
+      </div>
+      <p class="text-xs text-charcoal/50 italic mt-2 sm:mt-0">
+        Demo partner listings (Sample Data)
+      </p>
+    </div>
+
+    {% if hotels %}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      {% for hotel in hotels %}
+      <div class="bg-surface rounded-card overflow-hidden shadow-card card-hover flex flex-col justify-between border border-stone/40">
+        <div>
+          <!-- Hotel Image + Type Tag -->
+          <div class="relative h-56 overflow-hidden">
+            <img src="{{ hotel.cover_image_url }}" alt="{{ hotel.name }}" class="w-full h-full object-cover">
+            <div class="absolute top-3 left-3">
+              <span class="px-3 py-1 rounded-full text-xs font-semibold tracking-wide uppercase
+                           {% if hotel.hotel_type == 'homestay' %}bg-sage text-white{% else %}bg-pine text-ivory{% endif %}">
+                {{ hotel.hotel_type }}
+              </span>
+            </div>
+            <!-- Star Rating Badge -->
+            <div class="absolute bottom-3 right-3 px-2.5 py-1 rounded-lg bg-black/60 backdrop-blur-sm text-ivory text-xs flex items-center gap-1 font-medium">
+              <i data-lucide="star" class="w-3.5 h-3.5 text-terracotta fill-terracotta"></i>
+              <span>{{ hotel.rating }}</span>
+              <span class="text-white/60 text-[10px]">({{ hotel.review_count }})</span>
+            </div>
+          </div>
+
+          <!-- Content -->
+          <div class="p-6">
+            <div class="flex items-start justify-between gap-2 mb-2">
+              <h3 class="font-serif text-xl font-bold text-charcoal leading-snug">
+                {{ hotel.name }}
+              </h3>
+            </div>
+
+            <p class="text-xs text-charcoal/50 flex items-center gap-1 mb-3">
+              <i data-lucide="map-pin" class="w-3.5 h-3.5 text-terracotta"></i>
+              <span>{{ hotel.district }} District</span>
+            </p>
+
+            <p class="text-xs text-charcoal/80 leading-relaxed line-clamp-3 mb-4 font-light">
+              {{ hotel.host_story }}
+            </p>
+
+            <!-- Amenities Chips -->
+            <div class="flex flex-wrap gap-1.5 mb-4">
+              {% if hotel.amenities %}
+                {% for amenity in hotel.amenities|from_json %}
+                  <span class="px-2.5 py-0.5 rounded-full text-[11px] bg-ivory text-charcoal/70 border border-stone/50 capitalize">
+                    {{ amenity.replace('-', ' ') }}
+                  </span>
+                {% endfor %}
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer / Pricing & CTA -->
+        <div class="px-6 pb-6 pt-3 border-t border-stone/30 flex items-center justify-between">
+          <div>
+            <span class="text-[10px] text-charcoal/50 uppercase tracking-wider block">Price per night</span>
+            <p class="text-base font-bold text-charcoal">
+              ₹{{ hotel.price_min|format_number }} <span class="text-xs font-normal text-charcoal/60">– ₹{{ hotel.price_max|format_number }}</span>
+            </p>
+          </div>
+          <a href="{{ url_for('hotels.detail', hotel_id=hotel.id) }}"
+             class="px-4 py-2 rounded-full bg-terracotta hover:bg-terracotta-hover text-white text-xs font-medium transition-colors shadow-sm">
+            Book Stay
+          </a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="bg-surface rounded-card p-12 text-center border border-stone text-charcoal/60">
+      <i data-lucide="home" class="w-10 h-10 mx-auto text-charcoal/30 mb-3"></i>
+      <p>Partner stays for {{ district.name }} are coming soon.</p>
+    </div>
+    {% endif %}
+  </section>
+
+  <!-- Section 4: Verified Local Mountain Guides (4 Provided Native Guides) -->
+  <section id="guides">
+    <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-10 pb-4 border-b border-stone">
+      <div>
+        <span class="text-xs font-semibold uppercase tracking-widest text-terracotta mb-1 block">Native Mountain Expertise</span>
+        <h2 class="font-serif text-3xl sm:text-4xl font-bold text-charcoal flex items-center gap-3">
+          <i data-lucide="compass" class="w-8 h-8 text-terracotta stroke-[1.5]"></i>
+          <span>Verified Local Guides in {{ district.name }}</span>
+        </h2>
+      </div>
+      <a href="{{ url_for('guides.index', district=district.slug) }}" class="text-xs font-semibold text-terracotta hover:underline inline-flex items-center gap-1 mt-2 sm:mt-0">
+        <span>View all native guides</span>
+        <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+      </a>
+    </div>
+
+    {% if district_guides %}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+      {% for guide in district_guides %}
+      {% set gallery_list = guide.gallery_images|from_json if (guide.gallery_images and guide.gallery_images|from_json) else [] %}
+      {% set banner_img = gallery_list[1] if gallery_list|length > 1 else (gallery_list[0] if gallery_list|length > 0 else '/static/images/hero.jpg') %}
+      <div class="group bg-surface rounded-2xl overflow-hidden shadow-card card-hover border border-stone/40 flex flex-col justify-between transition-all duration-300 hover:shadow-xl hover:border-terracotta/40">
+        <div>
+          <!-- Scenic Header Banner -->
+          <div class="relative h-24 w-full overflow-hidden bg-stone/30">
+            <img src="{{ banner_img }}"
+                 alt="{{ guide.district }} landscape"
+                 class="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 brightness-95"
+                 loading="lazy">
+            <div class="absolute inset-0 bg-gradient-to-t from-charcoal/80 via-charcoal/25 to-transparent"></div>
+
+            <!-- Top Badges -->
+            <div class="absolute top-2.5 inset-x-3 flex items-center justify-between pointer-events-none">
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-black/60 text-emerald-300 backdrop-blur-sm border border-white/10 flex items-center gap-1 shadow-xs">
+                <i data-lucide="shield-check" class="w-3 h-3 text-emerald-400 stroke-[2.5]"></i>
+                <span>Verified</span>
+              </span>
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-black/60 text-amber-300 backdrop-blur-sm border border-white/10 flex items-center gap-1 shadow-xs">
+                <i data-lucide="star" class="w-3 h-3 text-amber-400 fill-amber-400"></i>
+                <span>{{ "%.1f"|format(guide.rating) }}</span>
+              </span>
+            </div>
+          </div>
+
+          <!-- Circular Display Picture (DP) Avatar Section -->
+          <div class="px-4 sm:px-5 -mt-11 flex flex-col items-center text-center">
+            <div class="relative">
+              <img src="{{ guide.profile_image }}"
+                   alt="{{ guide.name }}"
+                   class="w-20 h-20 rounded-full object-cover object-center ring-4 ring-surface shadow-md bg-stone/20"
+                   loading="lazy">
+              <span class="absolute bottom-0 right-0 w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center ring-2 ring-surface shadow-xs" title="Verified Mountain Guide">
+                <i data-lucide="check" class="w-3 h-3 stroke-[3]"></i>
+              </span>
+            </div>
+
+            <!-- Name & Districts Served -->
+            <h3 class="font-serif text-lg font-bold text-charcoal leading-snug group-hover:text-terracotta transition-colors mt-2">
+              <a href="{{ url_for('guides.detail', guide_id=guide.id) }}">{{ guide.name }}</a>
+            </h3>
+            <p class="text-xs text-charcoal/65 flex items-center justify-center gap-1 mt-0.5 font-light">
+              <i data-lucide="map-pin" class="w-3 h-3 text-terracotta flex-shrink-0"></i>
+              <span class="truncate max-w-[220px]">{{ guide.districts_served or guide.district }}</span>
+            </p>
+
+            <!-- Quick Trust Pills -->
+            <div class="flex items-center justify-center gap-1.5 mt-2 flex-wrap text-[11px]">
+              <span class="px-2 py-0.5 rounded-md bg-terracotta/10 text-terracotta font-medium border border-terracotta/20 flex items-center gap-1">
+                <i data-lucide="award" class="w-3 h-3"></i>
+                <span>{{ guide.years_experience }} yrs exp</span>
+              </span>
+              {% set lang_list = guide.languages|from_json if (guide.languages and guide.languages|from_json) else [] %}
+              {% if lang_list %}
+              <span class="px-2 py-0.5 rounded-md bg-stone/30 text-charcoal/70 font-medium flex items-center gap-1">
+                <i data-lucide="languages" class="w-3 h-3 text-charcoal/50"></i>
+                <span>{{ lang_list[0] }}</span>
+              </span>
+              {% endif %}
+            </div>
+
+            <!-- Bio snippet -->
+            <p class="text-charcoal/75 text-xs line-clamp-2 leading-relaxed mt-2.5 font-light text-left w-full">
+              {{ guide.bio }}
+            </p>
+          </div>
+        </div>
+
+        <!-- Footer / Rate & Booking CTA -->
+        <div class="px-4 sm:px-5 pb-4 pt-3 mt-3 border-t border-stone/30 flex items-center justify-between">
+          <div>
+            <span class="text-[9px] uppercase tracking-widest text-charcoal/50 block font-semibold">Daily Rate</span>
+            <p class="text-base font-bold text-charcoal font-serif">
+              ₹{{ guide.daily_rate|format_number }} <span class="text-[11px] font-normal text-charcoal/50">/ day</span>
+            </p>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <a href="{{ url_for('guides.detail', guide_id=guide.id) }}"
+               class="px-3.5 py-1.5 rounded-full bg-charcoal hover:bg-charcoal/90 text-white text-xs font-semibold transition-all inline-flex items-center gap-1 shadow-xs">
+              <i data-lucide="compass" class="w-3.5 h-3.5"></i>
+              <span>Book Guide</span>
+            </a>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="bg-surface rounded-card p-10 text-center border border-stone text-charcoal/60">
+      <i data-lucide="compass" class="w-10 h-10 mx-auto text-charcoal/30 mb-3"></i>
+      <p>Verified guides for {{ district.name }} are available on our guides hub.</p>
+      <a href="{{ url_for('guides.index') }}" class="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-terracotta hover:underline">
+        <span>Browse All Verified Guides</span>
+        <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+      </a>
+    </div>
+    {% endif %}
+  </section>
+
+</div>
+{% endblock %}

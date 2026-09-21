@@ -1,0 +1,53 @@
+<div id="guide-status-{{ guide.id }}" class="flex items-center gap-3">
+  <div>
+    {% if guide.status == 'live' %}
+    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+      <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+        <polyline points="20 6 9 17 4 12"/>
+      </svg>
+      <span>Live</span>
+    </span>
+    {% elif guide.status == 'changes_requested' %}
+    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-800 border border-rose-300">
+      <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" x2="12" y1="8" y2="12"/>
+        <line x1="12" x2="12.01" y1="16" y2="16"/>
+      </svg>
+      <span>Changes Requested</span>
+    </span>
+    {% else %}
+    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-300">
+      <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="10"/>
+        <polyline points="12 6 12 12 16 14"/>
+      </svg>
+      <span>Pending Review</span>
+    </span>
+    {% endif %}
+
+    {% if guide.admin_note %}
+    <p class="text-[11px] text-rose-700 mt-1 max-w-xs font-light">Note: {{ guide.admin_note }}</p>
+    {% endif %}
+  </div>
+
+  <div class="flex items-center gap-2">
+    {% if guide.status != 'live' %}
+    <form hx-post="{{ url_for('admin.guide_approve', guide_id=guide.id) }}"
+          hx-target="#guide-status-{{ guide.id }}"
+          hx-swap="outerHTML">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button type="submit"
+              class="px-3 py-1.5 rounded-xl bg-pine text-ivory text-xs font-bold hover:bg-pine-dark transition-colors shadow-2xs">
+        Approve Live
+      </button>
+    </form>
+    {% endif %}
+
+    <button type="button"
+            @click="activeModal = '{{ guide.id }}'"
+            class="px-3 py-1.5 rounded-xl bg-stone/20 hover:bg-stone/40 text-charcoal text-xs font-semibold transition-colors">
+      {{ 'Update Note' if guide.status == 'changes_requested' else 'Request Changes' }}
+    </button>
+  </div>
+</div>

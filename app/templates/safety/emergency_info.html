@@ -1,0 +1,101 @@
+{% extends '_base.html' %}
+{% block title %}Emergency Information — Beyond Tour{% endblock %}
+
+{% block content %}
+<div class="pt-6 pb-20 min-h-screen bg-ivory">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+
+    <!-- Header -->
+    <div class="text-center py-10">
+      <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-50 border border-red-200 text-red-700 text-sm font-semibold mb-6">
+        <i data-lucide="shield-alert" class="w-4 h-4"></i>
+        Emergency Information
+      </div>
+      <h1 class="font-serif text-4xl font-bold text-charcoal">Uttarakhand Emergency Helplines</h1>
+      <p class="text-charcoal/60 mt-3 text-sm max-w-lg mx-auto">Save these numbers before you travel. Offline-accessible even with poor connectivity.</p>
+    </div>
+
+    <!-- National Helplines -->
+    <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-10">
+      {% for h in national %}
+      <div class="{% if h.number in ('112','108') %}bg-red-600 text-white shadow-md{% else %}bg-white text-charcoal border border-stone/40 shadow-card{% endif %} rounded-2xl p-4 sm:p-5 text-center">
+        <p class="text-2xl sm:text-3xl font-bold {% if h.number not in ('112','108') %}text-pine{% endif %}">{{ h.number }}</p>
+        <p class="text-xs font-semibold mt-1 {% if h.number in ('112','108') %}text-white/90{% else %}text-charcoal/70{% endif %}">{{ h.name }}</p>
+        <span class="inline-block mt-2 px-2 py-0.5 text-[10px] rounded-full {% if h.number in ('112','108') %}bg-white/20 text-white{% else %}bg-stone/30 text-charcoal/70{% endif %}">{{ h.type }}</span>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- District-level Helplines Table -->
+    <div class="bg-white rounded-card shadow-card border border-stone/40 overflow-hidden mb-10">
+      <div class="px-6 py-4 border-b border-stone/40 flex items-center gap-3">
+        <i data-lucide="map-pin" class="w-5 h-5 text-terracotta"></i>
+        <h2 class="font-serif text-xl font-bold text-charcoal">District Contacts</h2>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="bg-ivory text-charcoal/60 text-xs uppercase tracking-wide">
+            <tr>
+              <th class="px-6 py-3 text-left">District</th>
+              <th class="px-6 py-3 text-left">Police</th>
+              <th class="px-6 py-3 text-left">Hospital</th>
+              <th class="px-6 py-3 text-left">SDRF / Tourist</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-stone/30">
+            {% for h in helplines %}
+            <tr class="hover:bg-ivory/50 transition-colors">
+              <td class="px-6 py-4 font-semibold text-charcoal">{{ h.district }}</td>
+              <td class="px-6 py-4 text-charcoal/70">
+                <a href="tel:{{ h.police }}" class="hover:text-pine font-medium">{{ h.police }}</a>
+              </td>
+              <td class="px-6 py-4 text-charcoal/70 text-xs">{{ h.hospital }}</td>
+              <td class="px-6 py-4 text-charcoal/70">
+                <span class="font-medium text-terracotta">{{ h.sdrf }}</span> / {{ h.tourist }}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Mountain Safety Tips -->
+    <div class="bg-pine rounded-card p-8 text-ivory shadow-card mb-10">
+      <h2 class="font-serif text-2xl font-bold mb-5 flex items-center gap-3">
+        <i data-lucide="mountain" class="w-6 h-6 text-terracotta"></i>
+        Mountain Safety Essentials
+      </h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-ivory/80">
+        {% for tip in [
+          ('smartphone', 'Save emergency numbers offline — mobile data is unreliable above 3,000 m'),
+          ('map', 'Download offline maps (Maps.me or Google Offline) for your route before leaving town'),
+          ('cloud-sun', 'Check the BeyondTour weather widget before starting any trek or high-altitude drive'),
+          ('alert-triangle', 'Never drive on mountain roads after dark or during heavy rain'),
+          ('thermometer-snowflake', 'Always carry a warm layer even in summer — temperatures drop 6°C per 1,000 m'),
+          ('users', 'Share your itinerary and expected return time with someone before trekking'),
+          ('heart-pulse', 'Carry a basic first-aid kit: ORS packets, altitude sickness tablets, antiseptic'),
+          ('radio', 'Turn on location sharing via BeyondTour if trekking in remote areas'),
+        ] %}
+        <div class="flex items-start gap-3">
+          <span class="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center flex-shrink-0 text-terracotta">
+            <i data-lucide="{{ tip[0] }}" class="w-4 h-4"></i>
+          </span>
+          <p class="pt-1">{{ tip[1] }}</p>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- SOS CTA -->
+    <div class="text-center">
+      <a href="{{ url_for('safety.contacts') }}"
+         class="inline-flex items-center gap-2 px-6 py-3 bg-terracotta text-white rounded-full font-semibold text-sm shadow-sm hover:bg-terracotta-hover transition-colors">
+        <i data-lucide="user-plus" class="w-4 h-4"></i>
+        Set Up Emergency Contacts
+      </a>
+      <p class="text-charcoal/40 text-xs mt-3">Emergency contacts are notified automatically when you trigger SOS</p>
+    </div>
+  </div>
+</div>
+{% endblock %}

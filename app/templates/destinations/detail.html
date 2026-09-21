@@ -1,0 +1,407 @@
+{% extends '_base.html' %}
+{% block title %}{{ dest.name }} — Beyond Tour{% endblock %}
+{% block meta_description %}{{ dest.description[:150] if dest.description else 'Discover ' ~ dest.name ~ ' in Uttarakhand' }}{% endblock %}
+
+{% block content %}
+<div class="pt-6 pb-20">
+  <!-- Hero -->
+  <div class="relative h-96 overflow-hidden rounded-b-3xl bg-pine">
+    <img src="{{ dest.cover_image_url or 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1400&q=80' }}"
+         alt="{{ dest.name }}" class="w-full h-full object-cover opacity-60">
+    <div class="absolute inset-0 bg-gradient-to-t from-pine via-pine/40 to-transparent"></div>
+    <div class="absolute bottom-10 left-6 sm:left-12 right-6 sm:right-12">
+      <div class="flex items-center gap-3 mb-3">
+        <span class="px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider
+          {% if dest.region == 'kumaon' %}bg-pine/90 text-ivory border border-white/20{% else %}bg-sage/90 text-white{% endif %}">
+          {{ dest.region | capitalize }}
+        </span>
+        {% if dest.category %}
+        <span class="px-3 py-1 rounded-full text-xs font-medium bg-white/20 backdrop-blur-sm text-ivory capitalize">
+          {{ dest.category }}
+        </span>
+        {% endif %}
+
+        <!-- Crowd Indicator Badge in Hero -->
+        {% if crowd %}
+        <span class="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-white/20 backdrop-blur-sm text-ivory">
+          <span class="w-2 h-2 rounded-full inline-block {{ crowd.color_class }}"></span>
+          {{ crowd.label }}
+        </span>
+        {% endif %}
+      </div>
+      <h1 class="font-serif text-4xl sm:text-5xl font-bold text-ivory">{{ dest.name }}</h1>
+      {% if dest.district %}
+      <p class="text-ivory/80 text-sm mt-1.5 flex items-center gap-1.5 font-medium">
+        <i data-lucide="map-pin" class="w-4 h-4 text-terracotta"></i>
+        <span>{{ dest.district }}, Uttarakhand</span>
+      </p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Weather Hazard Banner (dismissible) -->
+  {% if weather and weather.advisories %}
+  <div x-data="{ show: true }" x-show="show"
+       class="bg-amber-50 border-b border-amber-200 px-4 py-3 flex items-center gap-3 text-sm text-amber-800">
+    <i data-lucide="triangle-alert" class="w-4 h-4 text-amber-600 flex-shrink-0"></i>
+    <span><strong>Travel advisory:</strong> {{ weather.advisories[0] }}</span>
+    <button @click="show = false" class="ml-auto text-amber-500 hover:text-amber-700 p-1">
+      <i data-lucide="x" class="w-4 h-4"></i>
+    </button>
+  </div>
+  {% endif %}
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+
+      <!-- Main Content -->
+      <div class="lg:col-span-2 space-y-8">
+        <div class="bg-surface rounded-card shadow-card p-8 border border-stone/50">
+          <h2 class="font-serif text-2xl font-bold text-charcoal mb-4">About {{ dest.name }}</h2>
+          <p class="text-charcoal/80 leading-relaxed font-light text-base">{{ dest.description }}</p>
+        </div>
+
+        {% if dest.best_time %}
+        <div class="bg-surface rounded-card p-6 border border-stone/50 shadow-card">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-ivory flex items-center justify-center text-terracotta border border-stone/60">
+              <i data-lucide="calendar" class="w-6 h-6"></i>
+            </div>
+            <div>
+              <h3 class="font-semibold text-charcoal text-base">Best Season to Visit</h3>
+              <p class="text-charcoal/70 text-sm font-light mt-0.5">{{ dest.best_time }}</p>
+            </div>
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- Nearby Homestays & Stays -->
+        {% if nearby_hotels %}
+        <div class="pt-4">
+          <div class="flex items-center justify-between mb-5 pb-2 border-b border-stone">
+            <h2 class="font-serif text-2xl font-bold text-charcoal flex items-center gap-2">
+              <i data-lucide="home" class="w-6 h-6 text-terracotta"></i>
+              <span>Where to Stay Nearby</span>
+            </h2>
+            <a href="{{ url_for('hotels.index') }}" class="text-xs text-terracotta hover:underline font-semibold">View all stays</a>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            {% for hotel in nearby_hotels %}
+            <a href="{{ url_for('hotels.detail', hotel_id=hotel.id) }}"
+               class="flex items-center gap-4 bg-surface rounded-2xl shadow-card p-4 card-hover border border-stone/40">
+              <img src="{{ hotel.cover_image_url or 'https://images.unsplash.com/photo-1604537529428-15bcbeecfe4d?w=150&q=75' }}"
+                   alt="{{ hotel.name }}" class="w-18 h-18 rounded-xl object-cover flex-shrink-0">
+              <div class="overflow-hidden">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <span class="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-sage/15 text-pine">
+                    {{ hotel.hotel_type }}
+                  </span>
+                  {% if hotel.verification_status == 'verified' %}
+                  <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-pine/10 text-pine flex items-center gap-1">
+                    <i data-lucide="badge-check" class="w-3 h-3"></i> Verified
+                  </span>
+                  {% endif %}
+                </div>
+                <h4 class="font-semibold text-charcoal text-sm truncate mt-1">{{ hotel.name }}</h4>
+                {% if hotel.price_min %}
+                <p class="text-charcoal font-bold text-xs mt-1">₹{{ hotel.price_min|format_number }} <span class="font-normal text-charcoal/50">/ night</span></p>
+                {% endif %}
+              </div>
+            </a>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Verified Local Mountain Guides (From the 4 Provided Native Guides) -->
+        {% if nearby_guides %}
+        <div class="pt-2">
+          <div class="flex items-center justify-between mb-5 pb-2 border-b border-stone">
+            <h2 class="font-serif text-2xl font-bold text-charcoal flex items-center gap-2">
+              <i data-lucide="compass" class="w-6 h-6 text-terracotta"></i>
+              <span>Verified Mountain Guides for {{ dest.name }}</span>
+            </h2>
+            <a href="{{ url_for('guides.index', district=dest.district) }}" class="text-xs text-terracotta hover:underline font-semibold flex items-center gap-1">
+              <span>View all guides</span>
+              <i data-lucide="arrow-right" class="w-3 h-3"></i>
+            </a>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            {% for guide in nearby_guides %}
+            <div class="bg-surface rounded-2xl shadow-card p-4 border border-stone/40 flex items-center justify-between gap-4 card-hover">
+              <div class="flex items-center gap-3.5">
+                <div class="relative flex-shrink-0">
+                  <img src="{{ guide.profile_image }}"
+                       alt="{{ guide.name }}"
+                       class="w-16 h-16 rounded-full object-cover object-center ring-2 ring-stone/30 shadow-sm bg-stone/20">
+                  <span class="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-emerald-500 text-white flex items-center justify-center ring-1 ring-white" title="Verified Mountain Guide">
+                    <i data-lucide="check" class="w-2.5 h-2.5 stroke-[3]"></i>
+                  </span>
+                </div>
+                <div class="overflow-hidden">
+                  <div class="flex items-center gap-1.5 flex-wrap">
+                    <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                      Verified
+                    </span>
+                    <span class="text-[10px] font-bold text-amber-600 flex items-center gap-0.5">
+                      <i data-lucide="star" class="w-3 h-3 fill-amber-500 text-amber-500"></i>
+                      <span>{{ "%.1f"|format(guide.rating) }}</span>
+                    </span>
+                  </div>
+                  <h4 class="font-serif font-bold text-charcoal text-base truncate mt-0.5">
+                    <a href="{{ url_for('guides.detail', guide_id=guide.id) }}" class="hover:text-terracotta transition-colors">{{ guide.name }}</a>
+                  </h4>
+                  <p class="text-[11px] text-charcoal/60 truncate flex items-center gap-1">
+                    <i data-lucide="map-pin" class="w-2.5 h-2.5 text-terracotta"></i>
+                    <span>{{ guide.districts_served or guide.district }}</span>
+                  </p>
+                  <p class="text-xs font-bold text-charcoal mt-1">
+                    ₹{{ guide.daily_rate|format_number }} <span class="font-normal text-charcoal/50 text-[10px]">/ day</span>
+                  </p>
+                </div>
+              </div>
+              <div class="flex flex-col gap-2 flex-shrink-0">
+                <a href="{{ url_for('guides.detail', guide_id=guide.id) }}"
+                   class="px-3 py-1.5 rounded-full bg-terracotta hover:bg-terracotta-hover text-white text-xs font-semibold transition-all inline-flex items-center justify-center gap-1 shadow-xs">
+                  <span>Book</span>
+                  <i data-lucide="arrow-right" class="w-3 h-3"></i>
+                </a>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+
+        {% set dest_imgs = dest.gallery_images | from_json %}
+        {% if dest_imgs and dest_imgs|length > 0 %}
+        <div class="bg-surface rounded-card shadow-card p-8 border border-stone/50">
+          <div class="flex items-center justify-between mb-5 pb-2 border-b border-stone/40">
+            <h2 class="font-serif text-2xl font-bold text-charcoal flex items-center gap-2.5">
+              <i data-lucide="camera" class="w-6 h-6 text-terracotta"></i>
+              <span>Visuals of {{ dest.name }}</span>
+            </h2>
+            <span class="text-xs text-charcoal/50">{{ dest_imgs|length }} photos</span>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            {% for img in dest_imgs %}
+            <div class="h-48 rounded-xl overflow-hidden shadow-sm group relative">
+              <img src="{{ img }}" alt="{{ dest.name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- Traveler Reviews & Experiences -->
+        <div class="bg-surface rounded-card shadow-card p-8 border border-stone/50">
+          <div class="flex items-center justify-between mb-6 pb-3 border-b border-stone/40">
+            <div>
+              <h2 class="font-serif text-2xl font-bold text-charcoal flex items-center gap-2.5">
+                <i data-lucide="message-square" class="w-6 h-6 text-terracotta"></i>
+                <span>Traveler Reviews</span>
+              </h2>
+              <p class="text-xs text-charcoal/50 mt-1">Authentic experiences shared by mountain explorers</p>
+            </div>
+            <a href="{{ url_for('reviews.write') }}?target_type=destination&target_id={{ dest.id }}"
+               class="px-4 py-2 rounded-xl text-xs font-semibold bg-terracotta text-white hover:bg-terracotta-hover transition-colors shadow-xs flex items-center gap-1.5">
+              <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+              <span>Share Experience</span>
+            </a>
+          </div>
+
+          {% if reviews %}
+          <div class="space-y-5 divide-y divide-stone/25">
+            {% for r in reviews %}
+            <div class="pt-5 first:pt-0">
+              <div class="flex items-start justify-between gap-3 mb-2">
+                <div class="flex items-center gap-3">
+                  <div class="w-9 h-9 rounded-full bg-pine/10 text-pine font-bold text-sm flex items-center justify-center border border-pine/20 flex-shrink-0">
+                    {{ r.user.name[0] if r.user and r.user.name else 'T' }}
+                  </div>
+                  <div>
+                    <h4 class="font-semibold text-sm text-charcoal leading-tight">{{ r.user.name if r.user else 'Verified Traveler' }}</h4>
+                    <p class="text-[11px] text-charcoal/50 flex items-center gap-1 mt-0.5">
+                      <i data-lucide="map-pin" class="w-3 h-3 text-terracotta"></i>
+                      <span>{{ r.user.home_city if r.user and r.user.home_city else 'India' }}</span>
+                      <span>·</span>
+                      <span>{{ r.created_at.strftime('%b %d, %Y') }}</span>
+                    </p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-0.5 px-2 py-0.5 rounded-md bg-stone/20">
+                  {% for i in range(r.rating or 5) %}
+                  <i data-lucide="star" class="w-3 h-3 text-terracotta fill-terracotta"></i>
+                  {% endfor %}
+                </div>
+              </div>
+              <p class="text-xs sm:text-sm text-charcoal/80 leading-relaxed pl-12 font-light">{{ r.comment }}</p>
+            </div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <div class="text-center py-8 bg-ivory/50 rounded-2xl border border-dashed border-stone/60">
+            <i data-lucide="compass" class="w-8 h-8 text-charcoal/30 mx-auto mb-2"></i>
+            <p class="text-sm font-medium text-charcoal">Be the first to share travel notes on {{ dest.name }}</p>
+            <p class="text-xs text-charcoal/50 mt-1 max-w-sm mx-auto">Have you visited {{ dest.name }}? Help fellow travelers with your trail tips and seasonal advice.</p>
+            <a href="{{ url_for('reviews.write') }}?target_type=destination&target_id={{ dest.id }}"
+               class="mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold bg-terracotta text-white hover:bg-terracotta-hover transition-colors shadow-xs">
+              <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+              <span>Write first review</span>
+            </a>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <div class="space-y-6">
+
+        <!-- Weather Widget -->
+        {% if weather %}
+        <div class="bg-surface rounded-card shadow-card border border-stone/50 overflow-hidden">
+          <div class="bg-pine px-5 py-3 flex items-center justify-between">
+            <span class="text-ivory text-sm font-semibold flex items-center gap-2">
+              <i data-lucide="cloud-sun" class="w-4 h-4 text-terracotta"></i>
+              Current Weather
+            </span>
+            {% if weather.is_stub %}
+            <span class="text-ivory/50 text-[10px]">Demo data</span>
+            {% endif %}
+          </div>
+          <!-- Current Conditions -->
+          <div class="px-5 py-4 border-b border-stone/30">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-4xl font-bold text-charcoal">{{ weather.current.temp }}°C</p>
+                <p class="text-charcoal/60 text-sm mt-0.5">{{ weather.current.description }}</p>
+                <p class="text-charcoal/50 text-xs mt-1">Feels like {{ weather.current.feels_like }}°C · {{ weather.current.humidity }}% humidity</p>
+              </div>
+              <i data-lucide="{{ weather.current.icon or 'sun' }}" class="w-12 h-12 text-amber-500 flex-shrink-0"></i>
+            </div>
+          </div>
+          <!-- 3-Day Forecast Strip -->
+          <div class="grid grid-cols-3 divide-x divide-stone/30 px-2 py-3">
+            {% for day in weather.daily %}
+            <div class="text-center px-2">
+              <p class="text-xs text-charcoal/50 font-medium mb-1">{{ day.day }}</p>
+              <div class="flex justify-center my-1 text-terracotta"><i data-lucide="{{ day.icon or 'sun' }}" class="w-5 h-5"></i></div>
+              <p class="text-xs font-semibold text-charcoal mt-1">{{ day.high }}° / <span class="text-charcoal/50">{{ day.low }}°</span></p>
+              {% if day.rain_mm > 0 %}
+              <p class="text-[10px] text-blue-500 mt-0.5">{{ day.rain_mm }}mm</p>
+              {% endif %}
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- Crowd Indicator -->
+        {% if crowd %}
+        <div class="bg-surface rounded-card shadow-card p-5 border {{ crowd.border }}">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="font-semibold text-charcoal text-sm flex items-center gap-2">
+              <i data-lucide="users" class="w-4 h-4 text-charcoal/60"></i>
+              Crowd Level
+            </h3>
+            <!-- Info tooltip -->
+            <div x-data="{ open: false }" class="relative">
+              <button @click="open = !open" @click.away="open = false"
+                      class="text-charcoal/40 hover:text-charcoal/70 p-1"
+                      aria-label="How is crowd level calculated?">
+                <i data-lucide="info" class="w-4 h-4"></i>
+              </button>
+              <div x-show="open" x-transition
+                   class="absolute right-0 top-7 w-64 bg-charcoal text-ivory text-xs rounded-xl p-4 shadow-xl z-10 leading-relaxed">
+                <strong class="text-terracotta">How is this calculated?</strong><br>
+                {{ crowd.explanation }}
+                <div class="mt-2 pt-2 border-t border-white/10 text-ivory/60 space-y-0.5">
+                  <div>Seasonal patterns: {{ crowd.breakdown.baseline }}/50 pts</div>
+                  <div>Festivals: {{ crowd.breakdown.festivals }}/25 pts</div>
+                  <div>Live check-ins: {{ crowd.breakdown.checkins }}/25 pts</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="w-4 h-4 rounded-full flex-shrink-0 {{ crowd.color_class }}"></span>
+            <div>
+              <p class="font-bold text-charcoal text-sm">{{ crowd.label }}</p>
+              <p class="text-charcoal/50 text-xs">Score: {{ crowd.score }}/100</p>
+            </div>
+          </div>
+          <!-- Score bar -->
+          <div class="mt-3 bg-stone/40 rounded-full h-2 overflow-hidden">
+            <div class="h-full rounded-full {{ crowd.color_class }} transition-all"
+                 style="width: {{ crowd.score }}%"></div>
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- Best Time to Visit -->
+        {% if best_time_info %}
+        <div class="bg-surface rounded-card shadow-card p-5 border border-stone/50">
+          <h3 class="font-semibold text-charcoal text-sm flex items-center gap-2 mb-3">
+            <i data-lucide="sparkles" class="w-4 h-4 text-terracotta"></i>
+            Best Time to Visit
+          </h3>
+          <p class="text-charcoal/80 text-sm leading-relaxed">{{ best_time_info.recommendation }}</p>
+          {% if best_time_info.festivals_to_avoid %}
+          <div class="mt-3 pt-3 border-t border-stone/30">
+            <p class="text-xs text-charcoal/50 mb-1">Upcoming festivals (expect crowds):</p>
+            {% for fest in best_time_info.festivals_to_avoid %}
+            <span class="inline-block px-2 py-0.5 bg-terracotta/10 text-terracotta text-[11px] rounded-full mr-1">{{ fest }}</span>
+            {% endfor %}
+          </div>
+          {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Quick Info -->
+        <div class="bg-surface rounded-card shadow-card p-6 border border-stone/50">
+          <h3 class="font-serif font-bold text-charcoal text-lg mb-4">Location Snapshot</h3>
+          <div class="space-y-3 text-sm divide-y divide-stone/40">
+            {% if dest.altitude_m %}
+            <div class="flex justify-between pt-2">
+              <span class="text-charcoal/60">Altitude</span>
+              <span class="font-medium text-charcoal">{{ dest.altitude_m }} m</span>
+            </div>
+            {% endif %}
+            <div class="flex justify-between pt-2">
+              <span class="text-charcoal/60">Region</span>
+              <span class="font-medium text-charcoal capitalize">{{ dest.region }}</span>
+            </div>
+            <div class="flex justify-between pt-2">
+              <span class="text-charcoal/60">District</span>
+              <span class="font-medium text-charcoal">{{ dest.district or 'Uttarakhand' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Plan Trip CTA -->
+        <div class="bg-pine rounded-card p-7 text-ivory shadow-card">
+          <div class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-terracotta mb-4">
+            <i data-lucide="sparkles" class="w-5 h-5"></i>
+          </div>
+          <h3 class="font-serif text-xl font-bold mb-2 text-ivory">Plan a Journey Here</h3>
+          <p class="text-ivory/70 text-xs leading-relaxed mb-5 font-light">Let our AI trip planner create a personalized day-by-day route incorporating {{ dest.name }} and local homestays.</p>
+          <a href="{{ url_for('trip_planner.index') }}"
+             class="block w-full text-center px-4 py-3 bg-terracotta hover:bg-terracotta-hover text-white font-medium rounded-full transition-colors text-sm shadow-sm">
+            Generate Itinerary
+          </a>
+        </div>
+
+        <!-- Wishlist -->
+        <div class="bg-surface rounded-card shadow-card p-5 border border-stone/50">
+          <button class="flex items-center justify-center gap-2 w-full py-2.5 border border-stone rounded-full text-sm font-medium text-charcoal hover:border-terracotta hover:text-terracotta transition-all"
+                  hx-post="{{ url_for('wishlist.toggle') }}"
+                  hx-vals='{"target_type":"destination","target_id":{{ dest.id }}}'
+                  hx-swap="outerHTML">
+            <i data-lucide="heart" class="w-4 h-4 text-terracotta"></i>
+            <span>Save to Wishlist</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

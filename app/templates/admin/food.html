@@ -1,0 +1,130 @@
+{% extends 'admin/base.html' %}
+{% block title %}Local Food Directory — Beyond Tour Admin{% endblock %}
+
+{% block admin_content %}
+<div>
+
+  <!-- Header & Actions -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+    <div>
+      <h2 class="font-serif text-2xl font-bold text-charcoal">Himalayan Culinary Heritage Directory</h2>
+      <p class="text-xs text-charcoal/60 mt-0.5">Manage local Garhwali and Kumaoni traditional dishes, sweets, and trail recipes</p>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <!-- Region Filter -->
+      <div class="inline-flex items-center bg-surface rounded-2xl p-1 gap-1 border border-stone/60 shadow-2xs">
+        <a href="{{ url_for('admin.food') }}?region=all"
+           class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all
+           {% if region == 'all' or not region %}bg-terracotta text-white shadow-sm{% else %}text-charcoal/70 hover:text-charcoal{% endif %}">
+          All Dishes
+        </a>
+        <a href="{{ url_for('admin.food') }}?region=kumaon"
+           class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all
+           {% if region == 'kumaon' %}bg-terracotta text-white shadow-sm{% else %}text-charcoal/70 hover:text-charcoal{% endif %}">
+          Kumaon
+        </a>
+        <a href="{{ url_for('admin.food') }}?region=garhwal"
+           class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all
+           {% if region == 'garhwal' %}bg-terracotta text-white shadow-sm{% else %}text-charcoal/70 hover:text-charcoal{% endif %}">
+          Garhwal
+        </a>
+      </div>
+
+      <a href="{{ url_for('admin.food_new') }}"
+         class="px-4 py-2 rounded-xl bg-terracotta hover:bg-terracotta-hover text-white text-xs font-bold transition-colors flex items-center gap-1.5 shadow-sm">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <path d="M5 12h14"/><path d="M12 5v14"/>
+        </svg>
+        <span>Add Food Item</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Food Table -->
+  <div class="bg-surface rounded-3xl border border-stone/60 shadow-card overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-xs">
+        <thead class="bg-ivory/60 text-[11px] uppercase tracking-wider text-charcoal/70 border-b border-stone/30">
+          <tr>
+            <th class="py-3.5 px-5">Dish Name & Description</th>
+            <th class="py-3.5 px-4">Region</th>
+            <th class="py-3.5 px-4">Course</th>
+            <th class="py-3.5 px-4">Key Ingredients</th>
+            <th class="py-3.5 px-4">Where to Savor</th>
+            <th class="py-3.5 px-5 text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-stone/20">
+          {% for food in foods %}
+          <tr class="hover:bg-ivory/30 transition-colors">
+            <!-- Name & Description -->
+            <td class="py-4 px-5">
+              <div class="flex items-center gap-3">
+                <img src="{{ food.image_url or 'https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=200&q=75' }}"
+                     alt="{{ food.name }}"
+                     class="w-11 h-11 rounded-xl object-cover border border-stone/40 flex-shrink-0">
+                <div class="min-w-0 max-w-xs">
+                  <h3 class="font-bold text-sm text-charcoal">{{ food.name }}</h3>
+                  <p class="text-[11px] text-charcoal/60 truncate mt-0.5">{{ food.description }}</p>
+                </div>
+              </div>
+            </td>
+
+            <!-- Region -->
+            <td class="py-4 px-4">
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase
+                {% if food.region == 'kumaon' %}bg-terracotta/10 text-terracotta border border-terracotta/20{% else %}bg-pine/10 text-pine border border-pine/20{% endif %}">
+                {{ food.region|capitalize }}
+              </span>
+            </td>
+
+            <!-- Category -->
+            <td class="py-4 px-4 text-charcoal font-medium capitalize">
+              {{ food.category }}
+            </td>
+
+            <!-- Ingredients -->
+            <td class="py-4 px-4 text-charcoal/70 max-w-xs truncate">
+              {{ food.ingredients or '-' }}
+            </td>
+
+            <!-- Where to Savor -->
+            <td class="py-4 px-4 text-charcoal/70">
+              {{ food.where_to_try or 'Local village dhabas' }}
+            </td>
+
+            <!-- Actions -->
+            <td class="py-4 px-5 text-right whitespace-nowrap">
+              <div class="inline-flex items-center gap-2">
+                <a href="{{ url_for('admin.food_edit', food_id=food.id) }}"
+                   class="px-2.5 py-1.5 rounded-lg bg-stone/20 hover:bg-stone/40 text-charcoal text-xs font-semibold transition-colors">
+                  Edit
+                </a>
+
+                <form action="{{ url_for('admin.food_delete', food_id=food.id) }}"
+                      method="POST"
+                      onsubmit="return confirm('Delete {{ food.name }}?');">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <button type="submit"
+                          class="px-2.5 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-semibold transition-colors">
+                    Delete
+                  </button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="6" class="py-12 text-center text-charcoal/50">
+              No food items found matching the selected region.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

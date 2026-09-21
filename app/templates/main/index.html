@@ -1,0 +1,512 @@
+{% extends '_base.html' %}
+{% block title %}Beyond Tour — Go Beyond the Guidebook | Uttarakhand Tourism{% endblock %}
+{% block meta_description %}Discover authentic Uttarakhand — AI-powered trip planning, local festivals, Aipan art, traditional food, and handpicked homestays in Kumaon and Garhwal.{% endblock %}
+
+{% block content %}
+
+<!-- ============================================================
+     HERO SECTION
+     ============================================================ -->
+<section class="relative min-h-screen flex items-center overflow-hidden"
+         x-data="{ slide: 0 }"
+         x-init="setInterval(() => slide = (slide + 1) % 4, 6000)">
+
+  <!-- Background Image Carousel: Using Verified Provided Himalayan Cover Photos -->
+  <div class="absolute inset-0">
+    <div class="absolute inset-0 transition-opacity duration-1500"
+         :class="slide === 0 ? 'opacity-100' : 'opacity-0'">
+      <img src="{{ url_for('static', filename='images/coverpic/kumaon.png') }}"
+           alt="Kumaon Mountain Heritage" class="w-full h-full object-cover" />
+    </div>
+    <div class="absolute inset-0 transition-opacity duration-1500"
+         :class="slide === 1 ? 'opacity-100' : 'opacity-0'">
+      <img src="{{ url_for('static', filename='images/coverpic/gharwal.png') }}"
+           alt="Garhwal Spiritual Mountains" class="w-full h-full object-cover" />
+    </div>
+    <div class="absolute inset-0 transition-opacity duration-1500"
+         :class="slide === 2 ? 'opacity-100' : 'opacity-0'">
+      <img src="{{ url_for('static', filename='images/Nanital/lakenanital.png') }}"
+           alt="Nainital Lake Kumaon" class="w-full h-full object-cover" />
+    </div>
+    <div class="absolute inset-0 transition-opacity duration-1500"
+         :class="slide === 3 ? 'opacity-100' : 'opacity-0'">
+      <img src="{{ url_for('static', filename='images/Almora/jagwasher.png') }}"
+           alt="Sacred Jageshwar Temple Pine Forest" class="w-full h-full object-cover" />
+    </div>
+    <!-- Gradient overlay for optimal readability -->
+    <div class="absolute inset-0 bg-gradient-to-r from-pine/90 via-pine/65 to-black/45"></div>
+    <div class="absolute inset-0 bg-gradient-to-t from-pine/80 via-transparent to-black/35"></div>
+  </div>
+
+  <!-- Hero Content -->
+  <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 sm:pt-18 pb-14 sm:pb-18">
+    <div class="max-w-3xl">
+
+      <!-- Badge -->
+      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-ivory text-xs font-medium mb-4 animate-fade-in">
+        <span class="w-2 h-2 rounded-full bg-terracotta animate-pulse"></span>
+        AI-Powered Uttarakhand Tourism
+      </div>
+
+      <!-- Screen-Friendly Headline -->
+      <h1 class="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-[1.12] tracking-tight mb-3 drop-shadow-md">
+        Go Beyond<br>
+        <span class="text-terracotta italic font-normal">the Guidebook.</span>
+      </h1>
+
+      <!-- Screen-Friendly Subheading -->
+      <p class="text-ivory/90 text-xs sm:text-sm md:text-base leading-relaxed mb-6 max-w-2xl font-light drop-shadow-sm">
+        Discover the real Uttarakhand — from ancient Aipan art in Almora's lanes to the sacred forests of Jageshwar,
+        guided by locals who've walked every trail and cooked every recipe.
+      </p>
+
+      <!-- AI Search Bar -->
+      <form action="{{ url_for('trip_planner.index') }}" method="GET" class="flex flex-col sm:flex-row gap-2.5 mb-5 max-w-2xl" id="hero-ai-form">
+        <div class="flex-1 flex items-center gap-2.5 bg-white/95 backdrop-blur rounded-2xl px-4 py-3 shadow-hero border border-stone/30 focus-within:border-terracotta focus-within:ring-2 focus-within:ring-terracotta/20 transition-all">
+          <i data-lucide="sparkles" class="w-4 h-4 text-terracotta flex-shrink-0"></i>
+          <input type="text" name="q" id="hero-search"
+                 placeholder='Try "4 days in Almora, budget ₹7,000, love culture"'
+                 class="flex-1 bg-transparent text-charcoal placeholder-charcoal/40 text-xs sm:text-sm font-medium focus:outline-none"
+                 autocomplete="off">
+        </div>
+        <button type="submit" id="hero-plan-btn"
+                class="flex items-center justify-center gap-2 px-6 py-3 bg-terracotta text-white font-semibold rounded-2xl hover:bg-terracotta-dark transition-all hover:shadow-lg text-xs sm:text-sm whitespace-nowrap cursor-pointer">
+          <i data-lucide="compass" class="w-4 h-4" id="hero-plan-icon"></i>
+          <span id="hero-plan-text">Plan with AI</span>
+        </button>
+      </form>
+
+      <!-- Quick Action Buttons -->
+      <div class="flex flex-wrap gap-2 sm:gap-2.5">
+        <a href="{{ url_for('destinations.index') }}"
+           class="flex items-center gap-1.5 px-3.5 py-2 bg-white/15 backdrop-blur border border-white/30 text-ivory text-xs font-medium rounded-xl hover:bg-white/25 transition-all">
+          <i data-lucide="mountain" class="w-3.5 h-3.5 text-ivory"></i> Explore Destinations
+        </a>
+        <a href="{{ url_for('culture.index') }}"
+           class="flex items-center gap-1.5 px-3.5 py-2 bg-white/15 backdrop-blur border border-white/30 text-ivory text-xs font-medium rounded-xl hover:bg-white/25 transition-all">
+          <i data-lucide="palette" class="w-3.5 h-3.5 text-ivory"></i> Culture and Festivals
+        </a>
+        <a href="{{ url_for('hotels.index') }}?type=homestay"
+           class="flex items-center gap-1.5 px-3.5 py-2 bg-white/15 backdrop-blur border border-white/30 text-ivory text-xs font-medium rounded-xl hover:bg-white/25 transition-all">
+          <i data-lucide="home" class="w-3.5 h-3.5 text-ivory"></i> Local Homestays
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide indicators (4 Provided Himalayan Slides) -->
+  <div class="absolute bottom-5 right-6 flex gap-2 z-20">
+    <button @click="slide = 0" :class="slide === 0 ? 'w-8 bg-terracotta' : 'w-2 bg-white/40'"
+            class="h-2 rounded-full transition-all duration-300" aria-label="Slide 1"></button>
+    <button @click="slide = 1" :class="slide === 1 ? 'w-8 bg-terracotta' : 'w-2 bg-white/40'"
+            class="h-2 rounded-full transition-all duration-300" aria-label="Slide 2"></button>
+    <button @click="slide = 2" :class="slide === 2 ? 'w-8 bg-terracotta' : 'w-2 bg-white/40'"
+            class="h-2 rounded-full transition-all duration-300" aria-label="Slide 3"></button>
+    <button @click="slide = 3" :class="slide === 3 ? 'w-8 bg-terracotta' : 'w-2 bg-white/40'"
+            class="h-2 rounded-full transition-all duration-300" aria-label="Slide 4"></button>
+  </div>
+</section>
+
+<!-- ============================================================
+     STATS BANNER (Strictly 4 Core Districts)
+     ============================================================ -->
+<section class="bg-pine text-ivory py-7 border-y border-stone/20">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+      <div>
+        <p class="font-serif text-2xl sm:text-3xl font-bold text-terracotta">4</p>
+        <p class="text-ivory/70 text-xs mt-0.5">Core Districts Covered</p>
+      </div>
+      <div>
+        <p class="font-serif text-2xl sm:text-3xl font-bold text-terracotta">29</p>
+        <p class="text-ivory/70 text-xs mt-0.5">Destinations</p>
+      </div>
+      <div>
+        <p class="font-serif text-2xl sm:text-3xl font-bold text-terracotta">16</p>
+        <p class="text-ivory/70 text-xs mt-0.5">Verified Stays & Homestays</p>
+      </div>
+      <div>
+        <p class="font-serif text-2xl sm:text-3xl font-bold text-terracotta">AI</p>
+        <p class="text-ivory/70 text-xs mt-0.5">Powered Planning</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     KUMAON / GARHWAL REGION INTRO
+     ============================================================ -->
+<section class="py-14 sm:py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+  <div class="text-center mb-10 reveal">
+    <div class="flex items-center justify-center gap-3 mb-3">
+      <span class="w-10 h-px bg-stone"></span>
+      <span class="text-terracotta text-[11px] uppercase tracking-widest font-semibold">Two Worlds, One Journey</span>
+      <span class="w-10 h-px bg-stone"></span>
+    </div>
+    <h2 class="font-serif text-2xl sm:text-3xl lg:text-4xl font-bold text-charcoal mb-3 tracking-tight">
+      The Twin Souls of Uttarakhand
+    </h2>
+    <p class="text-xs sm:text-sm text-charcoal/70 max-w-xl mx-auto leading-relaxed">
+      Uttarakhand's magic lives in its two distinct cultural heartlands — Kumaon's ancient Aipan art and Garhwal's sacred Himalayan sanctuaries. Both are yours to discover.
+    </p>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+    <!-- Kumaon Card -->
+    <a href="{{ url_for('culture.index') }}?region=kumaon"
+       class="group relative rounded-2xl overflow-hidden h-72 sm:h-80 card-hover reveal border border-stone/30 shadow-card">
+      <img src="{{ url_for('static', filename='images/coverpic/kumaon.png') }}"
+           alt="Kumaon Cultural Heritage" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
+      <div class="absolute inset-0 bg-gradient-to-t from-pine/95 via-pine/45 to-transparent"></div>
+      <div class="absolute inset-0 p-6 sm:p-7 flex flex-col justify-end">
+        <span class="text-[11px] font-semibold uppercase tracking-widest text-terracotta mb-1">
+          Almora · Nainital · Pithoragarh
+        </span>
+        <h3 class="font-serif text-2xl sm:text-3xl font-bold text-ivory mb-1.5">Kumaon</h3>
+        <p class="text-ivory/80 text-xs sm:text-sm leading-relaxed mb-3 line-clamp-2">
+          Land of Aipan ritual art, the sacred Nanda Devi shrines, and panoramic vistas of Trishul and Nanda Devi peaks.
+        </p>
+        <span class="inline-flex items-center gap-1.5 text-terracotta text-xs font-semibold group-hover:gap-2.5 transition-all">
+          Explore Kumaon <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+        </span>
+      </div>
+    </a>
+
+    <!-- Garhwal Card -->
+    <a href="{{ url_for('culture.index') }}?region=garhwal"
+       class="group relative rounded-2xl overflow-hidden h-72 sm:h-80 card-hover reveal border border-stone/30 shadow-card">
+      <img src="{{ url_for('static', filename='images/coverpic/gharwal.png') }}"
+           alt="Garhwal Spiritual Heritage" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
+      <div class="absolute inset-0 bg-gradient-to-t from-pine/95 via-pine/45 to-transparent"></div>
+      <div class="absolute inset-0 p-6 sm:p-7 flex flex-col justify-end">
+        <span class="text-[11px] font-semibold uppercase tracking-widest text-terracotta mb-1">
+          Uttarkashi · Bhagirathi Valley · Gangotri
+        </span>
+        <h3 class="font-serif text-2xl sm:text-3xl font-bold text-ivory mb-1.5">Garhwal</h3>
+        <p class="text-ivory/80 text-xs sm:text-sm leading-relaxed mb-3 line-clamp-2">
+          Ancient mountain temples, sacred rivers, high alpine meadows of Dayara Bugyal, and high-altitude trails.
+        </p>
+        <span class="inline-flex items-center gap-1.5 text-terracotta text-xs font-semibold group-hover:gap-2.5 transition-all">
+          Explore Garhwal <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+        </span>
+      </div>
+    </a>
+  </div>
+</section>
+
+<!-- ============================================================
+     FEATURED DESTINATIONS
+     ============================================================ -->
+<section class="py-12 sm:py-14 bg-stone/20 border-y border-stone/30">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+    <div class="flex items-end justify-between mb-8 reveal">
+      <div>
+        <p class="text-terracotta font-semibold text-xs uppercase tracking-widest mb-1.5">Where to Go</p>
+        <h2 class="font-serif text-2xl sm:text-3xl lg:text-4xl font-bold text-charcoal tracking-tight">Featured Destinations</h2>
+      </div>
+      <a href="{{ url_for('destinations.index') }}"
+         class="hidden sm:flex items-center gap-1.5 text-pine font-semibold text-xs hover:gap-3 transition-all">
+        View all <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-terracotta"></i>
+      </a>
+    </div>
+
+    {% if destinations %}
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      {% for dest in destinations %}
+      <a href="{{ url_for('destinations.detail', dest_id=dest.id) }}"
+         class="group bg-white rounded-2xl overflow-hidden shadow-card card-hover reveal border border-stone/40">
+        <div class="relative h-44 overflow-hidden">
+          <img src="{{ dest.cover_image_url or 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=80' }}"
+               alt="{{ dest.name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+          <div class="absolute top-3 left-3">
+            <span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold
+              {% if dest.region == 'kumaon' %}tag-terracotta{% else %}tag-sage{% endif %}">
+              {{ dest.region | capitalize }}
+            </span>
+          </div>
+          {% if dest.category %}
+          <div class="absolute top-3 right-3">
+            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-[11px] font-medium bg-pine/85 text-ivory backdrop-blur-sm">
+              {% if dest.category == 'trek' %}
+                <i data-lucide="footprints" class="w-3 h-3"></i> Trek
+              {% elif dest.category == 'temple' %}
+                <i data-lucide="landmark" class="w-3 h-3"></i> Temple
+              {% elif dest.category == 'lake' %}
+                <i data-lucide="waves" class="w-3 h-3"></i> Lake
+              {% elif dest.category == 'heritage' %}
+                <i data-lucide="castle" class="w-3 h-3"></i> Heritage
+              {% elif dest.category == 'wildlife' %}
+                <i data-lucide="trees" class="w-3 h-3"></i> Wildlife
+              {% else %}
+                <i data-lucide="map-pin" class="w-3 h-3"></i> {{ dest.category | capitalize }}
+              {% endif %}
+            </span>
+          </div>
+          {% endif %}
+        </div>
+        <div class="p-4">
+          <h3 class="font-serif text-lg font-bold text-charcoal mb-0.5 group-hover:text-terracotta transition-colors">{{ dest.name }}</h3>
+          <p class="text-charcoal/50 text-xs mb-2">{{ dest.district }}</p>
+          <p class="text-charcoal/70 text-xs leading-relaxed line-clamp-2">{{ dest.description }}</p>
+          {% if dest.best_time %}
+          <div class="flex items-center gap-1.5 mt-2.5 text-[11px] text-charcoal/50">
+            <i data-lucide="calendar" class="w-3 h-3 text-terracotta"></i> <span>Best: {{ dest.best_time }}</span>
+          </div>
+          {% endif %}
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-12">
+      <p class="text-charcoal/50 text-base">No destinations yet. <a href="{{ url_for('destinations.index') }}" class="text-terracotta underline">Browse all</a></p>
+    </div>
+    {% endif %}
+
+    <div class="text-center mt-8 sm:hidden">
+      <a href="{{ url_for('destinations.index') }}"
+         class="inline-flex items-center gap-2 px-5 py-2.5 border border-pine text-pine font-semibold text-xs rounded-xl hover:bg-pine hover:text-white transition-all">
+        View All Destinations <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     AI TRIP PLANNER CTA
+     ============================================================ -->
+<section class="py-14 sm:py-16 bg-pine text-white overflow-hidden relative border-y border-stone/20">
+  <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+      <div class="reveal">
+        <p class="text-terracotta font-semibold text-xs uppercase tracking-widest mb-2">AI-Powered</p>
+        <h2 class="font-serif text-2xl sm:text-3xl lg:text-4xl font-bold text-ivory mb-3 tracking-tight">
+          Your Perfect Himalayan Trip,<br>Planned in Minutes.
+        </h2>
+        <p class="text-ivory/75 text-xs sm:text-sm leading-relaxed mb-6 max-w-lg">
+          Tell our AI your days, budget, and travel style. Get a day-by-day itinerary — optimized for hill terrain,
+          local festivals, and the kind of experiences no travel agent would suggest.
+        </p>
+        <div class="flex flex-wrap gap-3">
+          <a href="{{ url_for('trip_planner.index') }}"
+             class="flex items-center gap-2 px-6 py-3 bg-terracotta text-white font-semibold rounded-2xl hover:bg-terracotta-dark transition-all hover:shadow-lg text-xs sm:text-sm">
+            <i data-lucide="sparkles" class="w-4 h-4"></i>
+            Start Planning Free
+          </a>
+          <a href="{{ url_for('trip_planner.smart_route') }}"
+             class="flex items-center gap-2 px-7 py-4 border border-white/30 text-ivory font-medium rounded-2xl hover:bg-white/10 transition-all">
+            <i data-lucide="map" class="w-4 h-4"></i> Smart Route
+          </a>
+        </div>
+      </div>
+
+      <!-- Feature Cards -->
+      <div class="grid grid-cols-2 gap-4 reveal">
+        <div class="p-5 rounded-2xl bg-white/5 border border-white/10">
+          <i data-lucide="sparkles" class="w-6 h-6 text-terracotta mb-3"></i>
+          <h4 class="font-semibold text-ivory text-sm mb-1">Gemini AI Brain</h4>
+          <p class="text-ivory/60 text-xs">Powered by Google's most capable AI model for nuanced travel intelligence</p>
+        </div>
+        <div class="p-5 rounded-2xl bg-white/5 border border-white/10">
+          <i data-lucide="navigation" class="w-6 h-6 text-terracotta mb-3"></i>
+          <h4 class="font-semibold text-ivory text-sm mb-1">Hill Route Optimizer</h4>
+          <p class="text-ivory/60 text-xs">Accounts for mountain roads, altitude, and seasonal conditions</p>
+        </div>
+        <div class="p-5 rounded-2xl bg-white/5 border border-white/10">
+          <i data-lucide="home" class="w-6 h-6 text-terracotta mb-3"></i>
+          <h4 class="font-semibold text-ivory text-sm mb-1">Homestay-First</h4>
+          <p class="text-ivory/60 text-xs">Every itinerary prioritizes local homestays to support rural communities</p>
+        </div>
+        <div class="p-5 rounded-2xl bg-white/5 border border-white/10">
+          <i data-lucide="calendar" class="w-6 h-6 text-terracotta mb-3"></i>
+          <h4 class="font-semibold text-ivory text-sm mb-1">Festival-Aware</h4>
+          <p class="text-ivory/60 text-xs">Automatically includes upcoming local festivals in your travel window</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     CULTURE PREVIEW
+     ============================================================ -->
+<section class="py-14 sm:py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+  <div class="flex items-end justify-between mb-8 reveal">
+    <div>
+      <p class="text-terracotta font-semibold text-xs uppercase tracking-widest mb-1.5">Living Heritage</p>
+      <h2 class="font-serif text-2xl sm:text-3xl lg:text-4xl font-bold text-charcoal tracking-tight">Festivals Worth Travelling For</h2>
+    </div>
+    <a href="{{ url_for('culture.index') }}"
+       class="hidden sm:flex items-center gap-1.5 text-pine font-semibold text-xs hover:gap-3 transition-all">
+      All Festivals <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-terracotta"></i>
+    </a>
+  </div>
+
+  {% if festivals %}
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+    {% for festival in festivals %}
+    <a href="{{ url_for('culture.index') }}?region={{ festival.region }}"
+       class="group bg-white rounded-card overflow-hidden shadow-card card-hover reveal border border-stone/40">
+      <div class="relative h-44 overflow-hidden">
+        <img src="{{ festival.cover_image_url or 'https://images.unsplash.com/photo-1574232432284-71f1827e6a1c?w=400&q=80' }}"
+             alt="{{ festival.title }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+        <div class="absolute inset-0 bg-gradient-to-t from-pine/80 to-transparent"></div>
+        <div class="absolute bottom-3 left-3">
+          <span class="text-xs font-semibold {% if festival.region == 'kumaon' %}tag-terracotta{% else %}tag-sage{% endif %} px-2.5 py-0.5 rounded-full">
+            {{ festival.region | capitalize }}
+          </span>
+        </div>
+        {% if festival.unesco %}
+        <div class="absolute top-3 right-3">
+          <span class="inline-flex items-center gap-1 text-xs font-bold bg-white text-pine px-2.5 py-0.5 rounded-full shadow-sm">
+            <i data-lucide="award" class="w-3 h-3 text-terracotta"></i> UNESCO
+          </span>
+        </div>
+        {% endif %}
+      </div>
+      <div class="p-4">
+        <h3 class="font-serif text-lg font-semibold text-charcoal mb-1 group-hover:text-terracotta transition-colors">{{ festival.title }}</h3>
+        {% if festival.when_celebrated %}
+        <p class="text-xs text-terracotta mb-2 flex items-center gap-1">
+          <i data-lucide="calendar" class="w-3 h-3"></i> {{ festival.when_celebrated }}
+        </p>
+        {% endif %}
+        <p class="text-charcoal/70 text-xs leading-relaxed line-clamp-3">{{ festival.story_text }}</p>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="text-center py-12 text-charcoal/50">
+    <p>Festivals loading... <a href="{{ url_for('culture.index') }}" class="text-terracotta underline">Explore culture</a></p>
+  </div>
+  {% endif %}
+</section>
+
+<!-- ============================================================
+     FOOD PREVIEW
+     ============================================================ -->
+<section class="py-12 sm:py-14 bg-stone/20 border-y border-stone/30">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+    <div class="flex items-end justify-between mb-8 reveal">
+      <div>
+        <p class="text-terracotta font-semibold text-xs uppercase tracking-widest mb-1.5">Taste Uttarakhand</p>
+        <h2 class="font-serif text-2xl sm:text-3xl lg:text-4xl font-bold text-charcoal tracking-tight">Dishes That Tell Stories</h2>
+      </div>
+      <a href="{{ url_for('culture.food') }}"
+         class="hidden sm:flex items-center gap-1.5 text-pine font-semibold text-xs hover:gap-3 transition-all">
+        All Recipes <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-terracotta"></i>
+      </a>
+    </div>
+
+    {% if foods %}
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+      {% for food in foods %}
+      <a href="{{ url_for('culture.food') }}"
+         class="group bg-white rounded-card overflow-hidden shadow-card card-hover reveal text-center border border-stone/40">
+        <div class="h-28 overflow-hidden">
+          <img src="{{ food.image_url or 'https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=300&q=75' }}"
+               alt="{{ food.name }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+        </div>
+        <div class="p-3">
+          <h4 class="font-serif text-sm font-semibold text-charcoal group-hover:text-terracotta transition-colors">{{ food.name }}</h4>
+          <span class="text-xs {% if food.region == 'kumaon' %}text-terracotta{% else %}text-sage{% endif %} font-medium">{{ food.region | capitalize }}</span>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+</section>
+
+<!-- ============================================================
+     HOMESTAYS PREVIEW
+     ============================================================ -->
+{% if hotels %}
+<section class="py-14 sm:py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+  <div class="flex items-end justify-between mb-8 reveal">
+    <div>
+      <p class="text-terracotta font-semibold text-xs uppercase tracking-widest mb-1.5">Sleep Local</p>
+      <h2 class="font-serif text-2xl sm:text-3xl lg:text-4xl font-bold text-charcoal tracking-tight">Curated Homestays</h2>
+      <p class="text-charcoal/70 mt-1 max-w-xl text-xs sm:text-sm">Every stay supports a local family. Wake up to mountain views, home-cooked meals, and stories only locals know.</p>
+    </div>
+    <a href="{{ url_for('hotels.index') }}?type=homestay"
+       class="hidden sm:flex items-center gap-1.5 text-pine font-semibold text-xs hover:gap-3 transition-all">
+      All Homestays <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-terracotta"></i>
+    </a>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    {% for hotel in hotels %}
+    <a href="{{ url_for('hotels.detail', hotel_id=hotel.id) }}"
+       class="group bg-white rounded-card overflow-hidden shadow-card card-hover reveal border border-stone/40">
+      <div class="relative h-56 overflow-hidden">
+        <img src="{{ hotel.cover_image_url or 'https://images.unsplash.com/photo-1604537529428-15bcbeecfe4d?w=600&q=80' }}"
+             alt="{{ hotel.name }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+        <div class="absolute top-3 left-3 inline-flex items-center gap-1 px-3 py-1 bg-pine text-ivory text-xs font-medium rounded-full">
+          <i data-lucide="home" class="w-3 h-3 text-terracotta"></i> Homestay
+        </div>
+        {% if hotel.rating %}
+        <div class="absolute top-3 right-3 px-2 py-1 bg-white rounded-lg flex items-center gap-1 shadow-sm">
+          <i data-lucide="star" class="w-3 h-3 text-terracotta fill-terracotta"></i>
+          <span class="text-charcoal text-xs font-semibold">{{ "%.1f"|format(hotel.rating) }}</span>
+        </div>
+        {% endif %}
+      </div>
+      <div class="p-5">
+        <h3 class="font-serif text-xl font-semibold text-charcoal mb-1 group-hover:text-terracotta transition-colors">{{ hotel.name }}</h3>
+        {% if hotel.host_name %}
+        <p class="text-sm text-charcoal/60 mb-3">Hosted by {{ hotel.host_name }}</p>
+        {% endif %}
+        {% if hotel.price_min %}
+        <div class="flex items-center justify-between">
+          <span class="text-charcoal font-semibold">₹{{ hotel.price_min | int | format_number if hotel.price_min else '2,500' }}<span class="text-charcoal/50 font-normal text-xs">/night</span></span>
+          <span class="text-xs text-terracotta font-medium flex items-center gap-1">Book <i data-lucide="arrow-right" class="w-3 h-3"></i></span>
+        </div>
+        {% endif %}
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<!-- ============================================================
+     COMMUNITY STORIES TEASER
+     ============================================================ -->
+<section class="py-20 bg-pine text-ivory border-t border-stone/20">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+    <div class="reveal">
+      <p class="text-terracotta font-semibold text-sm uppercase tracking-widest mb-4">Traveler Stories</p>
+      <h2 class="font-serif text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 tracking-tight">
+        Every Trail Has a Story.<br>
+        <span class="text-terracotta italic">Share Yours.</span>
+      </h2>
+      <p class="text-ivory/70 max-w-2xl mx-auto leading-relaxed mb-10">
+        Join a community of travelers, locals, and culture lovers who document the living soul of Uttarakhand —
+        one story, one photograph, one festival at a time.
+      </p>
+      <div class="flex flex-wrap gap-4 justify-center">
+        <a href="{{ url_for('community.index') }}"
+           class="px-8 py-4 bg-terracotta text-white font-semibold rounded-2xl hover:bg-terracotta-dark transition-all hover:shadow-lg">
+          Read Stories
+        </a>
+        <a href="{{ url_for('auth.signup') }}"
+           class="px-8 py-4 border border-white/30 text-ivory font-medium rounded-2xl hover:bg-white/10 transition-all">
+          Share Your Trip
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/home.js') }}"></script>
+{% endblock %}

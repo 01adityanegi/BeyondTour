@@ -1,0 +1,58 @@
+{% extends 'admin/base.html' %}
+{% block title %}Community Moderation Queue — Beyond Tour Admin{% endblock %}
+
+{% block admin_content %}
+<div>
+
+  <!-- Header & Filters -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+    <div>
+      <h2 class="font-serif text-2xl font-bold text-charcoal">Community Content Moderation</h2>
+      <p class="text-xs text-charcoal/60 mt-0.5">Manage traveler trip stories, tips, photo shares, and reported posts</p>
+    </div>
+
+    <!-- Filter Tabs -->
+    <div class="inline-flex items-center bg-surface rounded-2xl p-1 gap-1 border border-stone/60 shadow-2xs">
+      <a href="{{ url_for('admin.community') }}?filter=all"
+         class="px-4 py-2 rounded-xl text-xs font-bold transition-all
+         {% if filter_mode == 'all' or not filter_mode %}bg-terracotta text-white shadow-sm{% else %}text-charcoal/70 hover:text-charcoal{% endif %}">
+        All Posts
+      </a>
+      <a href="{{ url_for('admin.community') }}?filter=flagged"
+         class="px-4 py-2 rounded-xl text-xs font-bold transition-all
+         {% if filter_mode == 'flagged' %}bg-terracotta text-white shadow-sm{% else %}text-charcoal/70 hover:text-charcoal{% endif %}">
+        Flagged Only
+      </a>
+    </div>
+  </div>
+
+  <!-- Posts Table -->
+  <div class="bg-surface rounded-3xl border border-stone/60 shadow-card overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-xs">
+        <thead class="bg-ivory/60 text-[11px] uppercase tracking-wider text-charcoal/70 border-b border-stone/30">
+          <tr>
+            <th class="py-3.5 px-5">Story & Author</th>
+            <th class="py-3.5 px-4">Flags</th>
+            <th class="py-3.5 px-4">State</th>
+            <th class="py-3.5 px-4">Engagement</th>
+            <th class="py-3.5 px-5 text-right">Moderation Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-stone/20">
+          {% for post in posts %}
+            {% include 'admin/_community_post_row.html' %}
+          {% else %}
+          <tr>
+            <td colspan="5" class="py-12 text-center text-charcoal/50">
+              No community posts found matching the current filter.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

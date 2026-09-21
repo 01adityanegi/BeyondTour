@@ -1,0 +1,235 @@
+{% extends '_base.html' %}
+{% block title %}My Profile & Account — Beyond Tour{% endblock %}
+
+{% block content %}
+<div class="pt-8 pb-20" x-data="{ deleteModalOpen: false }">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-8 pb-4 border-b border-stone">
+      <div>
+        <span class="text-xs font-semibold uppercase tracking-widest text-terracotta mb-1 block">Account Settings</span>
+        <h1 class="font-serif text-3xl font-bold text-charcoal">My Profile</h1>
+      </div>
+      <a href="{{ url_for('my_trips.index') }}" class="text-xs text-terracotta hover:underline font-semibold flex items-center gap-1">
+        <i data-lucide="map" class="w-4 h-4"></i>
+        <span>My Saved Trips</span>
+      </a>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+
+      <!-- Left: User Identity Card -->
+      <div class="md:col-span-1 space-y-6">
+        <div class="bg-surface rounded-card shadow-card p-6 border border-stone/50 text-center">
+          <div class="relative w-24 h-24 mx-auto mb-4">
+            {% if user.avatar_url %}
+              <img src="{{ user.avatar_url }}" alt="{{ user.name }}" class="w-full h-full rounded-full object-cover border-2 border-stone">
+            {% else %}
+              <div class="w-full h-full rounded-full bg-sage text-white font-serif font-bold text-3xl flex items-center justify-center">
+                {{ user.name[0] }}
+              </div>
+            {% endif %}
+          </div>
+
+          <h2 class="font-serif text-xl font-bold text-charcoal">{{ user.name }}</h2>
+          <p class="text-xs text-charcoal/60 mt-0.5">{{ user.email }}</p>
+
+          <div class="mt-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider
+                      {% if user.email_verified %}bg-sage/15 text-pine border border-sage/40{% else %}bg-terracotta/10 text-terracotta border border-terracotta/30{% endif %}">
+            <i data-lucide="{% if user.email_verified %}check-circle{% else %}shield-alert{% endif %}" class="w-3.5 h-3.5"></i>
+            <span>{{ 'Verified Traveler' if user.email_verified else 'Unverified Email' }}</span>
+          </div>
+
+          {% if not user.email_verified %}
+          <form action="{{ url_for('auth.resend_verification') }}" method="POST" class="mt-4">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="w-full py-2 rounded-full bg-terracotta/10 hover:bg-terracotta/20 text-terracotta text-xs font-semibold transition-colors">
+              Verify Email Now
+            </button>
+          </form>
+          {% endif %}
+
+          <div class="pt-4 mt-4 border-t border-stone/30 text-left text-xs space-y-2 text-charcoal/70">
+            <div class="flex justify-between">
+              <span>Role:</span>
+              <span class="font-semibold capitalize text-charcoal">{{ user.role }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span>Provider:</span>
+              <span class="font-semibold capitalize text-charcoal">{{ user.auth_provider }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span>Joined:</span>
+              <span class="font-semibold text-charcoal">{{ user.created_at.strftime('%b %Y') }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Linked Login Methods -->
+        <div class="bg-surface rounded-card shadow-card p-5 border border-stone/50 text-xs">
+          <h3 class="font-semibold text-charcoal mb-3 uppercase tracking-wider text-[11px]">Linked Methods</h3>
+          <div class="space-y-2">
+            <div class="flex items-center justify-between p-2 rounded-lg bg-ivory border border-stone/40">
+              <span class="flex items-center gap-2">
+                <i data-lucide="mail" class="w-3.5 h-3.5 text-charcoal/60"></i> Email & Password
+              </span>
+              <span class="text-sage font-medium">Connected</span>
+            </div>
+            <div class="flex items-center justify-between p-2 rounded-lg bg-ivory border border-stone/40">
+              <span class="flex items-center gap-2">
+                <i data-lucide="globe" class="w-3.5 h-3.5 text-charcoal/60"></i> Google OAuth
+              </span>
+              <span class="text-charcoal/50">{% if user.auth_provider == 'google' %}Active{% else %}Available{% endif %}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right 2 Columns: Editable Forms -->
+      <div class="md:col-span-2 space-y-8">
+
+        <!-- Personal Info Form -->
+        <div class="bg-surface rounded-card shadow-card p-6 sm:p-8 border border-stone/50">
+          <h2 class="font-serif text-xl font-bold text-charcoal mb-6 flex items-center gap-2">
+            <i data-lucide="user" class="w-5 h-5 text-terracotta"></i>
+            <span>Personal Information</span>
+          </h2>
+
+          <form method="POST" class="space-y-4">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="action" value="update_info">
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-charcoal/70 mb-1">Display Name</label>
+                <input type="text" name="name" value="{{ user.name }}" required
+                       class="w-full bg-ivory border border-stone rounded-xl px-4 py-2.5 text-sm text-charcoal focus:outline-none focus:border-terracotta">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-charcoal/70 mb-1">Home City</label>
+                <input type="text" name="home_city" value="{{ user.home_city or '' }}"
+                       placeholder="e.g. New Delhi, Mumbai"
+                       class="w-full bg-ivory border border-stone rounded-xl px-4 py-2.5 text-sm text-charcoal focus:outline-none focus:border-terracotta">
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-charcoal/70 mb-1">Phone Number (Optional)</label>
+              <input type="tel" name="phone_number" value="{{ user.phone_number or '' }}"
+                     placeholder="+91 98765 43210"
+                     class="w-full bg-ivory border border-stone rounded-xl px-4 py-2.5 text-sm text-charcoal focus:outline-none focus:border-terracotta">
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-charcoal/70 mb-1">Profile Photo URL (Cloudinary)</label>
+              <input type="url" name="avatar_url" value="{{ user.avatar_url or '' }}"
+                     placeholder="https://res.cloudinary.com/..."
+                     class="w-full bg-ivory border border-stone rounded-xl px-4 py-2.5 text-sm text-charcoal focus:outline-none focus:border-terracotta">
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-charcoal/70 mb-1">Bio & Travel Philosophy</label>
+              <textarea name="bio" rows="3"
+                        placeholder="Tell hosts and guides about your travel style and what excites you about the Himalayas..."
+                        class="w-full bg-ivory border border-stone rounded-xl p-3 text-sm text-charcoal focus:outline-none focus:border-terracotta resize-none">{{ user.bio or '' }}</textarea>
+            </div>
+
+            <!-- Travel Interests (used for AI trip planner defaults) -->
+            <div>
+              <label class="block text-xs font-semibold text-charcoal/70 mb-2">Travel Interests (Personalizes AI Itinerary defaults)</label>
+              <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {% set available_interests = ['trekking', 'culture', 'food', 'wildlife', 'photography', 'temples', 'homestays'] %}
+                {% for item in available_interests %}
+                <label class="flex items-center gap-2 p-2 rounded-xl bg-ivory border border-stone/50 text-xs text-charcoal cursor-pointer hover:bg-stone/30">
+                  <input type="checkbox" name="interests" value="{{ item }}"
+                         {% if item in user_interests %}checked{% endif %}
+                         class="accent-terracotta rounded">
+                  <span class="capitalize">{{ item }}</span>
+                </label>
+                {% endfor %}
+              </div>
+            </div>
+
+            <div class="pt-2 flex justify-end">
+              <button type="submit" class="px-6 py-2.5 rounded-full bg-terracotta hover:bg-terracotta-hover text-white text-xs font-semibold shadow-sm transition-colors">
+                Save Profile Changes
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Security & Password Change -->
+        <div class="bg-surface rounded-card shadow-card p-6 sm:p-8 border border-stone/50">
+          <h2 class="font-serif text-xl font-bold text-charcoal mb-6 flex items-center gap-2">
+            <i data-lucide="key" class="w-5 h-5 text-terracotta"></i>
+            <span>Security & Password</span>
+          </h2>
+
+          <form method="POST" class="space-y-4">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="action" value="change_password">
+
+            <div>
+              <label class="block text-xs font-semibold text-charcoal/70 mb-1">Current Password</label>
+              <input type="password" name="old_password" required
+                     class="w-full bg-ivory border border-stone rounded-xl px-4 py-2 text-sm text-charcoal focus:outline-none focus:border-terracotta">
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-charcoal/70 mb-1">New Password (Min 8 chars, 1 number)</label>
+              <input type="password" name="new_password" required
+                     class="w-full bg-ivory border border-stone rounded-xl px-4 py-2 text-sm text-charcoal focus:outline-none focus:border-terracotta">
+            </div>
+
+            <div class="pt-2 flex justify-end">
+              <button type="submit" class="px-6 py-2.5 rounded-full bg-pine hover:bg-pine-dark text-ivory text-xs font-semibold transition-colors">
+                Update Password
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Account Deletion (Soft Delete) -->
+        <div class="p-6 rounded-card bg-ivory border border-stone/60 flex items-center justify-between gap-4">
+          <div>
+            <h3 class="font-bold text-sm text-charcoal">Deactivate Account</h3>
+            <p class="text-xs text-charcoal/60 mt-0.5">Temporarily or permanently disable your account and remove your profile listings.</p>
+          </div>
+          <button type="button" @click="deleteModalOpen = true"
+                  class="px-4 py-2 rounded-full border border-terracotta text-terracotta hover:bg-terracotta/10 text-xs font-semibold transition-colors flex-shrink-0">
+            Deactivate
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div x-show="deleteModalOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4" style="display: none;">
+    <div @click="deleteModalOpen = false" class="fixed inset-0 bg-black/60 backdrop-blur-sm"></div>
+    <div class="relative w-full max-w-md bg-surface rounded-2xl shadow-hero border border-stone p-6 z-10 animate-fade-in text-charcoal">
+      <h3 class="font-serif text-xl font-bold text-charcoal mb-2">Deactivate your account?</h3>
+      <p class="text-xs text-charcoal/70 leading-relaxed mb-6 font-light">
+        Are you sure you want to deactivate your Beyond Tour account? Your trip planner history and community posts will be preserved in archived status.
+      </p>
+      <form method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="action" value="delete_account">
+        <div class="flex items-center justify-end gap-3">
+          <button type="button" @click="deleteModalOpen = false" class="px-4 py-2 rounded-full text-xs font-medium text-charcoal/60 hover:bg-stone/20">
+            Keep Account
+          </button>
+          <button type="submit" class="px-5 py-2 rounded-full bg-terracotta hover:bg-terracotta-hover text-white text-xs font-semibold">
+            Confirm Deactivation
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
