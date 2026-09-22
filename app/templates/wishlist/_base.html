@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Beyond Tour — Go Beyond the Guidebook{% endblock %}</title>
+  <meta name="description" content="{% block meta_description %}Discover the soul of Uttarakhand — authentic culture, art, local food, and AI-powered trip planning for Kumaon and Garhwal.{% endblock %}">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+  <meta name="theme-color" content="#16302B">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <!-- Favicon & Title Bar Brand Icons -->
+  <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='images/favicon-32x32.png') }}">
+  <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='images/favicon-16x16.png') }}">
+  <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='images/apple-touch-icon.png') }}">
+  <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+
+  <!-- Preconnect & DNS-Prefetch for 2G Himalayan Network Resilience -->
+  <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+  <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+  <link rel="dns-prefetch" href="https://maps.googleapis.com">
+  <link rel="dns-prefetch" href="https://res.cloudinary.com">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,600&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS & Configuration -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="{{ url_for('static', filename='js/tailwind-config.js') }}"></script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Alpine.js -->
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <!-- HTMX -->
+  <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+
+  <!-- Global Custom Stylesheet -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+
+  {% block extra_head %}{% endblock %}
+</head>
+
+<body class="bg-ivory text-charcoal antialiased flex flex-col min-h-screen">
+  <!-- Offline Mode Notification Banner -->
+  <div id="offline-status-banner"
+       class="fixed top-0 inset-x-0 z-[100] bg-amber-600 text-white text-xs font-semibold py-2 px-4 text-center transform -translate-y-full transition-transform duration-300 shadow-md flex items-center justify-center gap-2"
+       role="status"
+       aria-live="polite">
+    <i data-lucide="wifi-off" class="w-3.5 h-3.5"></i>
+    <span>Offline Mode Active · Serving cached Himalayan guides, cultural data & emergency lines</span>
+    <a href="{{ url_for('safety.emergency_info') }}" class="underline ml-2 hover:text-ivory font-bold">Offline Helplines</a>
+  </div>
+
+  <!-- Inline SVG Sprite for Instant Zero-Latency Icon Rendering -->
+  <div style="display:none;" aria-hidden="true">
+    {% include 'macros/_svg_sprite.html' %}
+  </div>
+
+  <!-- Email Verification Banner Prompt -->
+  {% if current_user.is_authenticated and not current_user.email_verified %}
+  <div class="bg-terracotta/10 border-b border-terracotta/20 text-charcoal px-4 py-2 text-xs text-center flex items-center justify-center gap-2">
+    <i data-lucide="shield-alert" class="w-4 h-4 text-terracotta inline-block"></i>
+    <span>Please verify your email address (<strong>{{ current_user.email }}</strong>) to unlock direct booking and community posting.</span>
+    <form action="{{ url_for('auth.resend_verification') }}" method="POST" class="inline">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button type="submit" class="font-semibold text-terracotta underline hover:text-terracotta-hover ml-1">Resend link</button>
+    </form>
+  </div>
+  {% endif %}
+
+  <!-- Flash Messages -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="fixed top-20 right-4 z-50 space-y-2" x-data="{ show: true }" x-show="show">
+        {% for category, message in messages %}
+          <div class="flex items-center gap-3 px-5 py-3 rounded-xl shadow-card text-sm font-medium animate-fade-in
+            {% if category == 'success' %}bg-pine text-ivory border border-sage/40
+            {% elif category == 'danger' %}bg-terracotta text-white
+            {% elif category == 'warning' %}bg-terracotta text-white
+            {% else %}bg-pine text-ivory border border-stone/30{% endif %}">
+            <i data-lucide="{% if category == 'success' %}check-circle{% elif category in ['danger', 'warning'] %}alert-circle{% else %}info{% endif %}" class="w-4 h-4 flex-shrink-0"></i>
+            <span>{{ message }}</span>
+            <button @click="show = false" class="ml-2 opacity-70 hover:opacity-100 p-1">
+              <i data-lucide="x" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <!-- Navbar -->
+  {% include '_navbar.html' %}
+
+  <!-- Main Content -->
+  <main class="flex-grow">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Footer -->
+  {% include '_footer.html' %}
+
+  <!-- Core Site JavaScript -->
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+  <!-- ── SOS Floating Action Button (authenticated users only) ── -->
+  {% if current_user.is_authenticated %}
+  <div id="sos-fab" x-data="sosWidget()" class="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
+
+    <!-- Confirmation panel (shown after SOS tap) -->
+    <div x-show="confirmed" x-transition
+         class="bg-white border border-red-200 rounded-2xl shadow-xl p-4 w-72 text-sm">
+      <p class="font-bold text-red-600 flex items-center gap-2 mb-1">
+        <i data-lucide="siren" class="w-4 h-4"></i>
+        SOS Alert Sent
+      </p>
+      <p class="text-charcoal/70 text-xs leading-relaxed" x-text="confirmMsg"></p>
+      <div class="mt-3 border-t border-stone/40 pt-3 flex gap-2">
+        <a href="tel:112" class="flex-1 text-center py-2 bg-red-600 text-white rounded-xl font-semibold text-xs">
+          Call 112 Now
+        </a>
+        <a href="/safety/emergency-info" class="flex-1 text-center py-2 border border-stone/40 text-charcoal rounded-xl text-xs">
+          Helplines
+        </a>
+      </div>
+    </div>
+
+    <!-- SOS Button -->
+    <button @click="triggerSos()"
+            :disabled="loading"
+            id="sos-button"
+            class="w-14 h-14 rounded-full bg-red-600 hover:bg-red-700 active:scale-95 text-white shadow-xl flex items-center justify-center transition-all"
+            title="SOS — Emergency Alert"
+            aria-label="Trigger SOS emergency alert">
+      <span x-show="!loading" class="font-black text-xs tracking-widest leading-none">SOS</span>
+      <div x-show="loading" class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+    </button>
+  </div>
+
+
+  {% endif %}
+
+  {% block extra_scripts %}{% endblock %}
+</body>
+</html>
+
