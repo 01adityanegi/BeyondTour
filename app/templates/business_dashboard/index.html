@@ -4,6 +4,9 @@
 <div class="pt-4 sm:pt-6 pb-16 min-h-screen bg-ivory">
   <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-2 pb-12">
     <div class="mb-8 text-center">
+      <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-pine p-2 mb-3 shadow-md border border-stone/20">
+        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Beyond Tour Logo" class="w-full h-full object-contain">
+      </div>
       <h1 class="font-serif text-4xl font-bold text-charcoal">Business Dashboard</h1>
       <p class="text-charcoal/60 mt-1">Welcome back, {{ current_user.name }}</p>
     </div>
